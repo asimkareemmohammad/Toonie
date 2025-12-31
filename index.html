@@ -402,7 +402,6 @@
           <div class="save-row">
             <div class="tool-field">
               <div class="tool-label">Episode / Movie Number</div>
-              <!-- FIX: dropdown 1-100 -->
               <select id="numSelect" class="tool-select"></select>
             </div>
 
@@ -443,9 +442,8 @@
     const TABLE_NAME = "toonie_progress";
 
     const ROOM_KEY  = "toonie_room_code_v1";
-    const STORE_KEY = "toonie_progress_tracker_v1";
+    const STORE_KEY = "toonie_progress_tracker_v2"; // bump version to avoid old-time parsing bugs
 
-    // 10s poll
     const SYNC_POLL_MS = 10000;
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -523,30 +521,32 @@
       return clean;
     }
 
-    // store timestamp always in a friendly format (local)
-    function nowStamp(){
-      const d = new Date();
-      const pad = (n) => String(n).padStart(2,'0');
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    // ALWAYS store as ISO so it parses consistently across devices.
+    function nowISO(){
+      return new Date().toISOString();
     }
 
-    // convert ISO/anything -> "YYYY-MM-DD HH:MM" (local)
-    function toSimpleTime(ts){
-      if(!ts) return nowStamp();
-      const s = String(ts);
+    // Display ISO -> "YYYY-MM-DD HH:MM" in LOCAL timezone.
+    function displayLocal(ts){
+      if(!ts) return "";
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return String(ts).slice(0,16);
 
-      // already simple
-      if(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}/.test(s)) return s.slice(0,16);
+      const fmt = new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
 
-      // ISO -> local
-      const d = new Date(s);
-      if(!isNaN(d.getTime())){
-        const pad = (n) => String(n).padStart(2,'0');
-        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-      }
-
-      // fallback: trim noisy stuff
-      return s.replace("T"," ").split("+")[0].slice(0,16);
+      // Convert parts to stable "YYYY-MM-DD HH:MM"
+      const parts = fmt.formatToParts(d).reduce((acc, p) => {
+        acc[p.type] = p.value;
+        return acc;
+      }, {});
+      return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
     }
 
     function loadStore(){
@@ -596,9 +596,6 @@
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
 
-      // keep simple time always
-      entry.ts = toSimpleTime(entry.ts);
-
       node.last = entry;
 
       const idx = node.history.findIndex(h =>
@@ -626,11 +623,11 @@
         room_code: room,
         profile: row.profile,
         cartoon_label: row.cartoon_label,
-        series_label: String(row.series_label ?? ""), // keep string
+        series_label: String(row.series_label ?? ""),
         type: row.type,
         season_or_movie: row.season_or_movie,
         num: Number(row.num) || 0,
-        ts: row.ts
+        ts: row.ts // ISO string
       };
 
       const { error } = await supabaseClient
@@ -680,8 +677,6 @@
       const typeSelect = document.getElementById("typeSelect");
       const seasonLabel = document.getElementById("seasonLabel");
       const seasonOrMovieSelect = document.getElementById("seasonOrMovieSelect");
-
-      // FIX: dropdown
       const numSelect = document.getElementById("numSelect");
 
       const saveBtn = document.getElementById("saveBtn");
@@ -702,26 +697,6 @@
       let activeMode = "save";
       let pollTimer = null;
       let lastCloudOk = true;
-
-      // ===== IMPORTANT FIX: do NOT overwrite episode dropdown while user is interacting =====
-      let isEditingEpisode = false;
-      let editEpTimer = null;
-
-      function beginEpisodeEdit(){
-        isEditingEpisode = true;
-        if(editEpTimer) clearTimeout(editEpTimer);
-      }
-
-      function endEpisodeEditSoon(){
-        if(editEpTimer) clearTimeout(editEpTimer);
-        editEpTimer = setTimeout(() => {
-          isEditingEpisode = false;
-          // do NOT force-reset value here
-          loadLastForSelection(false);
-          if(activeMode === "recent") renderRecent();
-        }, 1200);
-      }
-      // ================================================================================
 
       function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
 
@@ -813,21 +788,13 @@
         seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
       }
 
-      // dropdown 1..100
       function fillEpisodeDropdown(max = 100){
-        const cur = numSelect.value;
         let html = "";
         for(let i=1; i<=max; i++){
           html += `<option value="${i}">${i}</option>`;
         }
         numSelect.innerHTML = html;
-
-        // keep selection if possible
-        if(cur && Number(cur) >= 1 && Number(cur) <= max){
-          numSelect.value = cur;
-        } else {
-          numSelect.value = "1";
-        }
+        numSelect.value = "1"; // always start neutral; never auto-force from last saved
       }
 
       function currentKeyLabels(){
@@ -849,42 +816,17 @@
         return { cartoonLabel, seriesLabel, type, seasonOrMovie };
       }
 
-      // key-based lookup (so it loads correct last for THIS exact selection)
-      function findEntryForSelection(node, cur){
-        const list = node.history || [];
-        const hit = list.find(h =>
-          h.type === cur.type &&
-          h.seasonOrMovie === cur.seasonOrMovie &&
-          ((h.seriesLabel || null) === (cur.seriesLabel || null))
-        );
-        return hit || null;
-      }
-
-      // FIX: do not reset dropdown when it doesn't match; only update if found
-      // force=true is used after cloud sync to update if user isn't editing
-      function loadLastForSelection(force){
-        if(!numSelect) return;
-
-        // HARD BLOCK: never touch dropdown while interacting
-        if(isEditingEpisode || document.activeElement === numSelect) return;
-
+      // Hint should show "last activity for the cartoon", NOT force dropdown
+      function updateSaveHintForCartoon(){
         store = loadStore();
-        const cur = currentKeyLabels();
-        const node = ensurePath(store, activeProfile, cur.cartoonLabel);
+        const cfg = getCartoonCfg(cartoonSelect.value);
+        const cartoonLabel = cfg.label;
+        const node = ensurePath(store, activeProfile, cartoonLabel);
 
-        const entryForThis = findEntryForSelection(node, cur);
-
-        if(entryForThis){
-          // only set if we have a real saved value for this selection
-          numSelect.value = String(entryForThis.num);
-          saveHint.textContent = `Last saved: ${formatLine(entryForThis)}`;
+        if(node.last){
+          saveHint.textContent = `Last activity: ${formatLine(node.last)} (${displayLocal(node.last.ts)})`;
         } else {
-          // do NOT overwrite the dropdown value
-          if(node.last){
-            saveHint.textContent = `Last saved: ${formatLine(node.last)}`;
-          } else {
-            saveHint.textContent = "No saves yet for this cartoon.";
-          }
+          saveHint.textContent = "No activity yet for this cartoon.";
         }
       }
 
@@ -908,7 +850,7 @@
           .map(item => `
             <div class="activity-item">
               <div>${formatLine(item)}</div>
-              <div class="right">${toSimpleTime(item.ts)}</div>
+              <div class="right">${displayLocal(item.ts)}</div>
             </div>
           `)
           .join("");
@@ -917,9 +859,6 @@
       async function pollFromCloud(){
         const room = getRoomCode();
         if(!room || !supabaseEnabled()) return;
-
-        // HARD FIX: never poll-merge while user is interacting with dropdown
-        if(isEditingEpisode || document.activeElement === numSelect) return;
 
         const res = await sbFetchProgress(room, activeProfile, 250);
         if(!res.ok){
@@ -940,14 +879,13 @@
             type: r.type,
             seasonOrMovie: r.season_or_movie,
             num: Number(r.num) || 1,
-            ts: toSimpleTime(r.ts)
+            ts: r.ts // ISO
           };
           upsertEntry(store, activeProfile, entry);
         }
         saveStore(store);
 
-        // update UI safely
-        loadLastForSelection(true);
+        updateSaveHintForCartoon();
         if(activeMode === "recent") renderRecent();
         refreshRoomUI();
       }
@@ -973,7 +911,6 @@
 
       async function doSave(){
         vib();
-
         store = loadStore();
 
         const cur = currentKeyLabels();
@@ -985,17 +922,15 @@
           type: cur.type,
           seasonOrMovie: cur.seasonOrMovie,
           num,
-          ts: nowStamp()
+          ts: nowISO()
         };
 
         // LOCAL SAVE ALWAYS
         upsertEntry(store, activeProfile, entry);
         saveStore(store);
-        saveHint.textContent = `Saved: ${formatLine(entry)}`;
 
-        // after saving, user is no longer "editing"
-        isEditingEpisode = false;
-        if(editEpTimer) clearTimeout(editEpTimer);
+        // Update hint only (no dropdown forcing)
+        saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
 
         // CLOUD SAVE IF POSSIBLE
         const room = getRoomCode();
@@ -1016,7 +951,6 @@
         if(push.ok){
           pollFromCloud().catch(() => {});
         } else {
-          // RLS error etc. Local is still saved.
           saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
         }
       }
@@ -1032,9 +966,8 @@
 
       recentCartoonSelect.value = cartoonSelect.value;
 
-      loadLastForSelection(false);
-
       refreshRoomUI();
+      updateSaveHintForCartoon();
       startPolling();
 
       // ===== EVENTS =====
@@ -1050,8 +983,8 @@
         saveStore(store);
 
         setProfileUI();
-        loadLastForSelection(false);
-        renderRecent();
+        updateSaveHintForCartoon();
+        if(activeMode === "recent") renderRecent();
         startPolling();
       });
 
@@ -1070,8 +1003,8 @@
 
         fillSeasonOrMovie();
 
-        // do NOT reset episode dropdown on selection changes
-        loadLastForSelection(false);
+        // Never force dropdown; just update hint for cartoon
+        updateSaveHintForCartoon();
 
         recentCartoonSelect.value = cartoonSelect.value;
         if(activeMode === "recent") renderRecent();
@@ -1079,30 +1012,19 @@
 
       seriesSelect.addEventListener("change", () => {
         fillSeasonOrMovie();
-        loadLastForSelection(false);
+        updateSaveHintForCartoon();
       });
 
       typeSelect.addEventListener("change", () => {
         const cfg = getCartoonCfg(cartoonSelect.value);
         if(typeSelect.value === "movie" && !cfg.hasMovies) typeSelect.value = "season";
         fillSeasonOrMovie();
-        loadLastForSelection(false);
+        updateSaveHintForCartoon();
       });
 
       seasonOrMovieSelect.addEventListener("change", () => {
-        loadLastForSelection(false);
+        updateSaveHintForCartoon();
       });
-
-      // Episode dropdown editing guards
-      if(numSelect){
-        numSelect.addEventListener("pointerdown", beginEpisodeEdit);
-        numSelect.addEventListener("focus", beginEpisodeEdit);
-        numSelect.addEventListener("change", () => {
-          beginEpisodeEdit();
-          endEpisodeEditSoon();
-        });
-        numSelect.addEventListener("blur", endEpisodeEditSoon);
-      }
 
       saveBtn.addEventListener("click", () => { doSave().catch(() => {}); });
 
