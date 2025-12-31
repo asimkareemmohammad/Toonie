@@ -350,7 +350,11 @@
       <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
     </div>
 
-    <h1 class="heading section-gap">Progress Tracker & Syncing</h1>
+    <h1 class="heading section-gap">Progress Tracker </h1>
+    
+<div style="text-align:center; margin-top:-1rem; opacity:0.8;" id="syncStatus">
+  Sync: OFF (local only)
+</div>
 
     <div class="tools-wrap">
 
@@ -457,6 +461,33 @@ const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
+
+    // ===== Sync (Room Code) =====
+const ROOM_KEY = "toonie_room_code_v1";
+const TABLE_NAME = "toonie_progress";
+
+// Read room code saved on this device (phone/TV)
+function getRoomCode() {
+  return (localStorage.getItem(ROOM_KEY) || "").trim();
+}
+
+// Save room code on this device (phone/TV)
+function setRoomCode(code) {
+  const clean = String(code || "").trim();
+  if (clean) localStorage.setItem(ROOM_KEY, clean);
+  else localStorage.removeItem(ROOM_KEY);
+  return clean;
+}
+
+// Sync is ON only if a room code exists
+function syncOn() {
+  return getRoomCode().length > 0;
+}
+// Small helper so we can show status text easily
+function setSyncStatus(text) {
+  const el = document.getElementById("syncStatus");
+  if (el) el.textContent = text;
+}
 
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(30);
