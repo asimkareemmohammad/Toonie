@@ -20,39 +20,31 @@
 
   <style>
     :root{
-      /* tweak these two to taste */
-      --boot-min-show: 3500ms; /* how long the overlay stays (at least) */
-      --boot-fade: 1200ms;     /* how slowly the overlay fades out */
-      --app-fade: 700ms;       /* how your page fades/scales in */
-      --app-fade-delay: 150ms; /* delay before the page starts animating */
+      --boot-min-show: 3500ms;
+      --boot-fade: 1200ms;
+      --app-fade: 700ms;
+      --app-fade-delay: 150ms;
     }
 
-    /* Page base */
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #0f0f0f;
       color: #fff;
       min-height: 100vh;
-
-      /* allow vertical scroll for multiple sections */
       overflow-x: hidden;
       overflow-y: auto;
     }
 
-    /* Wrap the real UI so we can animate it in */
     #app {
       opacity: 0;
       transform: scale(0.985);
       transition:
         opacity var(--app-fade) ease var(--app-fade-delay),
         transform var(--app-fade) ease var(--app-fade-delay);
-      padding-bottom: 3rem; /* small breathing room at bottom */
+      padding-bottom: 3rem;
     }
-    .boot-done #app {
-      opacity: 1;
-      transform: scale(1);
-    }
+    .boot-done #app { opacity: 1; transform: scale(1); }
 
     .heading {
       font-size: 2rem;
@@ -79,10 +71,7 @@
       margin: 0 auto;
     }
 
-    /* spacing between sections */
-    .section-gap {
-      margin-top: 1.5rem;
-    }
+    .section-gap { margin-top: 1.5rem; }
 
     a {
       display: block;
@@ -143,11 +132,10 @@
     }
     @keyframes float { to { transform: translateY(110vh); opacity: 0; } }
 
-    /* ==== Boot overlay (NO image — lets Android circle be the only logo) ==== */
     #boot {
       position: fixed;
       inset: 0;
-      background: #0f0f0f;     /* matches theme_color */
+      background: #0f0f0f;
       z-index: 9999;
       opacity: 1;
       transition: opacity var(--boot-fade) ease;
@@ -159,9 +147,7 @@
       #app { transition: none; }
     }
 
-    /* ===========================
-       Tools UI (Episode counts + Notes)
-       =========================== */
+    /* ===== Tools (Progress Tracker) ===== */
 
     .tools-wrap{
       width: 100%;
@@ -196,8 +182,8 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.8rem;
+      align-items: end;
     }
-
     @media (max-width: 640px){
       .tool-row{ grid-template-columns: 1fr; }
     }
@@ -213,7 +199,7 @@
       opacity: 0.85;
     }
 
-    .tool-input, .tool-select, .tool-textarea{
+    .tool-input, .tool-select{
       width: 100%;
       background: #151515;
       border: 1px solid #2a2a2a;
@@ -225,45 +211,95 @@
       box-sizing: border-box;
     }
 
-    .tool-input:focus, .tool-select:focus, .tool-textarea:focus{
+    .tool-input:focus, .tool-select:focus{
       border-color: rgba(0,240,255,0.6);
       box-shadow: 0 0 0 3px rgba(0,240,255,0.12);
     }
 
-    .tool-range{
-      width: 100%;
+    .seg{
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .seg button{
+      background: #151515;
+      border: 1px solid #2a2a2a;
+      color: #fff;
+      border-radius: 999px;
+      padding: 0.55rem 0.9rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .seg button:active{ transform: scale(0.98); }
+    .seg button.active{
+      border-color: rgba(0,240,255,0.65);
+      background: rgba(0,240,255,0.08);
     }
 
     .tool-mini{
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       opacity: 0.9;
-      margin-top: 0.6rem;
+      margin-top: 0.8rem;
+      line-height: 1.4;
     }
 
-    .pill{
-      display: inline-block;
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-      background: rgba(0,240,255,0.08);
-      border: 1px solid rgba(0,240,255,0.25);
-      margin-left: 0.4rem;
-      font-size: 0.85rem;
+    .save-row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+    }
+    @media (max-width: 640px){
+      .save-row{ grid-template-columns: 1fr; }
     }
 
-    .tool-textarea{
-      min-height: 130px;
-      resize: vertical;
+    .save-btn{
+      width: 100%;
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      color: #fff;
+      border-radius: 14px;
+      padding: 0.75rem 0.95rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .save-btn:active{ transform: scale(0.98); background-color: #2a2a2a; }
+
+    .activity-list{
+      margin-top: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      max-height: 320px;
+      overflow: auto;
+      padding-right: 0.25rem;
+    }
+
+    .activity-item{
+      background: rgba(21,21,21,0.9);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 0.75rem 0.85rem;
+      font-size: 0.95rem;
       line-height: 1.35;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
     }
+    .activity-item .right{
+      opacity: 0.75;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .hidden{ display: none !important; }
   </style>
 </head>
 <body>
-  <!-- Boot overlay (blank) -->
   <div id="boot"></div>
 
-  <!-- Real UI -->
   <main id="app">
-    <!-- Doraemon section -->
     <h1 class="heading">DM All<br />Seasons & Movies</h1>
     <div class="grid">
       <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
@@ -288,7 +324,6 @@
       </div>
     </div>
 
-    <!-- Ben 10 section -->
     <h1 class="heading section-gap">B10 All<br />Seasons</h1>
     <div class="grid">
       <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
@@ -314,42 +349,86 @@
       <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
     </div>
 
-    <!-- Tools section (NEW) -->
-    <h1 class="heading section-gap">Tools<br />Episode Counts & Notes</h1>
+    <h1 class="heading section-gap">Tools<br />Progress Tracker</h1>
 
     <div class="tools-wrap">
       <div class="tool-card">
-        <h2 class="tool-title">Episode Count Helper</h2>
-
-        <div class="tool-row">
-          <div class="tool-field">
-            <div class="tool-label">Choose Season</div>
-            <select id="seasonSelect" class="tool-select"></select>
-          </div>
-
-          <div class="tool-field">
-            <div class="tool-label">Episodes (0 to 100)</div>
-            <input id="episodeRange" class="tool-range" type="range" min="0" max="100" value="0">
-            <input id="episodeNumber" class="tool-input" type="number" min="0" max="100" value="0">
-          </div>
+        <h2 class="tool-title">Profile</h2>
+        <div class="seg" id="profileSeg">
+          <button type="button" data-profile="Asim">Asim</button>
+          <button type="button" data-profile="Marwa">Marwa</button>
         </div>
-
-        <div id="episodeSummary" class="tool-mini"></div>
       </div>
 
       <div class="tool-card">
-        <h2 class="tool-title">Quick Notes (Saved)</h2>
-        <textarea id="notesBox" class="tool-textarea" placeholder="Write anything here... Example:
-DM_S3 = 45 eps
-B10 OV_S2 encoding pending
-Upload queue: AF_S1 next"></textarea>
-        <div class="tool-mini">Auto-saves on every change.</div>
+        <h2 class="tool-title">Mode</h2>
+        <div class="seg" id="modeSeg">
+          <button type="button" data-mode="save">Save</button>
+          <button type="button" data-mode="recent">Recent Activity</button>
+        </div>
+
+        <div id="savePanel">
+          <div class="tool-row" style="margin-top:0.9rem;">
+            <div class="tool-field">
+              <div class="tool-label">Cartoon</div>
+              <select id="cartoonSelect" class="tool-select"></select>
+            </div>
+
+            <div class="tool-field" id="seriesField">
+              <div class="tool-label">Series</div>
+              <select id="seriesSelect" class="tool-select"></select>
+            </div>
+          </div>
+
+          <div class="tool-row" style="margin-top:0.8rem;">
+            <div class="tool-field">
+              <div class="tool-label">Type</div>
+              <select id="typeSelect" class="tool-select">
+                <option value="season">Season</option>
+                <option value="movie">Movies</option>
+              </select>
+            </div>
+
+            <div class="tool-field">
+              <div class="tool-label" id="seasonLabel">Season</div>
+              <select id="seasonOrMovieSelect" class="tool-select"></select>
+            </div>
+          </div>
+
+          <div class="save-row">
+            <div class="tool-field">
+              <div class="tool-label">Episode / Movie Number</div>
+              <input id="numInput" class="tool-input" type="number" min="0" max="500" value="0">
+            </div>
+
+            <div class="tool-field">
+              <div class="tool-label">Actions</div>
+              <button class="save-btn" id="saveBtn" type="button">Save</button>
+            </div>
+          </div>
+
+          <div class="tool-mini" id="saveHint"></div>
+        </div>
+
+        <div id="recentPanel" class="hidden">
+          <div class="tool-row" style="margin-top:0.9rem;">
+            <div class="tool-field">
+              <div class="tool-label">Cartoon</div>
+              <select id="recentCartoonSelect" class="tool-select"></select>
+            </div>
+            <div class="tool-field">
+              <div class="tool-label">Info</div>
+              <div class="tool-mini" id="recentInfo">Select a cartoon to view full activity.</div>
+            </div>
+          </div>
+
+          <div class="activity-list" id="activityList"></div>
+        </div>
       </div>
     </div>
   </main>
 
   <script>
-    // Button ripple
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(30);
       const target = e.currentTarget;
@@ -362,7 +441,6 @@ Upload queue: AF_S1 next"></textarea>
       setTimeout(() => ripple.remove(), 600);
     }
 
-    // Smooth boot overlay with minimum show time
     const bootStart = performance.now();
     window.addEventListener('load', () => {
       const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement)
@@ -374,91 +452,375 @@ Upload queue: AF_S1 next"></textarea>
       setTimeout(() => {
         const b = document.getElementById('boot');
         if (b) {
-          b.classList.add('hide');          // fade black sheet
-          document.body.classList.add('boot-done'); // let #app fade/scale in
-          // remove the sheet after its fade
+          b.classList.add('hide');
+          document.body.classList.add('boot-done');
           const bootFade = parseFloat(getComputedStyle(b).transitionDuration) * 1000 || 1200;
           setTimeout(() => b.remove(), bootFade + 50);
         }
       }, wait);
     });
 
-    // --- Episode Counter + Notes (localStorage) ---
-    const SEASONS = [
-      // Doraemon
-      "DM_S1","DM_S2","DM_S3","DM_S4","DM_S5","DM_S6","DM_S7","DM_S8","DM_S12",
-      "DM_S14","DM_S15","DM_S16","DM_S17","DM_S18","DM_S19","DM_S20",
-      "MOVIES-1","MOVIES-2",
+    /* ===== Progress Tracker ===== */
 
-      // Ben 10
-      "CL_S1","CL_S2","CL_S3","CL_S4",
-      "AF_S1","AF_S2","AF_S3",
-      "UA_S1","UA_S2","UA_S3",
-      "OV_S1","OV_S2","OV_S3","OV_S4","OV_S5","OV_S6","OV_S7","OV_S8"
-    ];
+    const STORE_KEY = "toonie_progress_tracker_v1";
 
-    const STORE_KEY_COUNTS = "toonie_episode_counts_v1";
-    const STORE_KEY_NOTES  = "toonie_notes_v1";
+    const MODEL = {
+      "Doraemon": {
+        label: "DM",
+        hasSeries: false,
+        seasons: ["S1","S2","S3","S4","S5","S6","S7","S8","S12","S14","S15","S16","S17","S18","S19","S20"],
+        hasMovies: true
+      },
+      "Ben 10": {
+        label: "B10",
+        hasSeries: true,
+        series: ["Classic","Alien Force","Ultimate Alien","Omniverse"],
+        seasonsBySeries: {
+          "Classic": ["S1","S2","S3","S4"],
+          "Alien Force": ["S1","S2","S3"],
+          "Ultimate Alien": ["S1","S2","S3"],
+          "Omniverse": ["S1","S2","S3","S4","S5","S6","S7","S8"]
+        },
+        hasMovies: true
+      }
+      // Ninja Hattori later: add here
+    };
 
-    function loadCounts(){
-      try { return JSON.parse(localStorage.getItem(STORE_KEY_COUNTS) || "{}"); }
-      catch { return {}; }
+    function nowStamp(){
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
-    function saveCounts(counts){
-      localStorage.setItem(STORE_KEY_COUNTS, JSON.stringify(counts));
+
+    function loadStore(){
+      try{
+        const raw = localStorage.getItem(STORE_KEY);
+        if(!raw) return { activeProfile: "Asim", data: { Asim: {}, Marwa: {} } };
+        const obj = JSON.parse(raw);
+        if(!obj.data) obj.data = { Asim: {}, Marwa: {} };
+        if(!obj.data.Asim) obj.data.Asim = {};
+        if(!obj.data.Marwa) obj.data.Marwa = {};
+        if(!obj.activeProfile) obj.activeProfile = "Asim";
+        return obj;
+      } catch {
+        return { activeProfile: "Asim", data: { Asim: {}, Marwa: {} } };
+      }
     }
 
-    function initTools(){
-      const seasonSelect = document.getElementById("seasonSelect");
-      const episodeRange = document.getElementById("episodeRange");
-      const episodeNumber = document.getElementById("episodeNumber");
-      const episodeSummary = document.getElementById("episodeSummary");
-      const notesBox = document.getElementById("notesBox");
+    function saveStore(store){
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    }
 
-      if(!seasonSelect || !episodeRange || !episodeNumber || !episodeSummary || !notesBox) return;
+    function ensurePath(store, profile, cartoonLabel){
+      if(!store.data[profile][cartoonLabel]){
+        store.data[profile][cartoonLabel] = { last: null, history: [] };
+      }
+      if(!store.data[profile][cartoonLabel].history){
+        store.data[profile][cartoonLabel].history = [];
+      }
+      return store.data[profile][cartoonLabel];
+    }
 
-      // Populate dropdown
-      seasonSelect.innerHTML = SEASONS.map(s => `<option value="${s}">${s}</option>`).join("");
+    function formatLine(entry){
+      // entry: { cartoonLabel, seriesLabel?, type, seasonOrMovie, num, ts }
+      const parts = [];
+      parts.push(entry.cartoonLabel);
 
-      // Load saved notes
-      notesBox.value = localStorage.getItem(STORE_KEY_NOTES) || "";
+      if(entry.seriesLabel) parts.push(entry.seriesLabel);
 
-      // Load counts
-      let counts = loadCounts();
-
-      function render(){
-        const season = seasonSelect.value;
-        const val = Number(counts[season] ?? 0);
-        episodeRange.value = String(val);
-        episodeNumber.value = String(val);
-
-        episodeSummary.innerHTML = `
-          <span class="pill">${season}</span>
-          has <span class="pill">${val}</span> episode(s)
-        `;
+      if(entry.type === "season"){
+        parts.push(entry.seasonOrMovie);
+        parts.push(`EP ${entry.num}`);
+      } else {
+        parts.push("MOVIES");
+        parts.push(`M${entry.num}`);
       }
 
-      function updateCount(newVal){
-        const season = seasonSelect.value;
-        const v = Math.max(0, Math.min(100, Number(newVal) || 0));
-        counts[season] = v;
-        saveCounts(counts);
-        render();
+      return parts.join(" ");
+    }
+
+    function initTracker(){
+      const profileSeg = document.getElementById("profileSeg");
+      const modeSeg = document.getElementById("modeSeg");
+
+      const savePanel = document.getElementById("savePanel");
+      const recentPanel = document.getElementById("recentPanel");
+
+      const cartoonSelect = document.getElementById("cartoonSelect");
+      const seriesField = document.getElementById("seriesField");
+      const seriesSelect = document.getElementById("seriesSelect");
+      const typeSelect = document.getElementById("typeSelect");
+      const seasonLabel = document.getElementById("seasonLabel");
+      const seasonOrMovieSelect = document.getElementById("seasonOrMovieSelect");
+      const numInput = document.getElementById("numInput");
+      const saveBtn = document.getElementById("saveBtn");
+      const saveHint = document.getElementById("saveHint");
+
+      const recentCartoonSelect = document.getElementById("recentCartoonSelect");
+      const recentInfo = document.getElementById("recentInfo");
+      const activityList = document.getElementById("activityList");
+
+      if(!profileSeg || !modeSeg) return;
+
+      let store = loadStore();
+      let activeProfile = store.activeProfile || "Asim";
+      let activeMode = "save";
+
+      function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
+
+      function setProfileUI(){
+        [...profileSeg.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("active", b.dataset.profile === activeProfile);
+        });
       }
+
+      function setModeUI(){
+        [...modeSeg.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("active", b.dataset.mode === activeMode);
+        });
+
+        if(activeMode === "save"){
+          savePanel.classList.remove("hidden");
+          recentPanel.classList.add("hidden");
+        } else {
+          savePanel.classList.add("hidden");
+          recentPanel.classList.remove("hidden");
+          renderRecent();
+        }
+      }
+
+      function cartoonsList(){
+        return Object.keys(MODEL);
+      }
+
+      function getCartoonCfg(name){
+        return MODEL[name];
+      }
+
+      function fillCartoonSelects(){
+        const opts = cartoonsList().map(c => `<option value="${c}">${c}</option>`).join("");
+        cartoonSelect.innerHTML = opts;
+        recentCartoonSelect.innerHTML = opts;
+      }
+
+      function fillSeries(){
+        const cfg = getCartoonCfg(cartoonSelect.value);
+        if(!cfg || !cfg.hasSeries){
+          seriesField.classList.add("hidden");
+          seriesSelect.innerHTML = "";
+          return;
+        }
+        seriesField.classList.remove("hidden");
+        seriesSelect.innerHTML = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
+      }
+
+      function fillSeasonOrMovie(){
+        const cartoonName = cartoonSelect.value;
+        const cfg = getCartoonCfg(cartoonName);
+        const type = typeSelect.value;
+
+        if(type === "movie"){
+          seasonLabel.textContent = "Movies";
+          const list = ["Movies"];
+          seasonOrMovieSelect.innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join("");
+          return;
+        }
+
+        seasonLabel.textContent = "Season";
+
+        let seasons = [];
+        if(cfg.hasSeries){
+          const s = seriesSelect.value;
+          seasons = (cfg.seasonsBySeries && cfg.seasonsBySeries[s]) ? cfg.seasonsBySeries[s] : [];
+        } else {
+          seasons = cfg.seasons || [];
+        }
+
+        seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
+      }
+
+      function currentKeyLabels(){
+        const cartoonName = cartoonSelect.value;
+        const cfg = getCartoonCfg(cartoonName);
+        const cartoonLabel = cfg.label;
+
+        const type = typeSelect.value; // season/movie
+        let seriesLabel = null;
+
+        if(cfg.hasSeries){
+          const s = seriesSelect.value;
+          // short series label style
+          seriesLabel = (s === "Classic") ? "CL" :
+                        (s === "Alien Force") ? "AF" :
+                        (s === "Ultimate Alien") ? "UA" :
+                        (s === "Omniverse") ? "OV" : s;
+        }
+
+        const seasonOrMovie = seasonOrMovieSelect.value; // S1 or "Movies"
+
+        return { cartoonLabel, seriesLabel, type, seasonOrMovie };
+      }
+
+      function loadLastForSelection(){
+        store = loadStore();
+        const { cartoonLabel } = currentKeyLabels();
+        const node = ensurePath(store, activeProfile, cartoonLabel);
+
+        // if last matches current selection, load it
+        const last = node.last;
+        const cur = currentKeyLabels();
+
+        if(last && last.type === cur.type && last.seasonOrMovie === cur.seasonOrMovie && (last.seriesLabel || null) === (cur.seriesLabel || null)){
+          numInput.value = last.num;
+          saveHint.textContent = `Last saved: ${formatLine(last)}`;
+        } else {
+          // still show last overall for that cartoon
+          if(node.last){
+            saveHint.textContent = `Last saved: ${formatLine(node.last)}`;
+          } else {
+            saveHint.textContent = "No saves yet for this cartoon.";
+          }
+          numInput.value = 0;
+        }
+      }
+
+      function doSave(){
+        vib();
+        store = loadStore();
+        const { cartoonLabel, seriesLabel, type, seasonOrMovie } = currentKeyLabels();
+        const node = ensurePath(store, activeProfile, cartoonLabel);
+
+        const num = Math.max(0, Math.min(9999, Number(numInput.value) || 0));
+
+        const entry = {
+          cartoonLabel,
+          seriesLabel: seriesLabel || null,
+          type,
+          seasonOrMovie,
+          num,
+          ts: nowStamp()
+        };
+
+        node.last = entry;
+
+        // overwrite-if-same (keeps list clean)
+        const idx = node.history.findIndex(h =>
+          (h.type === entry.type) &&
+          (h.seasonOrMovie === entry.seasonOrMovie) &&
+          ((h.seriesLabel || null) === (entry.seriesLabel || null))
+        );
+        if(idx >= 0){
+          node.history[idx] = entry;
+        } else {
+          node.history.unshift(entry);
+        }
+
+        saveStore(store);
+
+        saveHint.textContent = `Saved: ${formatLine(entry)}`;
+      }
+
+      function renderRecent(){
+        store = loadStore();
+        const cartoonName = recentCartoonSelect.value;
+        const cfg = getCartoonCfg(cartoonName);
+        const cartoonLabel = cfg.label;
+
+        const node = ensurePath(store, activeProfile, cartoonLabel);
+        const list = node.history || [];
+
+        if(list.length === 0){
+          recentInfo.textContent = "No activity yet.";
+          activityList.innerHTML = "";
+          return;
+        }
+
+        recentInfo.textContent = `Showing all activity for ${cartoonLabel} (${activeProfile})`;
+
+        activityList.innerHTML = list
+          .map(item => `
+            <div class="activity-item">
+              <div>${formatLine(item)}</div>
+              <div class="right">${item.ts}</div>
+            </div>
+          `)
+          .join("");
+      }
+
+      // init selects
+      fillCartoonSelects();
+      fillSeries();
+      fillSeasonOrMovie();
+
+      // set profile + mode
+      setProfileUI();
+      setModeUI();
+
+      // set recent default same as save cartoon
+      recentCartoonSelect.value = cartoonSelect.value;
+
+      // Load last
+      loadLastForSelection();
 
       // Events
-      seasonSelect.addEventListener("change", render);
-      episodeRange.addEventListener("input", (e) => updateCount(e.target.value));
-      episodeNumber.addEventListener("input", (e) => updateCount(e.target.value));
-
-      notesBox.addEventListener("input", (e) => {
-        localStorage.setItem(STORE_KEY_NOTES, e.target.value);
+      profileSeg.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if(!btn) return;
+        vib();
+        activeProfile = btn.dataset.profile;
+        store = loadStore();
+        store.activeProfile = activeProfile;
+        saveStore(store);
+        setProfileUI();
+        loadLastForSelection();
+        renderRecent();
       });
 
-      render();
+      modeSeg.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if(!btn) return;
+        vib();
+        activeMode = btn.dataset.mode;
+        setModeUI();
+      });
+
+      cartoonSelect.addEventListener("change", () => {
+        fillSeries();
+        // if movies not supported, force season
+        const cfg = getCartoonCfg(cartoonSelect.value);
+        if(!cfg.hasMovies){
+          typeSelect.value = "season";
+        }
+        fillSeasonOrMovie();
+        recentCartoonSelect.value = cartoonSelect.value;
+        loadLastForSelection();
+        if(activeMode === "recent") renderRecent();
+      });
+
+      seriesSelect.addEventListener("change", () => {
+        fillSeasonOrMovie();
+        loadLastForSelection();
+      });
+
+      typeSelect.addEventListener("change", () => {
+        const cfg = getCartoonCfg(cartoonSelect.value);
+        if(typeSelect.value === "movie" && !cfg.hasMovies){
+          typeSelect.value = "season";
+        }
+        fillSeasonOrMovie();
+        loadLastForSelection();
+      });
+
+      seasonOrMovieSelect.addEventListener("change", () => {
+        loadLastForSelection();
+      });
+
+      saveBtn.addEventListener("click", doSave);
+
+      recentCartoonSelect.addEventListener("change", renderRecent);
     }
 
-    window.addEventListener("load", initTools);
+    window.addEventListener("load", initTracker);
   </script>
 </body>
 </html>
