@@ -350,15 +350,13 @@
       <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
     </div>
 
-    <h1 class="heading section-gap">Progress Tracker </h1>
-    
-<div style="text-align:center; margin-top:-1rem; opacity:0.8;" id="syncStatus">
-  Sync: OFF (local only)
-</div>
+    <h1 class="heading section-gap">Progress Tracker</h1>
+
+    <div style="text-align:center; margin-top:-1rem; opacity:0.8;" id="syncStatus">
+      Sync: OFF (local only)
+    </div>
 
     <div class="tools-wrap">
-
-      <!-- NEW: Sync card (Room Code) -->
       <div class="tool-card">
         <h2 class="tool-title">Sync</h2>
 
@@ -455,39 +453,34 @@
 
   <script>
     // ===== Supabase (sync) =====
-const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.com";
-const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+    const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ===== Sync (Room Code) =====
-const ROOM_KEY = "toonie_room_code_v1";
-const TABLE_NAME = "toonie_progress";
+    const ROOM_KEY = "toonie_room_code_v1";
+    const TABLE_NAME = "toonie_progress";
+    const SYNC_POLL_MS = 5000;
 
-// Read room code saved on this device (phone/TV)
-function getRoomCode() {
-  return (localStorage.getItem(ROOM_KEY) || "").trim();
-}
+    function getRoomCode() {
+      return (localStorage.getItem(ROOM_KEY) || "").trim();
+    }
 
-// Save room code on this device (phone/TV)
-function setRoomCode(code) {
-  const clean = String(code || "").trim();
-  if (clean) localStorage.setItem(ROOM_KEY, clean);
-  else localStorage.removeItem(ROOM_KEY);
-  return clean;
-}
+    function setRoomCode(code) {
+      const clean = String(code || "").trim();
+      if (clean) localStorage.setItem(ROOM_KEY, clean);
+      else localStorage.removeItem(ROOM_KEY);
+      return clean;
+    }
 
-// Sync is ON only if a room code exists
-function syncOn() {
-  return getRoomCode().length > 0;
-}
-// Small helper so we can show status text easily
-function setSyncStatus(text) {
-  const el = document.getElementById("syncStatus");
-  if (el) el.textContent = text;
-}
+    function syncOn() {
+      return getRoomCode().length > 0;
+    }
+
+    function setSyncStatus(text) {
+      const el = document.getElementById("syncStatus");
+      if (el) el.textContent = text;
+    }
 
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(30);
@@ -501,10 +494,11 @@ function setSyncStatus(text) {
       setTimeout(() => ripple.remove(), 600);
     }
 
+    // ===== Boot overlay fade =====
     const bootStart = performance.now();
     window.addEventListener('load', () => {
       const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement)
-                         .getPropertyValue('--boot-min-show')) || 3500;
+                        .getPropertyValue('--boot-min-show')) || 3500;
 
       const elapsed = performance.now() - bootStart;
       const wait = Math.max(0, MIN_SHOW - elapsed);
@@ -514,43 +508,13 @@ function setSyncStatus(text) {
         if (b) {
           b.classList.add('hide');
           document.body.classList.add('boot-done');
-          const bootFade = parseFloat(getComputedStyle(b).transitionDuration) * 1000 || 1200;
+          const bootFade = (parseFloat(getComputedStyle(b).transitionDuration) || 1.2) * 1000;
           setTimeout(() => b.remove(), bootFade + 50);
         }
       }, wait);
     });
 
-    /* =========================================================
-       Sync (Supabase) - READY NOW, keys will be added later
-       =========================================================
-
-       Later you'll paste:
-       - SUPABASE_URL
-       - SUPABASE_ANON_KEY
-
-       Table name: activity
-       We will poll every 5 seconds.
-    */
-
-    // TODO (later): paste your Supabase project settings here
-    const SUPABASE_URL = "";      // example: https://xxxx.supabase.co
-    const SUPABASE_ANON_KEY = ""; // example: eyJhbGciOi...
-
-    const SYNC_ROOM_KEY = "toonie_room_code_v1";
-    const SYNC_POLL_MS = 5000;
-
-    function supabaseEnabled(){
-      return !!(SUPABASE_URL && SUPABASE_ANON_KEY);
-    }
-
-    function getRoomCode(){
-      return (localStorage.getItem(SYNC_ROOM_KEY) || "").trim();
-    }
-
-    function setRoomCode(code){
-      localStorage.setItem(SYNC_ROOM_KEY, (code || "").trim());
-    }
-
+    // ===== Supabase REST helpers =====
     function sbHeaders(){
       return {
         "apikey": SUPABASE_ANON_KEY,
@@ -559,20 +523,18 @@ function setSyncStatus(text) {
       };
     }
 
-    async function sbInsertActivity(row){
-      // If no keys yet, skip silently (local mode)
-      if(!supabaseEnabled()) return { ok: false, skipped: true };
+    async function sbInsertProgress(row){
       const room = getRoomCode();
       if(!room) return { ok: false, skipped: true };
 
-      const url = `${SUPABASE_URL}/rest/v1/activity`;
+      const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
           ...sbHeaders(),
-          "Prefer": "return=minimal"
+          "Prefer": "resolution=merge-duplicates,return=minimal"
         },
-        body: JSON.stringify([{ ...row, room }])
+        body: JSON.stringify([{ ...row, room_code: room }])
       });
 
       if(!res.ok){
@@ -583,18 +545,17 @@ function setSyncStatus(text) {
       return { ok: true };
     }
 
-    async function sbFetchActivity(room, profile, limit = 200){
-      if(!supabaseEnabled()) return { ok: false, skipped: true, rows: [] };
+    async function sbFetchProgress(room, profile, limit = 200){
       if(!room) return { ok: false, skipped: true, rows: [] };
 
       const params = new URLSearchParams();
-      params.set("select", "room,profile,cartoon_label,series_label,type,season_or_movie,num,ts,created_at");
-      params.set("room", "eq." + room);
+      params.set("select", "room_code,profile,cartoon_label,series_label,type,season_or_movie,num,ts");
+      params.set("room_code", "eq." + room);
       params.set("profile", "eq." + profile);
-      params.set("order", "created_at.desc");
+      params.set("order", "ts.desc");
       params.set("limit", String(limit));
 
-      const url = `${SUPABASE_URL}/rest/v1/activity?${params.toString()}`;
+      const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?${params.toString()}`;
       const res = await fetch(url, { headers: sbHeaders() });
 
       if(!res.ok){
@@ -682,7 +643,6 @@ function setSyncStatus(text) {
       return parts.join(" ");
     }
 
-    // Merge one entry into local store cleanly (overwrite-if-same)
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
       node.last = entry;
@@ -729,7 +689,6 @@ function setSyncStatus(text) {
       let activeProfile = store.activeProfile || "Asim";
       let activeMode = "save";
       let pollTimer = null;
-      let lastPollOk = true;
 
       function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
 
@@ -878,34 +837,22 @@ function setSyncStatus(text) {
         if(roomInput) roomInput.value = room;
 
         if(!room){
+          setSyncStatus("Sync: OFF (local only)");
           updateRoomStatus("Sync: OFF (no room code). Local save only.");
           return;
         }
 
-        if(!supabaseEnabled()){
-          updateRoomStatus(`Room: ${room} (keys not added yet) → Sync not active yet.`);
-          return;
-        }
-
+        setSyncStatus(`Sync: ON (Room: ${room})`);
         updateRoomStatus(`Room: ${room} → Sync ON (auto refresh every ${Math.round(SYNC_POLL_MS/1000)}s).`);
       }
 
       async function pollFromCloud(){
-        // Pull room data for activeProfile, merge into local store
         const room = getRoomCode();
-        if(!room || !supabaseEnabled()) return;
+        if(!room) return;
 
-        const res = await sbFetchActivity(room, activeProfile, 250);
-        if(!res.ok){
-          if(lastPollOk){
-            updateRoomStatus(`Room: ${room} → Sync ON, but fetch failed. (Will keep trying)`);
-          }
-          lastPollOk = false;
-          return;
-        }
-        lastPollOk = true;
+        const res = await sbFetchProgress(room, activeProfile, 250);
+        if(!res.ok) return;
 
-        // Merge into local store
         store = loadStore();
         for(const r of res.rows){
           const entry = {
@@ -920,7 +867,6 @@ function setSyncStatus(text) {
         }
         saveStore(store);
 
-        // Refresh UI if needed
         loadLastForSelection();
         if(activeMode === "recent") renderRecent();
         refreshRoomUI();
@@ -929,13 +875,12 @@ function setSyncStatus(text) {
       function startPolling(){
         stopPolling();
         const room = getRoomCode();
-        if(!room || !supabaseEnabled()) return;
+        if(!room) return;
 
         pollTimer = setInterval(() => {
           pollFromCloud().catch(() => {});
         }, SYNC_POLL_MS);
 
-        // do an immediate poll so TV updates fast after entering room
         pollFromCloud().catch(() => {});
       }
 
@@ -962,13 +907,10 @@ function setSyncStatus(text) {
           ts: nowStamp()
         };
 
-        // Local save (always)
         upsertEntry(store, activeProfile, entry);
         saveStore(store);
         saveHint.textContent = `Saved: ${formatLine(entry)}`;
 
-        // Cloud save (optional)
-        // (table columns we will create later)
         const cloudRow = {
           profile: activeProfile,
           cartoon_label: entry.cartoonLabel,
@@ -979,38 +921,28 @@ function setSyncStatus(text) {
           ts: entry.ts
         };
 
-        const push = await sbInsertActivity(cloudRow);
+        const push = await sbInsertProgress(cloudRow);
         if(push.ok){
-          // Nice: after pushing, re-poll so TV gets it quickly even without waiting
           pollFromCloud().catch(() => {});
-        } else {
-          // If skipped, just stay quiet. If error, show tiny hint (non-scary).
-          if(push.error){
-            saveHint.textContent = `Saved locally. (Cloud save failed right now)`;
-          }
+        } else if(push.error){
+          saveHint.textContent = "Saved locally. (Cloud save failed right now)";
         }
       }
 
-      // init selects
       fillCartoonSelects();
       fillSeries();
       fillSeasonOrMovie();
 
-      // set profile + mode
       setProfileUI();
       setModeUI();
 
-      // set recent default same as save cartoon
       recentCartoonSelect.value = cartoonSelect.value;
 
-      // Load last
       loadLastForSelection();
 
-      // Sync UI init
       refreshRoomUI();
       startPolling();
 
-      // Events
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
@@ -1022,8 +954,6 @@ function setSyncStatus(text) {
         setProfileUI();
         loadLastForSelection();
         renderRecent();
-
-        // When profile changes, poll cloud for that profile
         startPolling();
       });
 
@@ -1065,7 +995,6 @@ function setSyncStatus(text) {
 
       recentCartoonSelect.addEventListener("change", renderRecent);
 
-      // Room code save
       if(roomSaveBtn && roomInput){
         roomSaveBtn.addEventListener("click", () => {
           vib();
@@ -1076,7 +1005,6 @@ function setSyncStatus(text) {
         });
       }
 
-      // Also save room when user presses Enter
       if(roomInput){
         roomInput.addEventListener("keydown", (e) => {
           if(e.key === "Enter"){
