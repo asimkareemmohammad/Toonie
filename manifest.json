@@ -1,6 +1,6 @@
 {
-  "name": "Makflix",
-  "short_name": "Makflix",
+  "name": "Toonie",
+"short_name": "Toonie",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
