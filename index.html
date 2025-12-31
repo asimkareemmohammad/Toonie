@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toonie</title>
 
-
   <link rel="manifest" href="manifest.json">
 
   <!-- Favicons (desktop/tab) -->
@@ -16,8 +15,7 @@
   <meta name="theme-color" content="#0f0f0f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Toonie">
-
+  <meta name="apple-mobile-web-app-title" content="Toonie">
   <meta name="mobile-web-app-capable" content="yes">
 
   <style>
@@ -37,7 +35,7 @@
       color: #fff;
       min-height: 100vh;
 
-      /* CHANGED: allow vertical scroll for multiple sections */
+      /* allow vertical scroll for multiple sections */
       overflow-x: hidden;
       overflow-y: auto;
     }
@@ -81,7 +79,7 @@
       margin: 0 auto;
     }
 
-    /* NEW: spacing between sections */
+    /* spacing between sections */
     .section-gap {
       margin-top: 1.5rem;
     }
@@ -160,6 +158,103 @@
       #boot { transition: none; }
       #app { transition: none; }
     }
+
+    /* ===========================
+       Tools UI (Episode counts + Notes)
+       =========================== */
+
+    .tools-wrap{
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto 3rem;
+      padding: 0 2rem;
+      box-sizing: border-box;
+    }
+
+    .tool-card{
+      background: rgba(30,30,30,0.75);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 1.25rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-top: 1rem;
+    }
+
+    .tool-title{
+      font-size: 1.15rem;
+      margin: 0 0 0.75rem 0;
+      background: linear-gradient(90deg, #facc15, #00f0ff, #facc15);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 3s linear infinite;
+    }
+
+    .tool-row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    @media (max-width: 640px){
+      .tool-row{ grid-template-columns: 1fr; }
+    }
+
+    .tool-field{
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .tool-label{
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .tool-input, .tool-select, .tool-textarea{
+      width: 100%;
+      background: #151515;
+      border: 1px solid #2a2a2a;
+      color: #fff;
+      border-radius: 12px;
+      padding: 0.7rem 0.8rem;
+      outline: none;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+    }
+
+    .tool-input:focus, .tool-select:focus, .tool-textarea:focus{
+      border-color: rgba(0,240,255,0.6);
+      box-shadow: 0 0 0 3px rgba(0,240,255,0.12);
+    }
+
+    .tool-range{
+      width: 100%;
+    }
+
+    .tool-mini{
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-top: 0.6rem;
+    }
+
+    .pill{
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(0,240,255,0.08);
+      border: 1px solid rgba(0,240,255,0.25);
+      margin-left: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .tool-textarea{
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.35;
+    }
   </style>
 </head>
 <body>
@@ -168,7 +263,7 @@
 
   <!-- Real UI -->
   <main id="app">
-    <!-- Doraemon section (UNCHANGED) -->
+    <!-- Doraemon section -->
     <h1 class="heading">DM All<br />Seasons & Movies</h1>
     <div class="grid">
       <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
@@ -193,26 +288,22 @@
       </div>
     </div>
 
-    <!-- Ben 10 section (NEW) -->
+    <!-- Ben 10 section -->
     <h1 class="heading section-gap">B10 All<br />Seasons</h1>
     <div class="grid">
-      <!-- Classic S1-S4 -->
       <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
       <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
       <a href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)"><span class="label">CL_S3</span></a>
       <a href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)"><span class="label">CL_S4</span></a>
 
-      <!-- Alien Force S1-S3 -->
       <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
       <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
       <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
 
-      <!-- Ultimate Alien S1-S3 -->
       <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
       <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
       <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
 
-      <!-- Omniverse S1-S8 -->
       <a href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)"><span class="label">OV_S1</span></a>
       <a href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)"><span class="label">OV_S2</span></a>
       <a href="https://archive.org/details/B10_OV_S03_MAK" onclick="ripple(event)"><span class="label">OV_S3</span></a>
@@ -221,6 +312,39 @@
       <a href="https://archive.org/details/B10_OV_S06_MAK" onclick="ripple(event)"><span class="label">OV_S6</span></a>
       <a href="https://archive.org/details/B10_OV_S07_MAK" onclick="ripple(event)"><span class="label">OV_S7</span></a>
       <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
+    </div>
+
+    <!-- Tools section (NEW) -->
+    <h1 class="heading section-gap">Tools<br />Episode Counts & Notes</h1>
+
+    <div class="tools-wrap">
+      <div class="tool-card">
+        <h2 class="tool-title">Episode Count Helper</h2>
+
+        <div class="tool-row">
+          <div class="tool-field">
+            <div class="tool-label">Choose Season</div>
+            <select id="seasonSelect" class="tool-select"></select>
+          </div>
+
+          <div class="tool-field">
+            <div class="tool-label">Episodes (0 to 100)</div>
+            <input id="episodeRange" class="tool-range" type="range" min="0" max="100" value="0">
+            <input id="episodeNumber" class="tool-input" type="number" min="0" max="100" value="0">
+          </div>
+        </div>
+
+        <div id="episodeSummary" class="tool-mini"></div>
+      </div>
+
+      <div class="tool-card">
+        <h2 class="tool-title">Quick Notes (Saved)</h2>
+        <textarea id="notesBox" class="tool-textarea" placeholder="Write anything here... Example:
+DM_S3 = 45 eps
+B10 OV_S2 encoding pending
+Upload queue: AF_S1 next"></textarea>
+        <div class="tool-mini">Auto-saves on every change.</div>
+      </div>
     </div>
   </main>
 
@@ -258,6 +382,83 @@
         }
       }, wait);
     });
+
+    // --- Episode Counter + Notes (localStorage) ---
+    const SEASONS = [
+      // Doraemon
+      "DM_S1","DM_S2","DM_S3","DM_S4","DM_S5","DM_S6","DM_S7","DM_S8","DM_S12",
+      "DM_S14","DM_S15","DM_S16","DM_S17","DM_S18","DM_S19","DM_S20",
+      "MOVIES-1","MOVIES-2",
+
+      // Ben 10
+      "CL_S1","CL_S2","CL_S3","CL_S4",
+      "AF_S1","AF_S2","AF_S3",
+      "UA_S1","UA_S2","UA_S3",
+      "OV_S1","OV_S2","OV_S3","OV_S4","OV_S5","OV_S6","OV_S7","OV_S8"
+    ];
+
+    const STORE_KEY_COUNTS = "toonie_episode_counts_v1";
+    const STORE_KEY_NOTES  = "toonie_notes_v1";
+
+    function loadCounts(){
+      try { return JSON.parse(localStorage.getItem(STORE_KEY_COUNTS) || "{}"); }
+      catch { return {}; }
+    }
+    function saveCounts(counts){
+      localStorage.setItem(STORE_KEY_COUNTS, JSON.stringify(counts));
+    }
+
+    function initTools(){
+      const seasonSelect = document.getElementById("seasonSelect");
+      const episodeRange = document.getElementById("episodeRange");
+      const episodeNumber = document.getElementById("episodeNumber");
+      const episodeSummary = document.getElementById("episodeSummary");
+      const notesBox = document.getElementById("notesBox");
+
+      if(!seasonSelect || !episodeRange || !episodeNumber || !episodeSummary || !notesBox) return;
+
+      // Populate dropdown
+      seasonSelect.innerHTML = SEASONS.map(s => `<option value="${s}">${s}</option>`).join("");
+
+      // Load saved notes
+      notesBox.value = localStorage.getItem(STORE_KEY_NOTES) || "";
+
+      // Load counts
+      let counts = loadCounts();
+
+      function render(){
+        const season = seasonSelect.value;
+        const val = Number(counts[season] ?? 0);
+        episodeRange.value = String(val);
+        episodeNumber.value = String(val);
+
+        episodeSummary.innerHTML = `
+          <span class="pill">${season}</span>
+          has <span class="pill">${val}</span> episode(s)
+        `;
+      }
+
+      function updateCount(newVal){
+        const season = seasonSelect.value;
+        const v = Math.max(0, Math.min(100, Number(newVal) || 0));
+        counts[season] = v;
+        saveCounts(counts);
+        render();
+      }
+
+      // Events
+      seasonSelect.addEventListener("change", render);
+      episodeRange.addEventListener("input", (e) => updateCount(e.target.value));
+      episodeNumber.addEventListener("input", (e) => updateCount(e.target.value));
+
+      notesBox.addEventListener("input", (e) => {
+        localStorage.setItem(STORE_KEY_NOTES, e.target.value);
+      });
+
+      render();
+    }
+
+    window.addEventListener("load", initTools);
   </script>
 </body>
 </html>
