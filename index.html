@@ -1,4 +1,3 @@
-<!-- PART 1 / 2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -281,6 +280,7 @@
     .hidden{ display: none !important; }
   </style>
 </head>
+
 <body>
   <div id="boot"></div>
 
@@ -405,7 +405,8 @@
           <div class="save-row">
             <div class="tool-field">
               <div class="tool-label">Episode / Movie Number</div>
-              <input id="numInput" class="tool-input" type="number" min="0" max="500" value="0">
+              <!-- FIX: Dropdown 1..100 -->
+              <select id="numSelect" class="tool-select"></select>
             </div>
 
             <div class="tool-field">
@@ -446,7 +447,7 @@
     const ROOM_KEY = "toonie_room_code_v1";
     const STORE_KEY = "toonie_progress_tracker_v1";
 
-    // FIX: 10s poll (not 5s)
+    // 10s poll
     const SYNC_POLL_MS = 10000;
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -511,6 +512,24 @@
     });
 
     // =========================
+    // TIME NORMALIZER (removes timezone / ISO look)
+    // =========================
+    function toSimpleTime(ts){
+      if(!ts) return "";
+      const s = String(ts);
+
+      // already simple: "YYYY-MM-DD HH:MM"
+      if(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}$/.test(s)) return s;
+
+      // try parse ISO or any date string
+      const d = new Date(s);
+      if(Number.isNaN(d.getTime())) return s;
+
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // =========================
     // STORAGE (ROOM + LOCAL)
     // =========================
     function getRoomCode() {
@@ -525,9 +544,7 @@
     }
 
     function nowStamp(){
-      const d = new Date();
-      const pad = (n) => String(n).padStart(2,'0');
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      return toSimpleTime(new Date().toISOString());
     }
 
     function loadStore(){
@@ -587,7 +604,7 @@
       if(idx >= 0) node.history[idx] = entry;
       else node.history.unshift(entry);
     }
-<!-- PART 2 / 2 -->
+
     // =========================
     // SUPABASE HELPERS (CLOUD)
     // =========================
@@ -603,7 +620,7 @@
         room_code: room,
         profile: row.profile,
         cartoon_label: row.cartoon_label,
-        series_label: String(row.series_label ?? ""), // keep string
+        series_label: String(row.series_label ?? ""),
         type: row.type,
         season_or_movie: row.season_or_movie,
         num: Number(row.num) || 0,
@@ -657,7 +674,10 @@
       const typeSelect = document.getElementById("typeSelect");
       const seasonLabel = document.getElementById("seasonLabel");
       const seasonOrMovieSelect = document.getElementById("seasonOrMovieSelect");
-      const numInput = document.getElementById("numInput");
+
+      // FIX: episode dropdown
+      const numSelect = document.getElementById("numSelect");
+
       const saveBtn = document.getElementById("saveBtn");
       const saveHint = document.getElementById("saveHint");
 
@@ -677,9 +697,8 @@
       let pollTimer = null;
       let lastCloudOk = true;
 
-      // FIX: don’t overwrite episode number while user is typing
-      let isEditingNum = false;
-      let editNumTimer = null;
+      // prevent overwrite while user is picking dropdown
+      let isPickingNum = false;
 
       function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
 
@@ -771,6 +790,17 @@
         seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
       }
 
+      // FIX: 1..100 dropdown
+      function fillEpisodeDropdown(){
+        if(!numSelect) return;
+        let html = "";
+        for(let i = 1; i <= 100; i++){
+          html += `<option value="${i}">${i}</option>`;
+        }
+        numSelect.innerHTML = html;
+        if(!numSelect.value) numSelect.value = "1";
+      }
+
       function currentKeyLabels(){
         const cfg = getCartoonCfg(cartoonSelect.value);
         const cartoonLabel = cfg.label;
@@ -791,8 +821,8 @@
       }
 
       function loadLastForSelection(){
-        // HARD FIX: do not touch num while user is editing
-        if(isEditingNum || document.activeElement === numInput) return;
+        // do not overwrite while user is interacting with dropdown
+        if(isPickingNum || document.activeElement === numSelect) return;
 
         store = loadStore();
         const { cartoonLabel } = currentKeyLabels();
@@ -802,7 +832,9 @@
         const cur = currentKeyLabels();
 
         if(last && last.type === cur.type && last.seasonOrMovie === cur.seasonOrMovie && (last.seriesLabel || null) === (cur.seriesLabel || null)){
-          numInput.value = last.num;
+          // clamp to 1..100
+          const n = Math.max(1, Math.min(100, Number(last.num) || 1));
+          numSelect.value = String(n);
           saveHint.textContent = `Last saved: ${formatLine(last)}`;
         } else {
           if(node.last){
@@ -810,7 +842,7 @@
           } else {
             saveHint.textContent = "No saves yet for this cartoon.";
           }
-          numInput.value = 0;
+          numSelect.value = "1";
         }
       }
 
@@ -834,48 +866,27 @@
           .map(item => `
             <div class="activity-item">
               <div>${formatLine(item)}</div>
-              <div class="right">${item.ts}</div>
+              <div class="right">${toSimpleTime(item.ts)}</div>
             </div>
           `)
           .join("");
       }
 
-      function beginNumEdit(){
-        isEditingNum = true;
-        if(editNumTimer) clearTimeout(editNumTimer);
-      }
-
-      function endNumEditSoon(){
-        if(editNumTimer) clearTimeout(editNumTimer);
-        editNumTimer = setTimeout(() => {
-          isEditingNum = false;
-          loadLastForSelection();
-          if(activeMode === "recent") renderRecent();
-        }, 900);
-      }
-
-      if(numInput){
-        numInput.addEventListener("focus", beginNumEdit);
-        numInput.addEventListener("input", beginNumEdit);
-        numInput.addEventListener("blur", endNumEditSoon);
-
-        numInput.addEventListener("keydown", (e) => {
-          if(e.key === "Enter"){
-            e.preventDefault();
-            isEditingNum = false;
-            if(editNumTimer) clearTimeout(editNumTimer);
-            doSave().catch(() => {});
-            numInput.blur();
-          }
+      if(numSelect){
+        numSelect.addEventListener("pointerdown", () => { isPickingNum = true; });
+        numSelect.addEventListener("focus", () => { isPickingNum = true; });
+        numSelect.addEventListener("change", () => {
+          isPickingNum = false;
         });
+        numSelect.addEventListener("blur", () => { isPickingNum = false; });
       }
 
       async function pollFromCloud(){
         const room = getRoomCode();
         if(!room || !supabaseEnabled()) return;
 
-        // HARD FIX: never poll while editing episode number
-        if(isEditingNum || document.activeElement === numInput) return;
+        // never poll-merge while user is interacting with dropdown
+        if(isPickingNum || document.activeElement === numSelect) return;
 
         const res = await sbFetchProgress(room, activeProfile, 250);
         if(!res.ok){
@@ -896,7 +907,7 @@
             type: r.type,
             seasonOrMovie: r.season_or_movie,
             num: Number(r.num) || 0,
-            ts: r.ts || nowStamp()
+            ts: toSimpleTime(r.ts || nowStamp())
           };
           upsertEntry(store, activeProfile, entry);
         }
@@ -931,7 +942,7 @@
         store = loadStore();
 
         const { cartoonLabel, seriesLabel, type, seasonOrMovie } = currentKeyLabels();
-        const num = Math.max(0, Math.min(9999, Number(numInput.value) || 0));
+        const num = Math.max(1, Math.min(100, Number(numSelect.value) || 1));
 
         const entry = {
           cartoonLabel,
@@ -947,7 +958,7 @@
         saveStore(store);
         saveHint.textContent = `Saved: ${formatLine(entry)}`;
 
-        // Cloud save (upsert)
+        // Cloud save
         const room = getRoomCode();
         if(!room || !supabaseEnabled()){
           return;
@@ -970,10 +981,11 @@
         }
       }
 
-      // INIT selects
+      // INIT
       fillCartoonSelects();
       fillSeries();
       fillSeasonOrMovie();
+      fillEpisodeDropdown();
 
       setProfileUI();
       setModeUI();
