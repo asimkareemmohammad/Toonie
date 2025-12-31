@@ -147,7 +147,7 @@
       #app { transition: none; }
     }
 
-    /* ===== Tools (Progress Tracker) ===== */
+    /* ===== Progress Tracker ===== */
 
     .tools-wrap{
       width: 100%;
@@ -351,8 +351,27 @@
 
     <h1 class="heading section-gap">Progress Tracker</h1>
 
-
     <div class="tools-wrap">
+
+      <!-- NEW: Sync card (Room Code) -->
+      <div class="tool-card">
+        <h2 class="tool-title">Sync</h2>
+
+        <div class="tool-row">
+          <div class="tool-field">
+            <div class="tool-label">Room Code (same on phone + TV)</div>
+            <input id="roomInput" class="tool-input" type="text" placeholder="Example: ASIM-MARWA-01">
+          </div>
+
+          <div class="tool-field">
+            <div class="tool-label">Actions</div>
+            <button class="save-btn" id="roomSaveBtn" type="button">Save Room Code</button>
+          </div>
+        </div>
+
+        <div class="tool-mini" id="roomStatus"></div>
+      </div>
+
       <div class="tool-card">
         <h2 class="tool-title">Profile</h2>
         <div class="seg" id="profileSeg">
@@ -461,7 +480,94 @@
       }, wait);
     });
 
-    /* ===== Progress Tracker ===== */
+    /* =========================================================
+       Sync (Supabase) - READY NOW, keys will be added later
+       =========================================================
+
+       Later you'll paste:
+       - SUPABASE_URL
+       - SUPABASE_ANON_KEY
+
+       Table name: activity
+       We will poll every 5 seconds.
+    */
+
+    // TODO (later): paste your Supabase project settings here
+    const SUPABASE_URL = "";      // example: https://xxxx.supabase.co
+    const SUPABASE_ANON_KEY = ""; // example: eyJhbGciOi...
+
+    const SYNC_ROOM_KEY = "toonie_room_code_v1";
+    const SYNC_POLL_MS = 5000;
+
+    function supabaseEnabled(){
+      return !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+    }
+
+    function getRoomCode(){
+      return (localStorage.getItem(SYNC_ROOM_KEY) || "").trim();
+    }
+
+    function setRoomCode(code){
+      localStorage.setItem(SYNC_ROOM_KEY, (code || "").trim());
+    }
+
+    function sbHeaders(){
+      return {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+        "Content-Type": "application/json"
+      };
+    }
+
+    async function sbInsertActivity(row){
+      // If no keys yet, skip silently (local mode)
+      if(!supabaseEnabled()) return { ok: false, skipped: true };
+      const room = getRoomCode();
+      if(!room) return { ok: false, skipped: true };
+
+      const url = `${SUPABASE_URL}/rest/v1/activity`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          ...sbHeaders(),
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify([{ ...row, room }])
+      });
+
+      if(!res.ok){
+        let txt = "";
+        try{ txt = await res.text(); } catch {}
+        return { ok: false, error: txt || ("HTTP " + res.status) };
+      }
+      return { ok: true };
+    }
+
+    async function sbFetchActivity(room, profile, limit = 200){
+      if(!supabaseEnabled()) return { ok: false, skipped: true, rows: [] };
+      if(!room) return { ok: false, skipped: true, rows: [] };
+
+      const params = new URLSearchParams();
+      params.set("select", "room,profile,cartoon_label,series_label,type,season_or_movie,num,ts,created_at");
+      params.set("room", "eq." + room);
+      params.set("profile", "eq." + profile);
+      params.set("order", "created_at.desc");
+      params.set("limit", String(limit));
+
+      const url = `${SUPABASE_URL}/rest/v1/activity?${params.toString()}`;
+      const res = await fetch(url, { headers: sbHeaders() });
+
+      if(!res.ok){
+        let txt = "";
+        try{ txt = await res.text(); } catch {}
+        return { ok: false, error: txt || ("HTTP " + res.status), rows: [] };
+      }
+
+      const rows = await res.json();
+      return { ok: true, rows };
+    }
+
+    /* ===== Progress Tracker (Local + Cloud Merge) ===== */
 
     const STORE_KEY = "toonie_progress_tracker_v1";
 
@@ -484,7 +590,6 @@
         },
         hasMovies: true
       }
-      // Ninja Hattori later: add here
     };
 
     function nowStamp(){
@@ -523,10 +628,8 @@
     }
 
     function formatLine(entry){
-      // entry: { cartoonLabel, seriesLabel?, type, seasonOrMovie, num, ts }
       const parts = [];
       parts.push(entry.cartoonLabel);
-
       if(entry.seriesLabel) parts.push(entry.seriesLabel);
 
       if(entry.type === "season"){
@@ -536,8 +639,22 @@
         parts.push("MOVIES");
         parts.push(`M${entry.num}`);
       }
-
       return parts.join(" ");
+    }
+
+    // Merge one entry into local store cleanly (overwrite-if-same)
+    function upsertEntry(store, profile, entry){
+      const node = ensurePath(store, profile, entry.cartoonLabel);
+      node.last = entry;
+
+      const idx = node.history.findIndex(h =>
+        (h.type === entry.type) &&
+        (h.seasonOrMovie === entry.seasonOrMovie) &&
+        ((h.seriesLabel || null) === (entry.seriesLabel || null))
+      );
+
+      if(idx >= 0) node.history[idx] = entry;
+      else node.history.unshift(entry);
     }
 
     function initTracker(){
@@ -561,11 +678,18 @@
       const recentInfo = document.getElementById("recentInfo");
       const activityList = document.getElementById("activityList");
 
+      // Sync UI
+      const roomInput = document.getElementById("roomInput");
+      const roomSaveBtn = document.getElementById("roomSaveBtn");
+      const roomStatus = document.getElementById("roomStatus");
+
       if(!profileSeg || !modeSeg) return;
 
       let store = loadStore();
       let activeProfile = store.activeProfile || "Asim";
       let activeMode = "save";
+      let pollTimer = null;
+      let lastPollOk = true;
 
       function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
 
@@ -616,14 +740,12 @@
       }
 
       function fillSeasonOrMovie(){
-        const cartoonName = cartoonSelect.value;
-        const cfg = getCartoonCfg(cartoonName);
+        const cfg = getCartoonCfg(cartoonSelect.value);
         const type = typeSelect.value;
 
         if(type === "movie"){
           seasonLabel.textContent = "Movies";
-          const list = ["Movies"];
-          seasonOrMovieSelect.innerHTML = list.map(x => `<option value="${x}">${x}</option>`).join("");
+          seasonOrMovieSelect.innerHTML = `<option value="Movies">Movies</option>`;
           return;
         }
 
@@ -641,24 +763,21 @@
       }
 
       function currentKeyLabels(){
-        const cartoonName = cartoonSelect.value;
-        const cfg = getCartoonCfg(cartoonName);
+        const cfg = getCartoonCfg(cartoonSelect.value);
         const cartoonLabel = cfg.label;
 
-        const type = typeSelect.value; // season/movie
+        const type = typeSelect.value;
         let seriesLabel = null;
 
         if(cfg.hasSeries){
           const s = seriesSelect.value;
-          // short series label style
           seriesLabel = (s === "Classic") ? "CL" :
                         (s === "Alien Force") ? "AF" :
                         (s === "Ultimate Alien") ? "UA" :
                         (s === "Omniverse") ? "OV" : s;
         }
 
-        const seasonOrMovie = seasonOrMovieSelect.value; // S1 or "Movies"
-
+        const seasonOrMovie = seasonOrMovieSelect.value;
         return { cartoonLabel, seriesLabel, type, seasonOrMovie };
       }
 
@@ -667,7 +786,6 @@
         const { cartoonLabel } = currentKeyLabels();
         const node = ensurePath(store, activeProfile, cartoonLabel);
 
-        // if last matches current selection, load it
         const last = node.last;
         const cur = currentKeyLabels();
 
@@ -675,7 +793,6 @@
           numInput.value = last.num;
           saveHint.textContent = `Last saved: ${formatLine(last)}`;
         } else {
-          // still show last overall for that cartoon
           if(node.last){
             saveHint.textContent = `Last saved: ${formatLine(node.last)}`;
           } else {
@@ -683,42 +800,6 @@
           }
           numInput.value = 0;
         }
-      }
-
-      function doSave(){
-        vib();
-        store = loadStore();
-        const { cartoonLabel, seriesLabel, type, seasonOrMovie } = currentKeyLabels();
-        const node = ensurePath(store, activeProfile, cartoonLabel);
-
-        const num = Math.max(0, Math.min(9999, Number(numInput.value) || 0));
-
-        const entry = {
-          cartoonLabel,
-          seriesLabel: seriesLabel || null,
-          type,
-          seasonOrMovie,
-          num,
-          ts: nowStamp()
-        };
-
-        node.last = entry;
-
-        // overwrite-if-same (keeps list clean)
-        const idx = node.history.findIndex(h =>
-          (h.type === entry.type) &&
-          (h.seasonOrMovie === entry.seasonOrMovie) &&
-          ((h.seriesLabel || null) === (entry.seriesLabel || null))
-        );
-        if(idx >= 0){
-          node.history[idx] = entry;
-        } else {
-          node.history.unshift(entry);
-        }
-
-        saveStore(store);
-
-        saveHint.textContent = `Saved: ${formatLine(entry)}`;
       }
 
       function renderRecent(){
@@ -737,7 +818,6 @@
         }
 
         recentInfo.textContent = `Showing all activity for ${cartoonLabel} (${activeProfile})`;
-
         activityList.innerHTML = list
           .map(item => `
             <div class="activity-item">
@@ -746,6 +826,129 @@
             </div>
           `)
           .join("");
+      }
+
+      function updateRoomStatus(msg){
+        if(!roomStatus) return;
+        roomStatus.textContent = msg;
+      }
+
+      function refreshRoomUI(){
+        const room = getRoomCode();
+        if(roomInput) roomInput.value = room;
+
+        if(!room){
+          updateRoomStatus("Sync: OFF (no room code). Local save only.");
+          return;
+        }
+
+        if(!supabaseEnabled()){
+          updateRoomStatus(`Room: ${room} (keys not added yet) → Sync not active yet.`);
+          return;
+        }
+
+        updateRoomStatus(`Room: ${room} → Sync ON (auto refresh every ${Math.round(SYNC_POLL_MS/1000)}s).`);
+      }
+
+      async function pollFromCloud(){
+        // Pull room data for activeProfile, merge into local store
+        const room = getRoomCode();
+        if(!room || !supabaseEnabled()) return;
+
+        const res = await sbFetchActivity(room, activeProfile, 250);
+        if(!res.ok){
+          if(lastPollOk){
+            updateRoomStatus(`Room: ${room} → Sync ON, but fetch failed. (Will keep trying)`);
+          }
+          lastPollOk = false;
+          return;
+        }
+        lastPollOk = true;
+
+        // Merge into local store
+        store = loadStore();
+        for(const r of res.rows){
+          const entry = {
+            cartoonLabel: r.cartoon_label,
+            seriesLabel: r.series_label || null,
+            type: r.type,
+            seasonOrMovie: r.season_or_movie,
+            num: Number(r.num) || 0,
+            ts: r.ts || nowStamp()
+          };
+          upsertEntry(store, activeProfile, entry);
+        }
+        saveStore(store);
+
+        // Refresh UI if needed
+        loadLastForSelection();
+        if(activeMode === "recent") renderRecent();
+        refreshRoomUI();
+      }
+
+      function startPolling(){
+        stopPolling();
+        const room = getRoomCode();
+        if(!room || !supabaseEnabled()) return;
+
+        pollTimer = setInterval(() => {
+          pollFromCloud().catch(() => {});
+        }, SYNC_POLL_MS);
+
+        // do an immediate poll so TV updates fast after entering room
+        pollFromCloud().catch(() => {});
+      }
+
+      function stopPolling(){
+        if(pollTimer){
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      }
+
+      async function doSave(){
+        vib();
+        store = loadStore();
+
+        const { cartoonLabel, seriesLabel, type, seasonOrMovie } = currentKeyLabels();
+        const num = Math.max(0, Math.min(9999, Number(numInput.value) || 0));
+
+        const entry = {
+          cartoonLabel,
+          seriesLabel: seriesLabel || null,
+          type,
+          seasonOrMovie,
+          num,
+          ts: nowStamp()
+        };
+
+        // Local save (always)
+        upsertEntry(store, activeProfile, entry);
+        saveStore(store);
+        saveHint.textContent = `Saved: ${formatLine(entry)}`;
+
+        // Cloud save (optional)
+        // (table columns we will create later)
+        const cloudRow = {
+          profile: activeProfile,
+          cartoon_label: entry.cartoonLabel,
+          series_label: entry.seriesLabel,
+          type: entry.type,
+          season_or_movie: entry.seasonOrMovie,
+          num: entry.num,
+          ts: entry.ts
+        };
+
+        const push = await sbInsertActivity(cloudRow);
+        if(push.ok){
+          // Nice: after pushing, re-poll so TV gets it quickly even without waiting
+          pollFromCloud().catch(() => {});
+        } else {
+          // If skipped, just stay quiet. If error, show tiny hint (non-scary).
+          if(push.error){
+            saveHint.textContent = `Saved locally. (Cloud save failed right now)`;
+          }
+        }
       }
 
       // init selects
@@ -763,6 +966,10 @@
       // Load last
       loadLastForSelection();
 
+      // Sync UI init
+      refreshRoomUI();
+      startPolling();
+
       // Events
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
@@ -775,6 +982,9 @@
         setProfileUI();
         loadLastForSelection();
         renderRecent();
+
+        // When profile changes, poll cloud for that profile
+        startPolling();
       });
 
       modeSeg.addEventListener("click", (e) => {
@@ -787,11 +997,8 @@
 
       cartoonSelect.addEventListener("change", () => {
         fillSeries();
-        // if movies not supported, force season
         const cfg = getCartoonCfg(cartoonSelect.value);
-        if(!cfg.hasMovies){
-          typeSelect.value = "season";
-        }
+        if(!cfg.hasMovies) typeSelect.value = "season";
         fillSeasonOrMovie();
         recentCartoonSelect.value = cartoonSelect.value;
         loadLastForSelection();
@@ -805,9 +1012,7 @@
 
       typeSelect.addEventListener("change", () => {
         const cfg = getCartoonCfg(cartoonSelect.value);
-        if(typeSelect.value === "movie" && !cfg.hasMovies){
-          typeSelect.value = "season";
-        }
+        if(typeSelect.value === "movie" && !cfg.hasMovies) typeSelect.value = "season";
         fillSeasonOrMovie();
         loadLastForSelection();
       });
@@ -816,9 +1021,30 @@
         loadLastForSelection();
       });
 
-      saveBtn.addEventListener("click", doSave);
+      saveBtn.addEventListener("click", () => { doSave().catch(() => {}); });
 
       recentCartoonSelect.addEventListener("change", renderRecent);
+
+      // Room code save
+      if(roomSaveBtn && roomInput){
+        roomSaveBtn.addEventListener("click", () => {
+          vib();
+          const code = (roomInput.value || "").trim();
+          setRoomCode(code);
+          refreshRoomUI();
+          startPolling();
+        });
+      }
+
+      // Also save room when user presses Enter
+      if(roomInput){
+        roomInput.addEventListener("keydown", (e) => {
+          if(e.key === "Enter"){
+            e.preventDefault();
+            if(roomSaveBtn) roomSaveBtn.click();
+          }
+        });
+      }
     }
 
     window.addEventListener("load", initTracker);
