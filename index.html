@@ -832,9 +832,449 @@
           .join("");
       }
 <!-- PART 2 / 2 -->
+      <script>
+    // ===== Supabase (sync) =====
+    const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ===== Sync (Room Code) =====
+    const ROOM_KEY = "toonie_room_code_v1";
+    const TABLE_NAME = "toonie_progress";
+    const SYNC_POLL_MS = 5000;
+
+    function getRoomCode() {
+      return (localStorage.getItem(ROOM_KEY) || "").trim();
+    }
+
+    function setRoomCode(code) {
+      const clean = String(code || "").trim();
+      if (clean) localStorage.setItem(ROOM_KEY, clean);
+      else localStorage.removeItem(ROOM_KEY);
+      return clean;
+    }
+
+    function syncOn() {
+      return getRoomCode().length > 0;
+    }
+
+    function setSyncStatus(text) {
+      const el = document.getElementById("syncStatus");
+      if (el) el.textContent = text;
+    }
+
+    function ripple(e) {
+      if (navigator.vibrate) navigator.vibrate(30);
+      const target = e.currentTarget;
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      ripple.style.width = ripple.style.height = Math.max(target.offsetWidth, target.offsetHeight) + 'px';
+      ripple.style.left = e.clientX - target.getBoundingClientRect().left - ripple.offsetWidth / 2 + 'px';
+      ripple.style.top = e.clientY - target.getBoundingClientRect().top - ripple.offsetHeight / 2 + 'px';
+      target.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    }
+
+    // ===== Boot overlay fade =====
+    const bootStart = performance.now();
+    window.addEventListener('load', () => {
+      const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement)
+                        .getPropertyValue('--boot-min-show')) || 3500;
+
+      const elapsed = performance.now() - bootStart;
+      const wait = Math.max(0, MIN_SHOW - elapsed);
+
+      setTimeout(() => {
+        const b = document.getElementById('boot');
+        if (b) {
+          b.classList.add('hide');
+          document.body.classList.add('boot-done');
+          const bootFade = (parseFloat(getComputedStyle(b).transitionDuration) || 1.2) * 1000;
+          setTimeout(() => b.remove(), bootFade + 50);
+        }
+      }, wait);
+    });
+
+    // ===== Supabase REST helpers =====
+    function sbHeaders(){
+      return {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+        "Content-Type": "application/json"
+      };
+    }
+
+    async function sbInsertProgress(row){
+      const room = getRoomCode();
+      if(!room) return { ok: false, skipped: true };
+
+      const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          ...sbHeaders(),
+          "Prefer": "resolution=merge-duplicates,return=minimal"
+        },
+        body: JSON.stringify([{ ...row, room_code: room }])
+      });
+
+      if(!res.ok){
+        let txt = "";
+        try{ txt = await res.text(); } catch {}
+        return { ok: false, error: txt || ("HTTP " + res.status) };
+      }
+      return { ok: true };
+    }
+
+    async function sbFetchProgress(room, profile, limit = 200){
+      if(!room) return { ok: false, skipped: true, rows: [] };
+
+      const params = new URLSearchParams();
+      params.set("select", "room_code,profile,cartoon_label,series_label,type,season_or_movie,num,ts");
+      params.set("room_code", "eq." + room);
+      params.set("profile", "eq." + profile);
+      params.set("order", "ts.desc");
+      params.set("limit", String(limit));
+
+      const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?${params.toString()}`;
+      const res = await fetch(url, { headers: sbHeaders() });
+
+      if(!res.ok){
+        let txt = "";
+        try{ txt = await res.text(); } catch {}
+        return { ok: false, error: txt || ("HTTP " + res.status), rows: [] };
+      }
+
+      const rows = await res.json();
+      return { ok: true, rows };
+    }
+
+    /* ===== Progress Tracker (Local + Cloud Merge) ===== */
+
+    const STORE_KEY = "toonie_progress_tracker_v1";
+
+    const MODEL = {
+      "Doraemon": {
+        label: "DM",
+        hasSeries: false,
+        seasons: ["S1","S2","S3","S4","S5","S6","S7","S8","S12","S14","S15","S16","S17","S18","S19","S20"],
+        hasMovies: true
+      },
+      "Ben 10": {
+        label: "B10",
+        hasSeries: true,
+        series: ["Classic","Alien Force","Ultimate Alien","Omniverse"],
+        seasonsBySeries: {
+          "Classic": ["S1","S2","S3","S4"],
+          "Alien Force": ["S1","S2","S3"],
+          "Ultimate Alien": ["S1","S2","S3"],
+          "Omniverse": ["S1","S2","S3","S4","S5","S6","S7","S8"]
+        },
+        hasMovies: true
+      }
+    };
+
+    function nowStamp(){
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function loadStore(){
+      try{
+        const raw = localStorage.getItem(STORE_KEY);
+        if(!raw) return { activeProfile: "Asim", data: { Asim: {}, Marwa: {} } };
+        const obj = JSON.parse(raw);
+        if(!obj.data) obj.data = { Asim: {}, Marwa: {} };
+        if(!obj.data.Asim) obj.data.Asim = {};
+        if(!obj.data.Marwa) obj.data.Marwa = {};
+        if(!obj.activeProfile) obj.activeProfile = "Asim";
+        return obj;
+      } catch {
+        return { activeProfile: "Asim", data: { Asim: {}, Marwa: {} } };
+      }
+    }
+
+    function saveStore(store){
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    }
+
+    function ensurePath(store, profile, cartoonLabel){
+      if(!store.data[profile][cartoonLabel]){
+        store.data[profile][cartoonLabel] = { last: null, history: [] };
+      }
+      if(!store.data[profile][cartoonLabel].history){
+        store.data[profile][cartoonLabel].history = [];
+      }
+      return store.data[profile][cartoonLabel];
+    }
+
+    function formatLine(entry){
+      const parts = [];
+      parts.push(entry.cartoonLabel);
+      if(entry.seriesLabel) parts.push(entry.seriesLabel);
+
+      if(entry.type === "season"){
+        parts.push(entry.seasonOrMovie);
+        parts.push(`EP ${entry.num}`);
+      } else {
+        parts.push("MOVIES");
+        parts.push(`M${entry.num}`);
+      }
+      return parts.join(" ");
+    }
+
+    function upsertEntry(store, profile, entry){
+      const node = ensurePath(store, profile, entry.cartoonLabel);
+      node.last = entry;
+
+      const idx = node.history.findIndex(h =>
+        (h.type === entry.type) &&
+        (h.seasonOrMovie === entry.seasonOrMovie) &&
+        ((h.seriesLabel || null) === (entry.seriesLabel || null))
+      );
+
+      if(idx >= 0) node.history[idx] = entry;
+      else node.history.unshift(entry);
+    }
+
+    function initTracker(){
+      const profileSeg = document.getElementById("profileSeg");
+      const modeSeg = document.getElementById("modeSeg");
+
+      const savePanel = document.getElementById("savePanel");
+      const recentPanel = document.getElementById("recentPanel");
+
+      const cartoonSelect = document.getElementById("cartoonSelect");
+      const seriesField = document.getElementById("seriesField");
+      const seriesSelect = document.getElementById("seriesSelect");
+      const typeSelect = document.getElementById("typeSelect");
+      const seasonLabel = document.getElementById("seasonLabel");
+      const seasonOrMovieSelect = document.getElementById("seasonOrMovieSelect");
+      const numInput = document.getElementById("numInput");
+      const saveBtn = document.getElementById("saveBtn");
+      const saveHint = document.getElementById("saveHint");
+
+      const recentCartoonSelect = document.getElementById("recentCartoonSelect");
+      const recentInfo = document.getElementById("recentInfo");
+      const activityList = document.getElementById("activityList");
+
+      // Sync UI
+      const roomInput = document.getElementById("roomInput");
+      const roomSaveBtn = document.getElementById("roomSaveBtn");
+      const roomStatus = document.getElementById("roomStatus");
+
+      if(!profileSeg || !modeSeg) return;
+
+      let store = loadStore();
+      let activeProfile = store.activeProfile || "Asim";
+      let activeMode = "save";
+      let pollTimer = null;
+      let lastCloudOk = true;
+
+      // ===== FIX: prevent num input from being overwritten while typing =====
+      let isEditingNum = false;
+      let editNumTimer = null;
+
+      function beginNumEdit(){
+        isEditingNum = true;
+        if(editNumTimer) clearTimeout(editNumTimer);
+      }
+
+      function endNumEditSoon(){
+        if(editNumTimer) clearTimeout(editNumTimer);
+        editNumTimer = setTimeout(() => {
+          isEditingNum = false;
+          loadLastForSelection();
+          if(activeMode === "recent") renderRecent();
+        }, 700);
+      }
+
+      if(numInput){
+        numInput.addEventListener("focus", beginNumEdit);
+        numInput.addEventListener("input", beginNumEdit);
+
+        numInput.addEventListener("blur", () => {
+          endNumEditSoon();
+        });
+
+        numInput.addEventListener("keydown", (e) => {
+          if(e.key === "Enter"){
+            e.preventDefault();
+            isEditingNum = false;
+            if(editNumTimer) clearTimeout(editNumTimer);
+            doSave().catch(() => {});
+            numInput.blur();
+          }
+        });
+      }
+      // ================================================================
+
+      function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
+
+      function setProfileUI(){
+        [...profileSeg.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("active", b.dataset.profile === activeProfile);
+        });
+      }
+
+      function setModeUI(){
+        [...modeSeg.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("active", b.dataset.mode === activeMode);
+        });
+
+        if(activeMode === "save"){
+          savePanel.classList.remove("hidden");
+          recentPanel.classList.add("hidden");
+        } else {
+          savePanel.classList.add("hidden");
+          recentPanel.classList.remove("hidden");
+          renderRecent();
+        }
+      }
+
+      function cartoonsList(){
+        return Object.keys(MODEL);
+      }
+
+      function getCartoonCfg(name){
+        return MODEL[name];
+      }
+
+      function fillCartoonSelects(){
+        const opts = cartoonsList().map(c => `<option value="${c}">${c}</option>`).join("");
+        cartoonSelect.innerHTML = opts;
+        recentCartoonSelect.innerHTML = opts;
+      }
+
+      function fillSeries(){
+        const cfg = getCartoonCfg(cartoonSelect.value);
+        if(!cfg || !cfg.hasSeries){
+          seriesField.classList.add("hidden");
+          seriesSelect.innerHTML = "";
+          return;
+        }
+        seriesField.classList.remove("hidden");
+        seriesSelect.innerHTML = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
+      }
+
+      function fillSeasonOrMovie(){
+        const cfg = getCartoonCfg(cartoonSelect.value);
+        const type = typeSelect.value;
+
+        if(type === "movie"){
+          seasonLabel.textContent = "Movies";
+          seasonOrMovieSelect.innerHTML = `<option value="Movies">Movies</option>`;
+          return;
+        }
+
+        seasonLabel.textContent = "Season";
+
+        let seasons = [];
+        if(cfg.hasSeries){
+          const s = seriesSelect.value;
+          seasons = (cfg.seasonsBySeries && cfg.seasonsBySeries[s]) ? cfg.seasonsBySeries[s] : [];
+        } else {
+          seasons = cfg.seasons || [];
+        }
+
+        seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
+      }
+
+      function currentKeyLabels(){
+        const cfg = getCartoonCfg(cartoonSelect.value);
+        const cartoonLabel = cfg.label;
+
+        const type = typeSelect.value;
+        let seriesLabel = null;
+
+        if(cfg.hasSeries){
+          const s = seriesSelect.value;
+          seriesLabel = (s === "Classic") ? "CL" :
+                        (s === "Alien Force") ? "AF" :
+                        (s === "Ultimate Alien") ? "UA" :
+                        (s === "Omniverse") ? "OV" : s;
+        }
+
+        const seasonOrMovie = seasonOrMovieSelect.value;
+        return { cartoonLabel, seriesLabel, type, seasonOrMovie };
+      }
+
+      function loadLastForSelection(){
+        // FIX: don't overwrite number while user is typing
+        if(isEditingNum) return;
+
+        store = loadStore();
+        const { cartoonLabel } = currentKeyLabels();
+        const node = ensurePath(store, activeProfile, cartoonLabel);
+
+        const last = node.last;
+        const cur = currentKeyLabels();
+
+        if(last && last.type === cur.type && last.seasonOrMovie === cur.seasonOrMovie && (last.seriesLabel || null) === (cur.seriesLabel || null)){
+          numInput.value = last.num;
+          saveHint.textContent = `Last saved: ${formatLine(last)}`;
+        } else {
+          if(node.last){
+            saveHint.textContent = `Last saved: ${formatLine(node.last)}`;
+          } else {
+            saveHint.textContent = "No saves yet for this cartoon.";
+          }
+          numInput.value = 0;
+        }
+      }
+
+      function renderRecent(){
+        store = loadStore();
+        const cartoonName = recentCartoonSelect.value;
+        const cfg = getCartoonCfg(cartoonName);
+        const cartoonLabel = cfg.label;
+
+        const node = ensurePath(store, activeProfile, cartoonLabel);
+        const list = node.history || [];
+
+        if(list.length === 0){
+          recentInfo.textContent = "No activity yet.";
+          activityList.innerHTML = "";
+          return;
+        }
+
+        recentInfo.textContent = `Showing all activity for ${cartoonLabel} (${activeProfile})`;
+        activityList.innerHTML = list
+          .map(item => `
+            <div class="activity-item">
+              <div>${formatLine(item)}</div>
+              <div class="right">${item.ts}</div>
+            </div>
+          `)
+          .join("");
+      }
+
+      function updateRoomStatus(msg){
+        if(!roomStatus) return;
+        roomStatus.textContent = msg;
+      }
+
+      function refreshRoomUI(){
+        const room = getRoomCode();
+        if(roomInput) roomInput.value = room;
+
+        if(!room){
+          setSyncStatus("Sync: OFF (local only)");
+          updateRoomStatus("Sync: OFF (no room code). Local save only.");
+          return;
+        }
+
+        setSyncStatus(`Sync: ON (Room: ${room})`);
+        updateRoomStatus(`Room: ${room} → Sync ON (auto refresh every ${Math.round(SYNC_POLL_MS/1000)}s).`);
+      }
+
       async function pollFromCloud(){
         const room = getRoomCode();
-        if(!room || !supabaseEnabled()) return;
+        if(!room) return;
+
+        // FIX: don't poll-merge into UI while user is typing
+        if(isEditingNum) return;
 
         const res = await sbFetchProgress(room, activeProfile, 250);
         if(!res.ok){
@@ -851,7 +1291,7 @@
         for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
-            seriesLabel: (r.series_label && r.series_label.trim()) ? r.series_label : null,
+            seriesLabel: (r.series_label && String(r.series_label).trim()) ? r.series_label : null,
             type: r.type,
             seasonOrMovie: r.season_or_movie,
             num: Number(r.num) || 0,
@@ -869,7 +1309,7 @@
       function startPolling(){
         stopPolling();
         const room = getRoomCode();
-        if(!room || !supabaseEnabled()) return;
+        if(!room) return;
 
         pollTimer = setInterval(() => {
           pollFromCloud().catch(() => {});
@@ -901,57 +1341,42 @@
           ts: nowStamp()
         };
 
-        // Local save (always)
         upsertEntry(store, activeProfile, entry);
         saveStore(store);
         saveHint.textContent = `Saved: ${formatLine(entry)}`;
 
-        // Cloud save (if enabled + room exists)
-        const room = getRoomCode();
-        if(!room || !supabaseEnabled()){
-          // local-only mode, nothing else to do
-          return;
-        }
-
         const cloudRow = {
           profile: activeProfile,
           cartoon_label: entry.cartoonLabel,
-          series_label: entry.seriesLabel || "", // MUST be string (NOT NULL col)
+          series_label: entry.seriesLabel || "",
           type: entry.type,
           season_or_movie: entry.seasonOrMovie,
           num: entry.num,
           ts: entry.ts
         };
 
-        const push = await sbUpsertProgress(cloudRow);
+        const push = await sbInsertProgress(cloudRow);
         if(push.ok){
-          // pull right away so other devices update fast
           pollFromCloud().catch(() => {});
-        } else {
-          saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
+        } else if(push.error){
+          saveHint.textContent = "Saved locally. (Cloud save failed right now)";
         }
       }
 
-      // init selects
       fillCartoonSelects();
       fillSeries();
       fillSeasonOrMovie();
 
-      // set profile + mode
       setProfileUI();
       setModeUI();
 
-      // set recent default same as save cartoon
       recentCartoonSelect.value = cartoonSelect.value;
 
-      // Load last
       loadLastForSelection();
 
-      // Sync UI init
       refreshRoomUI();
       startPolling();
 
-      // Events
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
@@ -1004,7 +1429,6 @@
 
       recentCartoonSelect.addEventListener("change", renderRecent);
 
-      // Room code save
       if(roomSaveBtn && roomInput){
         roomSaveBtn.addEventListener("click", () => {
           vib();
@@ -1015,7 +1439,6 @@
         });
       }
 
-      // Also save room when user presses Enter
       if(roomInput){
         roomInput.addEventListener("keydown", (e) => {
           if(e.key === "Enter"){
