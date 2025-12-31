@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toonie</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <link rel="manifest" href="manifest.json">
-
   <link rel="icon" href="icons/192.png" type="image/png" sizes="192x192">
   <link rel="icon" href="icons/512.png" type="image/png" sizes="512x512">
 
@@ -343,19 +343,16 @@
     <div class="tools-wrap">
       <div class="tool-card">
         <h2 class="tool-title">Sync</h2>
-
         <div class="tool-row">
           <div class="tool-field">
             <div class="tool-label">Room Code (same on phone + TV)</div>
-            <input id="roomInput" class="tool-input" type="text" placeholder="Example: ASIM-MARWA-01">
+            <input id="roomInput" class="tool-input" type="text" placeholder="Example: Asim123">
           </div>
-
           <div class="tool-field">
             <div class="tool-label">Actions</div>
             <button class="save-btn" id="roomSaveBtn" type="button">Save Room Code</button>
           </div>
         </div>
-
         <div class="tool-mini" id="roomStatus"></div>
       </div>
 
@@ -405,7 +402,7 @@
           <div class="save-row">
             <div class="tool-field">
               <div class="tool-label">Episode / Movie Number</div>
-              <!-- FIX: Dropdown 1..100 -->
+              <!-- FIX: dropdown 1-100 -->
               <select id="numSelect" class="tool-select"></select>
             </div>
 
@@ -432,6 +429,7 @@
 
           <div class="activity-list" id="activityList"></div>
         </div>
+
       </div>
     </div>
   </main>
@@ -444,7 +442,7 @@
     const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
     const TABLE_NAME = "toonie_progress";
 
-    const ROOM_KEY = "toonie_room_code_v1";
+    const ROOM_KEY  = "toonie_room_code_v1";
     const STORE_KEY = "toonie_progress_tracker_v1";
 
     // 10s poll
@@ -512,24 +510,6 @@
     });
 
     // =========================
-    // TIME NORMALIZER (removes timezone / ISO look)
-    // =========================
-    function toSimpleTime(ts){
-      if(!ts) return "";
-      const s = String(ts);
-
-      // already simple: "YYYY-MM-DD HH:MM"
-      if(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}$/.test(s)) return s;
-
-      // try parse ISO or any date string
-      const d = new Date(s);
-      if(Number.isNaN(d.getTime())) return s;
-
-      const pad = (n) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
-
-    // =========================
     // STORAGE (ROOM + LOCAL)
     // =========================
     function getRoomCode() {
@@ -543,8 +523,30 @@
       return clean;
     }
 
+    // store timestamp always in a friendly format (local)
     function nowStamp(){
-      return toSimpleTime(new Date().toISOString());
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // convert ISO/anything -> "YYYY-MM-DD HH:MM" (local)
+    function toSimpleTime(ts){
+      if(!ts) return nowStamp();
+      const s = String(ts);
+
+      // already simple
+      if(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}/.test(s)) return s.slice(0,16);
+
+      // ISO -> local
+      const d = new Date(s);
+      if(!isNaN(d.getTime())){
+        const pad = (n) => String(n).padStart(2,'0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
+
+      // fallback: trim noisy stuff
+      return s.replace("T"," ").split("+")[0].slice(0,16);
     }
 
     function loadStore(){
@@ -593,6 +595,10 @@
 
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
+
+      // keep simple time always
+      entry.ts = toSimpleTime(entry.ts);
+
       node.last = entry;
 
       const idx = node.history.findIndex(h =>
@@ -620,7 +626,7 @@
         room_code: room,
         profile: row.profile,
         cartoon_label: row.cartoon_label,
-        series_label: String(row.series_label ?? ""),
+        series_label: String(row.series_label ?? ""), // keep string
         type: row.type,
         season_or_movie: row.season_or_movie,
         num: Number(row.num) || 0,
@@ -675,7 +681,7 @@
       const seasonLabel = document.getElementById("seasonLabel");
       const seasonOrMovieSelect = document.getElementById("seasonOrMovieSelect");
 
-      // FIX: episode dropdown
+      // FIX: dropdown
       const numSelect = document.getElementById("numSelect");
 
       const saveBtn = document.getElementById("saveBtn");
@@ -697,8 +703,25 @@
       let pollTimer = null;
       let lastCloudOk = true;
 
-      // prevent overwrite while user is picking dropdown
-      let isPickingNum = false;
+      // ===== IMPORTANT FIX: do NOT overwrite episode dropdown while user is interacting =====
+      let isEditingEpisode = false;
+      let editEpTimer = null;
+
+      function beginEpisodeEdit(){
+        isEditingEpisode = true;
+        if(editEpTimer) clearTimeout(editEpTimer);
+      }
+
+      function endEpisodeEditSoon(){
+        if(editEpTimer) clearTimeout(editEpTimer);
+        editEpTimer = setTimeout(() => {
+          isEditingEpisode = false;
+          // do NOT force-reset value here
+          loadLastForSelection(false);
+          if(activeMode === "recent") renderRecent();
+        }, 1200);
+      }
+      // ================================================================================
 
       function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
 
@@ -790,15 +813,21 @@
         seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
       }
 
-      // FIX: 1..100 dropdown
-      function fillEpisodeDropdown(){
-        if(!numSelect) return;
+      // dropdown 1..100
+      function fillEpisodeDropdown(max = 100){
+        const cur = numSelect.value;
         let html = "";
-        for(let i = 1; i <= 100; i++){
+        for(let i=1; i<=max; i++){
           html += `<option value="${i}">${i}</option>`;
         }
         numSelect.innerHTML = html;
-        if(!numSelect.value) numSelect.value = "1";
+
+        // keep selection if possible
+        if(cur && Number(cur) >= 1 && Number(cur) <= max){
+          numSelect.value = cur;
+        } else {
+          numSelect.value = "1";
+        }
       }
 
       function currentKeyLabels(){
@@ -820,29 +849,42 @@
         return { cartoonLabel, seriesLabel, type, seasonOrMovie };
       }
 
-      function loadLastForSelection(){
-        // do not overwrite while user is interacting with dropdown
-        if(isPickingNum || document.activeElement === numSelect) return;
+      // key-based lookup (so it loads correct last for THIS exact selection)
+      function findEntryForSelection(node, cur){
+        const list = node.history || [];
+        const hit = list.find(h =>
+          h.type === cur.type &&
+          h.seasonOrMovie === cur.seasonOrMovie &&
+          ((h.seriesLabel || null) === (cur.seriesLabel || null))
+        );
+        return hit || null;
+      }
+
+      // FIX: do not reset dropdown when it doesn't match; only update if found
+      // force=true is used after cloud sync to update if user isn't editing
+      function loadLastForSelection(force){
+        if(!numSelect) return;
+
+        // HARD BLOCK: never touch dropdown while interacting
+        if(isEditingEpisode || document.activeElement === numSelect) return;
 
         store = loadStore();
-        const { cartoonLabel } = currentKeyLabels();
-        const node = ensurePath(store, activeProfile, cartoonLabel);
-
-        const last = node.last;
         const cur = currentKeyLabels();
+        const node = ensurePath(store, activeProfile, cur.cartoonLabel);
 
-        if(last && last.type === cur.type && last.seasonOrMovie === cur.seasonOrMovie && (last.seriesLabel || null) === (cur.seriesLabel || null)){
-          // clamp to 1..100
-          const n = Math.max(1, Math.min(100, Number(last.num) || 1));
-          numSelect.value = String(n);
-          saveHint.textContent = `Last saved: ${formatLine(last)}`;
+        const entryForThis = findEntryForSelection(node, cur);
+
+        if(entryForThis){
+          // only set if we have a real saved value for this selection
+          numSelect.value = String(entryForThis.num);
+          saveHint.textContent = `Last saved: ${formatLine(entryForThis)}`;
         } else {
+          // do NOT overwrite the dropdown value
           if(node.last){
             saveHint.textContent = `Last saved: ${formatLine(node.last)}`;
           } else {
             saveHint.textContent = "No saves yet for this cartoon.";
           }
-          numSelect.value = "1";
         }
       }
 
@@ -872,21 +914,12 @@
           .join("");
       }
 
-      if(numSelect){
-        numSelect.addEventListener("pointerdown", () => { isPickingNum = true; });
-        numSelect.addEventListener("focus", () => { isPickingNum = true; });
-        numSelect.addEventListener("change", () => {
-          isPickingNum = false;
-        });
-        numSelect.addEventListener("blur", () => { isPickingNum = false; });
-      }
-
       async function pollFromCloud(){
         const room = getRoomCode();
         if(!room || !supabaseEnabled()) return;
 
-        // never poll-merge while user is interacting with dropdown
-        if(isPickingNum || document.activeElement === numSelect) return;
+        // HARD FIX: never poll-merge while user is interacting with dropdown
+        if(isEditingEpisode || document.activeElement === numSelect) return;
 
         const res = await sbFetchProgress(room, activeProfile, 250);
         if(!res.ok){
@@ -906,14 +939,15 @@
             seriesLabel: (r.series_label && String(r.series_label).trim()) ? r.series_label : null,
             type: r.type,
             seasonOrMovie: r.season_or_movie,
-            num: Number(r.num) || 0,
-            ts: toSimpleTime(r.ts || nowStamp())
+            num: Number(r.num) || 1,
+            ts: toSimpleTime(r.ts)
           };
           upsertEntry(store, activeProfile, entry);
         }
         saveStore(store);
 
-        loadLastForSelection();
+        // update UI safely
+        loadLastForSelection(true);
         if(activeMode === "recent") renderRecent();
         refreshRoomUI();
       }
@@ -939,26 +973,31 @@
 
       async function doSave(){
         vib();
+
         store = loadStore();
 
-        const { cartoonLabel, seriesLabel, type, seasonOrMovie } = currentKeyLabels();
+        const cur = currentKeyLabels();
         const num = Math.max(1, Math.min(100, Number(numSelect.value) || 1));
 
         const entry = {
-          cartoonLabel,
-          seriesLabel: seriesLabel || null,
-          type,
-          seasonOrMovie,
+          cartoonLabel: cur.cartoonLabel,
+          seriesLabel: cur.seriesLabel || null,
+          type: cur.type,
+          seasonOrMovie: cur.seasonOrMovie,
           num,
           ts: nowStamp()
         };
 
-        // Local save
+        // LOCAL SAVE ALWAYS
         upsertEntry(store, activeProfile, entry);
         saveStore(store);
         saveHint.textContent = `Saved: ${formatLine(entry)}`;
 
-        // Cloud save
+        // after saving, user is no longer "editing"
+        isEditingEpisode = false;
+        if(editEpTimer) clearTimeout(editEpTimer);
+
+        // CLOUD SAVE IF POSSIBLE
         const room = getRoomCode();
         if(!room || !supabaseEnabled()){
           return;
@@ -977,37 +1016,41 @@
         if(push.ok){
           pollFromCloud().catch(() => {});
         } else {
+          // RLS error etc. Local is still saved.
           saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
         }
       }
 
-      // INIT
+      // ===== INIT =====
       fillCartoonSelects();
       fillSeries();
       fillSeasonOrMovie();
-      fillEpisodeDropdown();
+      fillEpisodeDropdown(100);
 
       setProfileUI();
       setModeUI();
 
       recentCartoonSelect.value = cartoonSelect.value;
 
-      loadLastForSelection();
+      loadLastForSelection(false);
 
       refreshRoomUI();
       startPolling();
 
-      // EVENTS
+      // ===== EVENTS =====
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
         vib();
+
         activeProfile = btn.dataset.profile;
+
         store = loadStore();
         store.activeProfile = activeProfile;
         saveStore(store);
+
         setProfileUI();
-        loadLastForSelection();
+        loadLastForSelection(false);
         renderRecent();
         startPolling();
       });
@@ -1024,27 +1067,42 @@
         fillSeries();
         const cfg = getCartoonCfg(cartoonSelect.value);
         if(!cfg.hasMovies) typeSelect.value = "season";
+
         fillSeasonOrMovie();
+
+        // do NOT reset episode dropdown on selection changes
+        loadLastForSelection(false);
+
         recentCartoonSelect.value = cartoonSelect.value;
-        loadLastForSelection();
         if(activeMode === "recent") renderRecent();
       });
 
       seriesSelect.addEventListener("change", () => {
         fillSeasonOrMovie();
-        loadLastForSelection();
+        loadLastForSelection(false);
       });
 
       typeSelect.addEventListener("change", () => {
         const cfg = getCartoonCfg(cartoonSelect.value);
         if(typeSelect.value === "movie" && !cfg.hasMovies) typeSelect.value = "season";
         fillSeasonOrMovie();
-        loadLastForSelection();
+        loadLastForSelection(false);
       });
 
       seasonOrMovieSelect.addEventListener("change", () => {
-        loadLastForSelection();
+        loadLastForSelection(false);
       });
+
+      // Episode dropdown editing guards
+      if(numSelect){
+        numSelect.addEventListener("pointerdown", beginEpisodeEdit);
+        numSelect.addEventListener("focus", beginEpisodeEdit);
+        numSelect.addEventListener("change", () => {
+          beginEpisodeEdit();
+          endEpisodeEditSoon();
+        });
+        numSelect.addEventListener("blur", endEpisodeEditSoon);
+      }
 
       saveBtn.addEventListener("click", () => { doSave().catch(() => {}); });
 
