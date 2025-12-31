@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toonie</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <link rel="manifest" href="manifest.json">
 
@@ -449,6 +450,14 @@
   </main>
 
   <script>
+    // ===== Supabase (sync) =====
+const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.com";
+const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(30);
       const target = e.currentTarget;
