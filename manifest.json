@@ -1,6 +1,6 @@
 {
   "name": "Toonie",
-"short_name": "Toonie",
+  "short_name": "Toonie",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
