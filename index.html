@@ -34,7 +34,10 @@
       background-color: #0f0f0f;
       color: #fff;
       min-height: 100vh;
-      overflow: hidden; /* avoid scroll flicker during boot */
+
+      /* CHANGED: allow vertical scroll for multiple sections */
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
     /* Wrap the real UI so we can animate it in */
@@ -44,6 +47,7 @@
       transition:
         opacity var(--app-fade) ease var(--app-fade-delay),
         transform var(--app-fade) ease var(--app-fade-delay);
+      padding-bottom: 3rem; /* small breathing room at bottom */
     }
     .boot-done #app {
       opacity: 1;
@@ -73,6 +77,11 @@
       padding: 0 2rem 2rem;
       box-sizing: border-box;
       margin: 0 auto;
+    }
+
+    /* NEW: spacing between sections */
+    .section-gap {
+      margin-top: 1.5rem;
     }
 
     a {
@@ -157,6 +166,7 @@
 
   <!-- Real UI -->
   <main id="app">
+    <!-- Doraemon section (UNCHANGED) -->
     <h1 class="heading">DM All<br />Seasons & Movies</h1>
     <div class="grid">
       <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
@@ -179,6 +189,36 @@
         <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
         <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
       </div>
+    </div>
+
+    <!-- Ben 10 section (NEW) -->
+    <h1 class="heading section-gap">B10 All<br />Seasons</h1>
+    <div class="grid">
+      <!-- Classic S1-S4 -->
+      <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
+      <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
+      <a href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)"><span class="label">CL_S3</span></a>
+      <a href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)"><span class="label">CL_S4</span></a>
+
+      <!-- Alien Force S1-S3 -->
+      <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
+      <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
+      <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
+
+      <!-- Ultimate Alien S1-S3 -->
+      <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
+      <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
+      <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
+
+      <!-- Omniverse S1-S8 -->
+      <a href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)"><span class="label">OV_S1</span></a>
+      <a href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)"><span class="label">OV_S2</span></a>
+      <a href="https://archive.org/details/B10_OV_S03_MAK" onclick="ripple(event)"><span class="label">OV_S3</span></a>
+      <a href="https://archive.org/details/B10_OV_S04_MAK" onclick="ripple(event)"><span class="label">OV_S4</span></a>
+      <a href="https://archive.org/details/B10_OV_S05_MAK" onclick="ripple(event)"><span class="label">OV_S5</span></a>
+      <a href="https://archive.org/details/B10_OV_S06_MAK" onclick="ripple(event)"><span class="label">OV_S6</span></a>
+      <a href="https://archive.org/details/B10_OV_S07_MAK" onclick="ripple(event)"><span class="label">OV_S7</span></a>
+      <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
     </div>
   </main>
 
