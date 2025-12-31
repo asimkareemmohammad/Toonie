@@ -1,3 +1,4 @@
+<!-- PART 1 / 2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -118,20 +119,6 @@
     }
     .movies-row a { flex: 1; border-radius: 0; background: transparent; }
     .movies-row a:first-child { border-right: 1px solid #333; }
-
-    .particle {
-      position: fixed;
-      top: 0;
-      opacity: 0.9;
-      pointer-events: none;
-      font-size: 18px;
-      background: linear-gradient(90deg, #ff69b4, #ffb6c1, #ff69b4);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: float 10s linear forwards, shine 2s infinite linear;
-    }
-    @keyframes float { to { transform: translateY(110vh); opacity: 0; } }
 
     #boot {
       position: fixed;
@@ -453,14 +440,19 @@
 
   <script>
     // ===== Supabase (sync) =====
+    // NOTE: keep your real project values here
     const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ===== Sync (Room Code) =====
+    // ===== Sync config =====
     const ROOM_KEY = "toonie_room_code_v1";
     const TABLE_NAME = "toonie_progress";
     const SYNC_POLL_MS = 5000;
+
+    function supabaseEnabled(){
+      return !!(SUPABASE_URL && SUPABASE_ANON_KEY && supabaseClient);
+    }
 
     function getRoomCode() {
       return (localStorage.getItem(ROOM_KEY) || "").trim();
@@ -471,10 +463,6 @@
       if (clean) localStorage.setItem(ROOM_KEY, clean);
       else localStorage.removeItem(ROOM_KEY);
       return clean;
-    }
-
-    function syncOn() {
-      return getRoomCode().length > 0;
     }
 
     function setSyncStatus(text) {
@@ -514,58 +502,51 @@
       }, wait);
     });
 
-    // ===== Supabase REST helpers =====
-    function sbHeaders(){
-      return {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-        "Content-Type": "application/json"
-      };
-    }
-
-    async function sbInsertProgress(row){
+    // ===== Cloud (Supabase JS) =====
+    async function sbUpsertProgress(row){
       const room = getRoomCode();
       if(!room) return { ok: false, skipped: true };
 
-      const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          ...sbHeaders(),
-          "Prefer": "resolution=merge-duplicates,return=minimal"
-        },
-        body: JSON.stringify([{ ...row, room_code: room }])
-      });
+      const payload = {
+        room_code: room,
+        profile: row.profile,
+        cartoon_label: row.cartoon_label,
+        series_label: String(row.series_label ?? ""), // MUST be string (table is NOT NULL)
+        type: row.type,
+        season_or_movie: row.season_or_movie,
+        num: Number(row.num) || 0,
+        ts: row.ts
+      };
 
-      if(!res.ok){
-        let txt = "";
-        try{ txt = await res.text(); } catch {}
-        return { ok: false, error: txt || ("HTTP " + res.status) };
+      const { error } = await supabaseClient
+        .from(TABLE_NAME)
+        .upsert(payload, {
+          onConflict: "room_code,profile,cartoon_label,series_label,type,season_or_movie"
+        });
+
+      if(error){
+        console.error("Cloud upsert error:", error);
+        return { ok: false, error: error.message || "Cloud upsert failed" };
       }
       return { ok: true };
     }
 
-    async function sbFetchProgress(room, profile, limit = 200){
+    async function sbFetchProgress(room, profile, limit = 250){
       if(!room) return { ok: false, skipped: true, rows: [] };
 
-      const params = new URLSearchParams();
-      params.set("select", "room_code,profile,cartoon_label,series_label,type,season_or_movie,num,ts");
-      params.set("room_code", "eq." + room);
-      params.set("profile", "eq." + profile);
-      params.set("order", "ts.desc");
-      params.set("limit", String(limit));
+      const { data, error } = await supabaseClient
+        .from(TABLE_NAME)
+        .select("room_code,profile,cartoon_label,series_label,type,season_or_movie,num,ts")
+        .eq("room_code", room)
+        .eq("profile", profile)
+        .order("ts", { ascending: false })
+        .limit(limit);
 
-      const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?${params.toString()}`;
-      const res = await fetch(url, { headers: sbHeaders() });
-
-      if(!res.ok){
-        let txt = "";
-        try{ txt = await res.text(); } catch {}
-        return { ok: false, error: txt || ("HTTP " + res.status), rows: [] };
+      if(error){
+        console.error("Cloud fetch error:", error);
+        return { ok: false, error: error.message || "Cloud fetch failed", rows: [] };
       }
-
-      const rows = await res.json();
-      return { ok: true, rows };
+      return { ok: true, rows: data || [] };
     }
 
     /* ===== Progress Tracker (Local + Cloud Merge) ===== */
@@ -678,7 +659,6 @@
       const recentInfo = document.getElementById("recentInfo");
       const activityList = document.getElementById("activityList");
 
-      // Sync UI
       const roomInput = document.getElementById("roomInput");
       const roomSaveBtn = document.getElementById("roomSaveBtn");
       const roomStatus = document.getElementById("roomStatus");
@@ -689,8 +669,33 @@
       let activeProfile = store.activeProfile || "Asim";
       let activeMode = "save";
       let pollTimer = null;
+      let lastCloudOk = true;
 
       function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
+
+      function updateRoomStatus(msg){
+        if(roomStatus) roomStatus.textContent = msg;
+      }
+
+      function refreshRoomUI(){
+        const room = getRoomCode();
+        if(roomInput) roomInput.value = room;
+
+        if(!room){
+          setSyncStatus("Sync: OFF (local only)");
+          updateRoomStatus("Sync: OFF (no room code). Local save only.");
+          return;
+        }
+
+        if(!supabaseEnabled()){
+          setSyncStatus(`Sync: OFF (Room: ${room})`);
+          updateRoomStatus(`Room: ${room} (keys missing) → Sync not active.`);
+          return;
+        }
+
+        setSyncStatus(`Sync: ON (Room: ${room})`);
+        updateRoomStatus(`Room: ${room} → Sync ON (auto refresh every ${Math.round(SYNC_POLL_MS/1000)}s).`);
+      }
 
       function setProfileUI(){
         [...profileSeg.querySelectorAll("button")].forEach(b => {
@@ -826,38 +831,27 @@
           `)
           .join("");
       }
-
-      function updateRoomStatus(msg){
-        if(!roomStatus) return;
-        roomStatus.textContent = msg;
-      }
-
-      function refreshRoomUI(){
+<!-- PART 2 / 2 -->
+      async function pollFromCloud(){
         const room = getRoomCode();
-        if(roomInput) roomInput.value = room;
+        if(!room || !supabaseEnabled()) return;
 
-        if(!room){
-          setSyncStatus("Sync: OFF (local only)");
-          updateRoomStatus("Sync: OFF (no room code). Local save only.");
+        const res = await sbFetchProgress(room, activeProfile, 250);
+        if(!res.ok){
+          if(lastCloudOk){
+            updateRoomStatus(`Room: ${room} → Sync ON, but fetch failed. (Will keep trying)`);
+          }
+          lastCloudOk = false;
           return;
         }
 
-        setSyncStatus(`Sync: ON (Room: ${room})`);
-        updateRoomStatus(`Room: ${room} → Sync ON (auto refresh every ${Math.round(SYNC_POLL_MS/1000)}s).`);
-      }
-
-      async function pollFromCloud(){
-        const room = getRoomCode();
-        if(!room) return;
-
-        const res = await sbFetchProgress(room, activeProfile, 250);
-        if(!res.ok) return;
+        lastCloudOk = true;
 
         store = loadStore();
         for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
-            seriesLabel: r.series_label || null,
+            seriesLabel: (r.series_label && r.series_label.trim()) ? r.series_label : null,
             type: r.type,
             seasonOrMovie: r.season_or_movie,
             num: Number(r.num) || 0,
@@ -875,7 +869,7 @@
       function startPolling(){
         stopPolling();
         const room = getRoomCode();
-        if(!room) return;
+        if(!room || !supabaseEnabled()) return;
 
         pollTimer = setInterval(() => {
           pollFromCloud().catch(() => {});
@@ -907,42 +901,57 @@
           ts: nowStamp()
         };
 
+        // Local save (always)
         upsertEntry(store, activeProfile, entry);
         saveStore(store);
         saveHint.textContent = `Saved: ${formatLine(entry)}`;
 
+        // Cloud save (if enabled + room exists)
+        const room = getRoomCode();
+        if(!room || !supabaseEnabled()){
+          // local-only mode, nothing else to do
+          return;
+        }
+
         const cloudRow = {
           profile: activeProfile,
           cartoon_label: entry.cartoonLabel,
-          series_label: entry.seriesLabel || "",
+          series_label: entry.seriesLabel || "", // MUST be string (NOT NULL col)
           type: entry.type,
           season_or_movie: entry.seasonOrMovie,
           num: entry.num,
           ts: entry.ts
         };
 
-        const push = await sbInsertProgress(cloudRow);
+        const push = await sbUpsertProgress(cloudRow);
         if(push.ok){
+          // pull right away so other devices update fast
           pollFromCloud().catch(() => {});
-        } else if(push.error){
-          saveHint.textContent = "Saved locally. (Cloud save failed right now)";
+        } else {
+          saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
         }
       }
 
+      // init selects
       fillCartoonSelects();
       fillSeries();
       fillSeasonOrMovie();
 
+      // set profile + mode
       setProfileUI();
       setModeUI();
 
+      // set recent default same as save cartoon
       recentCartoonSelect.value = cartoonSelect.value;
 
+      // Load last
       loadLastForSelection();
 
+      // Sync UI init
       refreshRoomUI();
       startPolling();
 
+      // Events
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
@@ -995,6 +1004,7 @@
 
       recentCartoonSelect.addEventListener("change", renderRecent);
 
+      // Room code save
       if(roomSaveBtn && roomInput){
         roomSaveBtn.addEventListener("click", () => {
           vib();
@@ -1005,6 +1015,7 @@
         });
       }
 
+      // Also save room when user presses Enter
       if(roomInput){
         roomInput.addEventListener("keydown", (e) => {
           if(e.key === "Enter"){
