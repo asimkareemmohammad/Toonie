@@ -577,12 +577,19 @@
       return store.data[profile][cartoonLabel];
     }
 
+    // Normalize series label so old null and new "-" behave the same
+    function normSeriesLabel(x){
+      const v = (x == null) ? "-" : String(x).trim();
+      return v ? v : "-";
+    }
+
     function formatLine(entry){
       const parts = [];
       parts.push(entry.cartoonLabel);
 
-      // Keep "-" internally for keys, but don't show it in UI (cleaner)
-      if(entry.seriesLabel && entry.seriesLabel !== "-") parts.push(entry.seriesLabel);
+      // hide "-" so it doesn’t look ugly in the UI
+      const s = normSeriesLabel(entry.seriesLabel);
+      if(s !== "-") parts.push(s);
 
       if(entry.type === "season"){
         parts.push(entry.seasonOrMovie);
@@ -594,22 +601,27 @@
       return parts.join(" ");
     }
 
+    // IMPORTANT: always move latest to top + avoid duplicates after series "-" change
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
 
-      // ✅ FIX: keep "global last" truly latest by timestamp
-      if(!node.last || new Date(entry.ts).getTime() > new Date(node.last.ts).getTime()){
-        node.last = entry;
-      }
+      entry.seriesLabel = normSeriesLabel(entry.seriesLabel);
+
+      node.history = (node.history || []).map(h => ({
+        ...h,
+        seriesLabel: normSeriesLabel(h.seriesLabel)
+      }));
+
+      node.last = entry;
 
       const idx = node.history.findIndex(h =>
         (h.type === entry.type) &&
         (h.seasonOrMovie === entry.seasonOrMovie) &&
-        ((h.seriesLabel || null) === (entry.seriesLabel || null))
+        (normSeriesLabel(h.seriesLabel) === normSeriesLabel(entry.seriesLabel))
       );
 
-      if(idx >= 0) node.history[idx] = entry;
-      else node.history.unshift(entry);
+      if(idx >= 0) node.history.splice(idx, 1);
+      node.history.unshift(entry);
     }
 
     // =========================
@@ -627,7 +639,7 @@
         room_code: room,
         profile: row.profile,
         cartoon_label: row.cartoon_label,
-        series_label: String(row.series_label ?? "-"),
+        series_label: normSeriesLabel(row.series_label),
         type: row.type,
         season_or_movie: row.season_or_movie,
         num: Number(row.num) || 0,
@@ -803,26 +815,28 @@
 
       function currentKeyLabels(){
         const cfg = getCartoonCfg(cartoonSelect.value);
+
         const cartoonLabel = cfg.label;
-
         const type = typeSelect.value;
+        const seasonOrMovie = seasonOrMovieSelect.value;
 
-        let seriesLabel = null;
+        let seriesLabel = "-";
         if(cfg.hasSeries){
           const s = seriesSelect.value;
           seriesLabel = (s === "Classic") ? "CL" :
                         (s === "Alien Force") ? "AF" :
                         (s === "Ultimate Alien") ? "UA" :
                         (s === "Omniverse") ? "OV" : s;
-        } else {
-          seriesLabel = "-"; // forced series label for cartoons without series
         }
 
-        const seasonOrMovie = seasonOrMovieSelect.value;
-        return { cartoonLabel, seriesLabel, type, seasonOrMovie };
+        return {
+          cartoonLabel,
+          seriesLabel: normSeriesLabel(seriesLabel),
+          type,
+          seasonOrMovie
+        };
       }
 
-      // Hint should show "global last activity for the cartoon"
       function updateSaveHintForCartoon(){
         store = loadStore();
         const cfg = getCartoonCfg(cartoonSelect.value);
@@ -881,8 +895,7 @@
         for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
-            // ✅ FIX: always normalize series to "-" if empty
-            seriesLabel: (r.series_label && String(r.series_label).trim()) ? String(r.series_label).trim() : "-",
+            seriesLabel: normSeriesLabel(r.series_label),
             type: r.type,
             seasonOrMovie: r.season_or_movie,
             num: Number(r.num) || 1,
@@ -925,7 +938,7 @@
 
         const entry = {
           cartoonLabel: cur.cartoonLabel,
-          seriesLabel: cur.seriesLabel || "-",
+          seriesLabel: cur.seriesLabel,
           type: cur.type,
           seasonOrMovie: cur.seasonOrMovie,
           num,
@@ -948,7 +961,7 @@
         const push = await sbUpsertProgress({
           profile: activeProfile,
           cartoon_label: entry.cartoonLabel,
-          series_label: entry.seriesLabel || "-",
+          series_label: entry.seriesLabel,
           type: entry.type,
           season_or_movie: entry.seasonOrMovie,
           num: entry.num,
@@ -1009,7 +1022,6 @@
         if(!cfg.hasMovies) typeSelect.value = "season";
 
         fillSeasonOrMovie();
-
         updateSaveHintForCartoon();
 
         recentCartoonSelect.value = cartoonSelect.value;
