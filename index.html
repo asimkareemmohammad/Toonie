@@ -442,7 +442,7 @@
     const TABLE_NAME = "toonie_progress";
 
     const ROOM_KEY  = "toonie_room_code_v1";
-    const STORE_KEY = "toonie_progress_tracker_v2"; // bump version to avoid old-time parsing bugs
+    const STORE_KEY = "toonie_progress_tracker_v2";
 
     const SYNC_POLL_MS = 10000;
 
@@ -541,7 +541,6 @@
         hour12: false
       });
 
-      // Convert parts to stable "YYYY-MM-DD HH:MM"
       const parts = fmt.formatToParts(d).reduce((acc, p) => {
         acc[p.type] = p.value;
         return acc;
@@ -581,7 +580,9 @@
     function formatLine(entry){
       const parts = [];
       parts.push(entry.cartoonLabel);
-      if(entry.seriesLabel) parts.push(entry.seriesLabel);
+
+      // Keep "-" internally for keys, but don't show it in UI (cleaner)
+      if(entry.seriesLabel && entry.seriesLabel !== "-") parts.push(entry.seriesLabel);
 
       if(entry.type === "season"){
         parts.push(entry.seasonOrMovie);
@@ -596,7 +597,10 @@
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
 
-      node.last = entry;
+      // ✅ FIX: keep "global last" truly latest by timestamp
+      if(!node.last || new Date(entry.ts).getTime() > new Date(node.last.ts).getTime()){
+        node.last = entry;
+      }
 
       const idx = node.history.findIndex(h =>
         (h.type === entry.type) &&
@@ -623,11 +627,11 @@
         room_code: room,
         profile: row.profile,
         cartoon_label: row.cartoon_label,
-        series_label: String(row.series_label ?? ""),
+        series_label: String(row.series_label ?? "-"),
         type: row.type,
         season_or_movie: row.season_or_movie,
         num: Number(row.num) || 0,
-        ts: row.ts // ISO string
+        ts: row.ts
       };
 
       const { error } = await supabaseClient
@@ -794,7 +798,7 @@
           html += `<option value="${i}">${i}</option>`;
         }
         numSelect.innerHTML = html;
-        numSelect.value = "1"; // always start neutral; never auto-force from last saved
+        numSelect.value = "1";
       }
 
       function currentKeyLabels(){
@@ -802,21 +806,23 @@
         const cartoonLabel = cfg.label;
 
         const type = typeSelect.value;
-        let seriesLabel = null;
 
+        let seriesLabel = null;
         if(cfg.hasSeries){
           const s = seriesSelect.value;
           seriesLabel = (s === "Classic") ? "CL" :
                         (s === "Alien Force") ? "AF" :
                         (s === "Ultimate Alien") ? "UA" :
                         (s === "Omniverse") ? "OV" : s;
+        } else {
+          seriesLabel = "-"; // forced series label for cartoons without series
         }
 
         const seasonOrMovie = seasonOrMovieSelect.value;
         return { cartoonLabel, seriesLabel, type, seasonOrMovie };
       }
 
-      // Hint should show "last activity for the cartoon", NOT force dropdown
+      // Hint should show "global last activity for the cartoon"
       function updateSaveHintForCartoon(){
         store = loadStore();
         const cfg = getCartoonCfg(cartoonSelect.value);
@@ -875,11 +881,12 @@
         for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
-            seriesLabel: (r.series_label && String(r.series_label).trim()) ? r.series_label : null,
+            // ✅ FIX: always normalize series to "-" if empty
+            seriesLabel: (r.series_label && String(r.series_label).trim()) ? String(r.series_label).trim() : "-",
             type: r.type,
             seasonOrMovie: r.season_or_movie,
             num: Number(r.num) || 1,
-            ts: r.ts // ISO
+            ts: r.ts
           };
           upsertEntry(store, activeProfile, entry);
         }
@@ -918,7 +925,7 @@
 
         const entry = {
           cartoonLabel: cur.cartoonLabel,
-          seriesLabel: cur.seriesLabel || null,
+          seriesLabel: cur.seriesLabel || "-",
           type: cur.type,
           seasonOrMovie: cur.seasonOrMovie,
           num,
@@ -929,7 +936,7 @@
         upsertEntry(store, activeProfile, entry);
         saveStore(store);
 
-        // Update hint only (no dropdown forcing)
+        // Update hint only
         saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
 
         // CLOUD SAVE IF POSSIBLE
@@ -941,7 +948,7 @@
         const push = await sbUpsertProgress({
           profile: activeProfile,
           cartoon_label: entry.cartoonLabel,
-          series_label: entry.seriesLabel || "",
+          series_label: entry.seriesLabel || "-",
           type: entry.type,
           season_or_movie: entry.seasonOrMovie,
           num: entry.num,
@@ -1003,7 +1010,6 @@
 
         fillSeasonOrMovie();
 
-        // Never force dropdown; just update hint for cartoon
         updateSaveHintForCartoon();
 
         recentCartoonSelect.value = cartoonSelect.value;
