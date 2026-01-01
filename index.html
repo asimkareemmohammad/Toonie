@@ -521,12 +521,10 @@
       return clean;
     }
 
-    // ALWAYS store as ISO so it parses consistently across devices.
     function nowISO(){
       return new Date().toISOString();
     }
 
-    // Display ISO -> "YYYY-MM-DD HH:MM" in LOCAL timezone.
     function displayLocal(ts){
       if(!ts) return "";
       const d = new Date(ts);
@@ -548,23 +546,12 @@
       return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
     }
 
-    function loadStore(){
-      try{
-        const raw = localStorage.getItem(STORE_KEY);
-        if(!raw) return { activeProfile: "Asim", data: { Asim: {}, Marwa: {} } };
-        const obj = JSON.parse(raw);
-        if(!obj.data) obj.data = { Asim: {}, Marwa: {} };
-        if(!obj.data.Asim) obj.data.Asim = {};
-        if(!obj.data.Marwa) obj.data.Marwa = {};
-        if(!obj.activeProfile) obj.activeProfile = "Asim";
-        return obj;
-      } catch {
-        return { activeProfile: "Asim", data: { Asim: {}, Marwa: {} } };
-      }
-    }
-
-    function saveStore(store){
-      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    // Normalize seriesLabel: keep local as null (never "-")
+    function normalizeSeriesLocal(x){
+      const v = (x == null) ? null : String(x).trim();
+      if(!v) return null;
+      if(v === "-") return null;
+      return v;
     }
 
     function ensurePath(store, profile, cartoonLabel){
@@ -577,19 +564,75 @@
       return store.data[profile][cartoonLabel];
     }
 
-    // Normalize series label so old null and new "-" behave the same
-    function normSeriesLabel(x){
-      const v = (x == null) ? "-" : String(x).trim();
-      return v ? v : "-";
+    // Clean old local data so we don't keep duplicates from the old null vs "-" switch
+    function normalizeAndDedupeStore(store){
+      const profiles = ["Asim","Marwa"];
+      for(const p of profiles){
+        if(!store.data[p]) store.data[p] = {};
+        for(const cartoonLabel of Object.keys(store.data[p] || {})){
+          const node = ensurePath(store, p, cartoonLabel);
+
+          if(node.last){
+            node.last.seriesLabel = normalizeSeriesLocal(node.last.seriesLabel);
+          }
+
+          // normalize + dedupe by (type, seasonOrMovie, seriesLabel), keep newest ts
+          const map = new Map();
+          const arr = Array.isArray(node.history) ? node.history : [];
+          for(const it of arr){
+            if(!it) continue;
+            it.seriesLabel = normalizeSeriesLocal(it.seriesLabel);
+            const key = `${it.type}|${it.seasonOrMovie}|${it.seriesLabel || ""}`;
+            const prev = map.get(key);
+            if(!prev || (String(it.ts) > String(prev.ts))){
+              map.set(key, it);
+            }
+          }
+
+          const merged = Array.from(map.values())
+            .sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
+
+          node.history = merged;
+
+          // make sure node.last is the real latest event for that cartoon
+          if(merged.length){
+            const latest = merged[0];
+            if(!node.last || String(latest.ts) > String(node.last.ts)){
+              node.last = latest;
+            }
+          }
+        }
+      }
+      return store;
+    }
+
+    function loadStore(){
+      try{
+        const raw = localStorage.getItem(STORE_KEY);
+        if(!raw){
+          return normalizeAndDedupeStore({ activeProfile: "Asim", data: { Asim: {}, Marwa: {} } });
+        }
+        const obj = JSON.parse(raw);
+        if(!obj.data) obj.data = { Asim: {}, Marwa: {} };
+        if(!obj.data.Asim) obj.data.Asim = {};
+        if(!obj.data.Marwa) obj.data.Marwa = {};
+        if(!obj.activeProfile) obj.activeProfile = "Asim";
+        return normalizeAndDedupeStore(obj);
+      } catch {
+        return normalizeAndDedupeStore({ activeProfile: "Asim", data: { Asim: {}, Marwa: {} } });
+      }
+    }
+
+    function saveStore(store){
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
     }
 
     function formatLine(entry){
       const parts = [];
       parts.push(entry.cartoonLabel);
 
-      // hide "-" so it doesn’t look ugly in the UI
-      const s = normSeriesLabel(entry.seriesLabel);
-      if(s !== "-") parts.push(s);
+      // Only show series if it's a real series (Ben 10). Doraemon stays clean.
+      if(entry.seriesLabel) parts.push(entry.seriesLabel);
 
       if(entry.type === "season"){
         parts.push(entry.seasonOrMovie);
@@ -601,27 +644,37 @@
       return parts.join(" ");
     }
 
-    // IMPORTANT: always move latest to top + avoid duplicates after series "-" change
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
 
-      entry.seriesLabel = normSeriesLabel(entry.seriesLabel);
+      // local seriesLabel should always be normalized
+      entry.seriesLabel = normalizeSeriesLocal(entry.seriesLabel);
 
-      node.history = (node.history || []).map(h => ({
-        ...h,
-        seriesLabel: normSeriesLabel(h.seriesLabel)
-      }));
+      // Keep "global last" for the cartoon = newest ts
+      if(!node.last || String(entry.ts) >= String(node.last.ts)){
+        node.last = entry;
+      }
 
-      node.last = entry;
+      const keySeries = entry.seriesLabel || null;
 
       const idx = node.history.findIndex(h =>
         (h.type === entry.type) &&
         (h.seasonOrMovie === entry.seasonOrMovie) &&
-        (normSeriesLabel(h.seriesLabel) === normSeriesLabel(entry.seriesLabel))
+        (normalizeSeriesLocal(h.seriesLabel) === keySeries)
       );
 
-      if(idx >= 0) node.history.splice(idx, 1);
-      node.history.unshift(entry);
+      if(idx >= 0){
+        // replace if newer
+        const old = node.history[idx];
+        if(!old || String(entry.ts) >= String(old.ts)){
+          node.history[idx] = entry;
+        }
+      } else {
+        node.history.unshift(entry);
+      }
+
+      // keep history ordered
+      node.history.sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
     }
 
     // =========================
@@ -635,11 +688,16 @@
       const room = getRoomCode();
       if(!room) return { ok: false, skipped: true };
 
+      // IMPORTANT: cloud series_label must be NOT NULL => send "-" if no series
+      const cloudSeries = (row.series_label == null || String(row.series_label).trim() === "")
+        ? "-"
+        : String(row.series_label);
+
       const payload = {
         room_code: room,
         profile: row.profile,
         cartoon_label: row.cartoon_label,
-        series_label: normSeriesLabel(row.series_label),
+        series_label: cloudSeries,
         type: row.type,
         season_or_movie: row.season_or_movie,
         num: Number(row.num) || 0,
@@ -709,6 +767,9 @@
       if(!profileSeg || !modeSeg) return;
 
       let store = loadStore();
+      // write back cleaned store so duplicates are gone immediately
+      saveStore(store);
+
       let activeProfile = store.activeProfile || "Asim";
       let activeMode = "save";
       let pollTimer = null;
@@ -815,12 +876,13 @@
 
       function currentKeyLabels(){
         const cfg = getCartoonCfg(cartoonSelect.value);
-
         const cartoonLabel = cfg.label;
-        const type = typeSelect.value;
-        const seasonOrMovie = seasonOrMovieSelect.value;
 
-        let seriesLabel = "-";
+        const type = typeSelect.value;
+
+        // LOCAL: Doraemon has no series => keep null locally
+        let seriesLabel = null;
+
         if(cfg.hasSeries){
           const s = seriesSelect.value;
           seriesLabel = (s === "Classic") ? "CL" :
@@ -829,12 +891,9 @@
                         (s === "Omniverse") ? "OV" : s;
         }
 
-        return {
-          cartoonLabel,
-          seriesLabel: normSeriesLabel(seriesLabel),
-          type,
-          seasonOrMovie
-        };
+        const seasonOrMovie = seasonOrMovieSelect.value;
+
+        return { cartoonLabel, seriesLabel, type, seasonOrMovie };
       }
 
       function updateSaveHintForCartoon(){
@@ -892,10 +951,12 @@
         lastCloudOk = true;
 
         store = loadStore();
+
         for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
-            seriesLabel: normSeriesLabel(r.series_label),
+            // CLOUD "-" => LOCAL null
+            seriesLabel: normalizeSeriesLocal(r.series_label),
             type: r.type,
             seasonOrMovie: r.season_or_movie,
             num: Number(r.num) || 1,
@@ -903,6 +964,8 @@
           };
           upsertEntry(store, activeProfile, entry);
         }
+
+        store = normalizeAndDedupeStore(store);
         saveStore(store);
 
         updateSaveHintForCartoon();
@@ -938,7 +1001,7 @@
 
         const entry = {
           cartoonLabel: cur.cartoonLabel,
-          seriesLabel: cur.seriesLabel,
+          seriesLabel: normalizeSeriesLocal(cur.seriesLabel), // local normalized
           type: cur.type,
           seasonOrMovie: cur.seasonOrMovie,
           num,
@@ -947,9 +1010,9 @@
 
         // LOCAL SAVE ALWAYS
         upsertEntry(store, activeProfile, entry);
+        store = normalizeAndDedupeStore(store);
         saveStore(store);
 
-        // Update hint only
         saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
 
         // CLOUD SAVE IF POSSIBLE
@@ -961,7 +1024,8 @@
         const push = await sbUpsertProgress({
           profile: activeProfile,
           cartoon_label: entry.cartoonLabel,
-          series_label: entry.seriesLabel,
+          // only cloud gets "-"
+          series_label: entry.seriesLabel || "-",
           type: entry.type,
           season_or_movie: entry.seasonOrMovie,
           num: entry.num,
