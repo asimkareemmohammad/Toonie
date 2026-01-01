@@ -902,7 +902,7 @@
         const node = ensurePath(store, activeProfile, cartoonLabel);
 
         if(node.last){
-          saveHint.textContent = `Last activity: ${formatLine(node.last)} (${displayLocal(node.last.ts)})`;
+          saveHint.textContent = `Last Watched: ${formatLine(node.last)} (${displayLocal(node.last.ts)})`;
         } else {
           saveHint.textContent = "No activity yet for this cartoon.";
         }
