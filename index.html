@@ -331,10 +331,46 @@ a:hover::after{
     }
 
     .hidden{ display: none !important; }
+
+  /* ===== ALL-IN FX LAYERS ===== */
+#fxCanvas{
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+#cursorGlow{
+  position: fixed;
+  width: 520px;
+  height: 520px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -2;
+  background: radial-gradient(circle, rgba(0,240,255,0.20), rgba(250,204,21,0.10), transparent 60%);
+  filter: blur(22px);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  transition: opacity 0.25s ease;
+}
+
+/* optional: when user is inactive, reduce intensity */
+.fx-idle #cursorGlow{ opacity: 0.45; }
+
+    
   </style>
 </head>
 
 <body>
+  <canvas id="fxCanvas"></canvas>
+<div id="cursorGlow"></div>
+
   <div id="boot"></div>
 
   <main id="app">
@@ -790,6 +826,148 @@ a:hover::after{
     // =========================
     // APP
     // =========================
+
+// =========================
+// ALL-IN BACKGROUND FX
+// =========================
+(function initAllInFX(){
+  const canvas = document.getElementById("fxCanvas");
+  const glow = document.getElementById("cursorGlow");
+  if(!canvas || !glow) return;
+
+  const ctx = canvas.getContext("2d", { alpha: true });
+  let w = 0, h = 0, dpr = Math.min(2, window.devicePixelRatio || 1);
+
+  const particles = [];
+  const PCOUNT = 95; // increase to 140 if you want even crazier
+
+  // mouse/touch target
+  let tx = window.innerWidth * 0.5;
+  let ty = window.innerHeight * 0.35;
+  let gx = tx, gy = ty;
+
+  // idle detection for glow intensity
+  let idleTimer = null;
+  function markActive(){
+    document.body.classList.remove("fx-idle");
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => document.body.classList.add("fx-idle"), 1500);
+  }
+
+  function resize(){
+    w = Math.floor(window.innerWidth);
+    h = Math.floor(window.innerHeight);
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+
+  function spawn(){
+    particles.length = 0;
+    for(let i=0;i<PCOUNT;i++){
+      particles.push({
+        x: rand(0,w),
+        y: rand(0,h),
+        r: rand(0.9, 2.6),
+        vx: rand(-0.25, 0.25),
+        vy: rand(-0.18, 0.18),
+        a: rand(0.25, 0.85),
+        tw: rand(0.008, 0.02) // twinkle
+      });
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+
+    // soft gradient wash (aurora)
+    const g = ctx.createRadialGradient(w*0.25,h*0.2, 80, w*0.25,h*0.2, Math.max(w,h)*0.9);
+    g.addColorStop(0, "rgba(0,240,255,0.10)");
+    g.addColorStop(0.45, "rgba(250,204,21,0.07)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    // sparkles
+    for(const p of particles){
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // wrap around edges
+      if(p.x < -10) p.x = w+10;
+      if(p.x > w+10) p.x = -10;
+      if(p.y < -10) p.y = h+10;
+      if(p.y > h+10) p.y = -10;
+
+      // subtle pull toward cursor/touch
+      const dx = gx - p.x;
+      const dy = gy - p.y;
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      const pull = Math.min(0.04, 18/dist) * 0.0016;
+      p.vx += dx * pull;
+      p.vy += dy * pull;
+
+      // dampen speed
+      p.vx *= 0.995;
+      p.vy *= 0.995;
+
+      // twinkle
+      p.a += (Math.random()-0.5) * p.tw;
+      p.a = Math.max(0.15, Math.min(0.95, p.a));
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${p.a})`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  function setTarget(x,y){
+    tx = x; ty = y;
+    markActive();
+  }
+
+  // smooth follow
+  function follow(){
+    gx += (tx - gx) * 0.08;
+    gy += (ty - gy) * 0.08;
+
+    // move glow
+    glow.style.left = gx + "px";
+    glow.style.top = gy + "px";
+
+    requestAnimationFrame(follow);
+  }
+
+  window.addEventListener("resize", () => { resize(); spawn(); });
+
+  window.addEventListener("mousemove", (e) => setTarget(e.clientX, e.clientY), { passive: true });
+
+  window.addEventListener("touchstart", (e) => {
+    const t = e.touches && e.touches[0];
+    if(t) setTarget(t.clientX, t.clientY);
+  }, { passive: true });
+
+  window.addEventListener("touchmove", (e) => {
+    const t = e.touches && e.touches[0];
+    if(t) setTarget(t.clientX, t.clientY);
+  }, { passive: true });
+
+  // init
+  resize();
+  spawn();
+  markActive();
+  follow();
+  draw();
+})();
+
+    
     function initTracker(){
       const profileSeg = document.getElementById("profileSeg");
       const modeSeg = document.getElementById("modeSeg");
