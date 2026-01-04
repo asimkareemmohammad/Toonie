@@ -1,1435 +1,1008 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toonie</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toonie</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/192.png" type="image/png" sizes="192x192">
-  <link rel="icon" href="icons/512.png" type="image/png" sizes="512x512">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/192.png" type="image/png" sizes="192x192">
+  <link rel="icon" href="icons/512.png" type="image/png" sizes="512x512">
 
-  <meta name="theme-color" content="#0f0f0f">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Toonie">
-  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0f0f0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Toonie">
+  <meta name="mobile-web-app-capable" content="yes">
 
-  <style>
-    :root{
-      --boot-min-show: 3500ms;
-      --boot-fade: 1200ms;
-      --app-fade: 700ms;
-      --app-fade-delay: 150ms;
+  <style>
+    :root{
+      --boot-min-show: 3500ms;
+      --boot-fade: 1200ms;
+      --app-fade: 700ms;
+      --app-fade-delay: 150ms;
 
-      /* ===== Unified Glass Theme ===== */
-      --bg: #0f0f0f;
-      --glass: rgba(30,30,30,0.64);
-      --glass-strong: rgba(30,30,30,0.78);
-      --border: rgba(255,255,255,0.08);
-      --border-soft: rgba(255,255,255,0.06);
-      --shadow: 0 12px 26px rgba(0,0,0,0.46), 0 2px 0 rgba(255,255,255,0.05) inset;
-      --shadow-soft: 0 10px 25px rgba(0,0,0,0.35);
-      --radius-pill: 999px;
-      --radius-card: 22px;
-      --blur: blur(12px);
+      /* ===== Unified Glass Theme ===== */
+      --bg: #0f0f0f;
+      --glass: rgba(30,30,30,0.64);
+      --glass-strong: rgba(30,30,30,0.78);
+      --border: rgba(255,255,255,0.08);
+      --border-soft: rgba(255,255,255,0.06);
+      --shadow: 0 12px 26px rgba(0,0,0,0.46), 0 2px 0 rgba(255,255,255,0.05) inset;
+      --shadow-soft: 0 10px 25px rgba(0,0,0,0.35);
+      --radius-pill: 999px;
+      --radius-card: 22px;
+      --blur: blur(12px);
 
-      --accentA: #facc15;
-      --accentB: #00f0ff;
-      --shineSpeed: 3s;
-    }
+      /* ===== REVISED ACCENTS ===== */
+      --accent-main: #00ddff; /* Vibrant Cyan */
+      --accent-secondary: #facc15; /* Yellow */
+      --accent-green-light: #4ade80; /* Light Green for B10 */
+      --accent-green-dark: #22c55e; /* Darker Green for B10 */
+      --shineSpeed: 5s; /* Slower, more subtle shine */
+    }
 
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg);
-      color: #fff;
-      min-height: 100vh;
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
 
-    #app {
-      opacity: 0;
-      transform: scale(0.985);
-      transition:
-        opacity var(--app-fade) ease var(--app-fade-delay),
-        transform var(--app-fade) ease var(--app-fade-delay);
-      padding-bottom: 3rem;
-    }
-    .boot-done #app { opacity: 1; transform: scale(1); }
+    #app {
+      opacity: 0;
+      transform: scale(0.985);
+      transition:
+        opacity var(--app-fade) ease var(--app-fade-delay),
+        transform var(--app-fade) ease var(--app-fade-delay);
+      padding-bottom: 3rem;
+    }
+    .boot-done #app { opacity: 1; transform: scale(1); }
 
-    .heading {
-      font-size: 2rem;
-      margin: 2rem auto;
-      text-align: center;
-      line-height: 1.4;
-      width: 100%;
-      background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentA));
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine var(--shineSpeed) linear infinite;
-    }
-    @keyframes shine { 0% {background-position:0% center;} 100% {background-position:-200% center;} }
+    /* ===== REVISED HEADING STYLES ===== */
+    .heading {
+      font-size: 2.2rem;
+      margin: 2rem auto;
+      text-align: center;
+      line-height: 1.4;
+      width: 100%;
+      /* Solid Color for Main Title */
+      background: var(--accent-secondary); 
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      background-size: initial;
+      animation: none;
+    }
+    .heading br + span {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 400;
+      /* Gradient with Shine for Subtitle */
+      background: linear-gradient(90deg, var(--accent-secondary), var(--accent-main), var(--accent-secondary));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine var(--shineSpeed) linear infinite;
+    }
+    /* B10 Section uses a Green Accent */
+    .section-gap + .heading {
+      background: var(--accent-green-light);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .section-gap + .heading br + span {
+      background: linear-gradient(90deg, var(--accent-green-light), var(--accent-green-dark), var(--accent-green-light));
+    }
+    @keyframes shine { 0% {background-position:0% center;} 100% {background-position:-200% center;} }
 
-    .section-gap { margin-top: 1.5rem; }
+    .section-gap { margin-top: 1.5rem; }
 
-    /* Layout wrappers */
-    .panel-wrap{
-      max-width: 820px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      box-sizing: border-box;
-    }
+    /* Layout wrappers */
+    .panel-wrap{
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      box-sizing: border-box;
+    }
 
-    /* FIXED: Proper grid layout for consistent alignment */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr); /* Fixed 4 columns for consistency */
-      gap: 1rem;
-      width: 100%;
-      box-sizing: border-box;
-      margin: 0 auto;
-    }
+    /* FIXED: Proper grid layout for consistent alignment */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr); /* Fixed 4 columns for consistency */
+      gap: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0 auto;
+    }
 
-    /* For movie grid (2 items) */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr); /* 2 columns for movies */
-      gap: 1rem;
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
-    }
+    /* For movie grid (2 items) */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* 2 columns for movies */
+      gap: 1rem;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
 
-    /* Menu buttons grid */
-    .menu-grid{
-      grid-template-columns: repeat(2, 1fr); /* 2 columns for menu buttons */
-      max-width: 640px;
-      padding-bottom: 1.2rem;
-      margin: 0 auto;
-    }
+    /* Menu buttons grid */
+    .menu-grid{
+      grid-template-columns: repeat(2, 1fr); /* 2 columns for menu buttons */
+      max-width: 640px;
+      padding-bottom: 1.2rem;
+      margin: 0 auto;
+    }
 
-    .menu-btn{
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      min-height: 56px;
-    }
+    .menu-btn{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 56px;
+    }
 
-    /* Unified pill buttons (anchors) */
-    a {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--glass-strong);
-      border: 1px solid var(--border);
-      padding: 0.78rem 0.5rem; /* Reduced padding for better fit */
-      text-align: center;
-      border-radius: var(--radius-pill);
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-      transition:
-        transform 160ms cubic-bezier(.2,.9,.2,1),
-        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
-        filter 160ms ease,
-        background-color 200ms ease,
-        border-color 200ms ease;
-      -webkit-tap-highlight-color: transparent;
-      color: inherit;
-      transform: translateZ(0);
-      box-shadow: var(--shadow);
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-      min-height: 48px; /* Consistent height */
-      word-break: break-word; /* Handle long text */
-    }
+    /* Unified pill buttons (anchors) */
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      padding: 0.78rem 0.5rem; /* Reduced padding for better fit */
+      text-align: center;
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition:
+        transform 160ms cubic-bezier(.2,.9,.2,1),
+        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
+        filter 160ms ease,
+        background-color 200ms ease,
+        border-color 200ms ease;
+      -webkit-tap-highlight-color: transparent;
+      color: inherit;
+      transform: translateZ(0);
+      box-shadow: var(--shadow);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      min-height: 48px; /* Consistent height */
+      word-break: break-word; /* Handle long text */
+    }
 
-    a span.label {
-      display: inline-block;
-      background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentA));
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine var(--shineSpeed) linear infinite;
-      letter-spacing: 0.2px;
-      font-size: 0.95rem; /* Slightly smaller font for better fit */
-      text-align: center;
-      width: 100%;
-    }
+    /* REVISED Button Label Gradients */
+    a span.label {
+      display: inline-block;
+      /* Updated gradient for button text */
+      background: linear-gradient(90deg, var(--accent-main), #fff, var(--accent-main));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine var(--shineSpeed) linear infinite;
+      letter-spacing: 0.2px;
+      font-size: 0.95rem; /* Slightly smaller font for better fit */
+      text-align: center;
+      width: 100%;
+    }
 
-    a span.ripple {
-      position: absolute;
-      border-radius: 50%;
-      transform: scale(0);
-      animation: ripple 3.5s linear;
-      background-color: rgba(0, 240, 255, 0.3);
-      pointer-events: none;
-    }
-    @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+    a span.ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple 3.5s linear;
+      background-color: rgba(0, 240, 255, 0.3);
+      pointer-events: none;
+    }
+    @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
-    a:active{
-      transform: translateY(1px) scale(0.985);
-      box-shadow:
-        0 8px 18px rgba(0,0,0,0.42),
-        0 1px 0 rgba(255,255,255,0.04) inset;
-      filter: brightness(1.06);
-    }
-    a:hover{
-      transform: translateY(-2px) scale(1.01);
-      box-shadow:
-        0 16px 30px rgba(0,0,0,0.54),
-        0 2px 0 rgba(255,255,255,0.06) inset;
-    }
+    /* ===== REVISED HOVER/ACTIVE STATES ===== */
+    a:active{
+      transform: translateY(1px) scale(0.985);
+      /* Inset shadow for a "depressed" look */
+      box-shadow:
+        0 0 0 transparent, 
+        0 4px 6px rgba(0,0,0,0.4) inset, 
+        0 -2px 4px rgba(255,255,255,0.02) inset;
+      filter: brightness(1.02);
+    }
+    a:hover{
+      transform: translateY(-3px) scale(1.015);
+      box-shadow:
+        0 18px 34px rgba(0,0,0,0.60), /* Darker, larger outer shadow */
+        0 3px 0 rgba(255,255,255,0.08) inset; /* Brighter inner highlight */
+    }
 
-    a::before{
-      content:"";
-      position:absolute;
-      inset: 0;
-      pointer-events:none;
-      background: radial-gradient(120px 80px at 25% 15%, rgba(255,255,255,0.10), transparent 60%);
-      opacity: 0.9;
-    }
+    a::before{
+      content:"";
+      position:absolute;
+      inset: 0;
+      pointer-events:none;
+      background: radial-gradient(120px 80px at 25% 15%, rgba(255,255,255,0.10), transparent 60%);
+      opacity: 0.9;
+    }
 
-    a::after{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      border-radius: var(--radius-pill);
-      pointer-events:none;
-      border: 2px solid rgba(0,240,255,0.10);
-      opacity: 0;
-      transform: scale(0.985);
-      transition: opacity 200ms ease, transform 200ms ease;
-    }
-    a:hover::after{
-      opacity: 1;
-      transform: scale(1);
-    }
+    a::after{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius: var(--radius-pill);
+      pointer-events:none;
+      border: 2px solid rgba(0,240,255,0.10);
+      opacity: 0;
+      transform: scale(0.985);
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+    a:hover::after{
+      opacity: 1;
+      transform: scale(1);
+    }
 
-    @media (prefers-reduced-motion: reduce){
-      a{ transition:none; }
-      a:hover{ transform:none; }
-    }
+    @media (prefers-reduced-motion: reduce){
+      a{ transition:none; }
+      a:hover{ transform:none; }
+    }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: repeat(3, 1fr); /* 3 columns on medium screens */
-      }
-      
-      .menu-grid {
-        max-width: 500px;
-      }
-    }
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns on medium screens */
+      }
+      
+      .menu-grid {
+        max-width: 500px;
+      }
+    }
 
-    @media (max-width: 480px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns on small screens */
-      }
-      
-      .menu-grid {
-        max-width: 100%;
-        padding: 0 1rem 1.2rem;
-      }
-      
-      .panel-wrap {
-        padding: 0 1rem;
-      }
-      
-      a {
-        padding: 0.7rem 0.4rem;
-        font-size: 0.9rem;
-      }
-    }
+    @media (max-width: 480px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on small screens */
+      }
+      
+      .menu-grid {
+        max-width: 100%;
+        padding: 0 1rem 1.2rem;
+      }
+      
+      .panel-wrap {
+        padding: 0 1rem;
+      }
+      
+      a {
+        padding: 0.7rem 0.4rem;
+        font-size: 0.9rem;
+      }
+    }
 
-    /* ===== Animated expand/collapse panels (smooth JS-driven max-height) ===== */
-    .panel{
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-      max-height: 0;
-      opacity: 0;
-      transform: translateY(-6px);
-      pointer-events: none;
-      transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
-      will-change: max-height, opacity, transform;
-    }
-    .panel.open{
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-      margin-top: 14px;
-    }
+    /* ===== Animated expand/collapse panels (smooth JS-driven max-height) ===== */
+    .panel{
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
+      will-change: max-height, opacity, transform;
+    }
+    .panel.open{
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      margin-top: 14px;
+    }
 
-    /* ===== Boot Overlay ===== */
-    #boot {
-      position: fixed;
-      inset: 0;
-      background: #0f0f0f;
-      z-index: 9999;
-      opacity: 1;
-      transition: opacity var(--boot-fade) ease;
-    }
-    #boot.hide { opacity: 0; pointer-events: none; }
+    /* ===== Progress Tracker (re-skinned to match) ===== */
+    .tools-wrap{
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto 3rem;
+      padding: 0 2rem;
+      box-sizing: border-box;
+    }
 
-    @media (prefers-reduced-motion: reduce) {
-      #boot { transition: none; }
-      #app { transition: none; }
-      .panel{ transition: none; }
-    }
+    .tool-card{
+      background: var(--glass);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      margin-top: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      /* REVISED: Softer internal gradient */
+      background: radial-gradient(140px 80px at 15% 10%, rgba(255,255,255,0.06), transparent 70%);
+      opacity: 1; 
+    }
 
-    /* ===== Progress Tracker (re-skinned to match) ===== */
-    .tools-wrap{
-      width: 100%;
-      max-width: 820px;
-      margin: 0 auto 3rem;
-      padding: 0 2rem;
-      box-sizing: border-box;
-    }
+    .tool-title{
+      font-size: 1.15rem;
+      margin: 0 0 0.85rem 0;
+      /* Using a solid green accent color for the title */
+      background: var(--accent-green-light);
+      background-size: initial;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: none;
+      position: relative;
+      z-index: 1;
+    }
 
-    .tool-card{
-      background: var(--glass);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius-card);
-      padding: 1.25rem;
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-      margin-top: 1rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .tool-card::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background: radial-gradient(160px 90px at 20% 10%, rgba(255,255,255,0.10), transparent 62%);
-      opacity: 0.9;
-    }
+    .tool-row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      align-items: end;
+      position: relative;
+      z-index: 1;
+    }
+    @media (max-width: 640px){
+      .tool-row{ grid-template-columns: 1fr; }
+    }
 
-    .tool-title{
-      font-size: 1.15rem;
-      margin: 0 0 0.85rem 0;
-      background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentA));
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine var(--shineSpeed) linear infinite;
-      position: relative;
-      z-index: 1;
-    }
+    .tool-field{
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      position: relative;
+      z-index: 1;
+    }
 
-    .tool-row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.85rem;
-      align-items: end;
-      position: relative;
-      z-index: 1;
-    }
-    @media (max-width: 640px){
-      .tool-row{ grid-template-columns: 1fr; }
-    }
+    .tool-label{
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
 
-    .tool-field{
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      position: relative;
-      z-index: 1;
-    }
+    /* REVISED Input and Select Fields */
+    .tool-input, .tool-select{
+      width: 100%;
+      /* Darker glass background */
+      background: rgba(30,30,30,0.50);
+      /* Softer border */
+      border: 1px solid rgba(255,255,255,0.05);
+      color: #fff;
+      border-radius: 14px;
+      padding: 0.75rem 0.9rem;
+      outline: none;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 160ms ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
 
-    .tool-label{
-      font-size: 0.9rem;
-      opacity: 0.85;
-    }
+    .tool-input:focus, .tool-select:focus{
+      border-color: var(--accent-main);
+      box-shadow: 0 0 0 3px rgba(0,240,255,0.15), 0 0 0 1px var(--accent-main);
+      transform: translateY(-1px) scale(1.005);
+    }
 
-    .tool-input, .tool-select{
-      width: 100%;
-      background: rgba(21,21,21,0.70);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #fff;
-      border-radius: 14px;
-      padding: 0.75rem 0.9rem;
-      outline: none;
-      font-size: 0.95rem;
-      box-sizing: border-box;
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-      transition: border-color 180ms ease, box-shadow 180ms ease, transform 160ms ease;
-    }
+    .seg{
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
 
-    .tool-input:focus, .tool-select:focus{
-      border-color: rgba(0,240,255,0.55);
-      box-shadow: 0 0 0 3px rgba(0,240,255,0.10);
-      transform: translateY(-1px);
-    }
+    .seg button{
+      background: rgba(21,21,21,0.65);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff;
+      border-radius: var(--radius-pill);
+      padding: 0.6rem 0.95rem;
+      cursor: pointer;
+      transition:
+        transform 160ms cubic-bezier(.2,.9,.2,1),
+        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
+        border-color 200ms ease,
+        background-color 200ms ease;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+    }
+    .seg button:hover{ transform: translateY(-2px); }
+    /* REVISED Button Active State */
+    .seg button:active{
+      transform: translateY(1px) scale(0.985);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.4) inset, 0 -2px 4px rgba(255,255,255,0.02) inset;
+    }
+    .seg button.active{
+      border-color: var(--accent-main);
+      background: rgba(0,240,255,0.08);
+      box-shadow: 0 12px 22px rgba(0,0,0,0.42);
+    }
 
-    .seg{
-      display: flex;
-      gap: 0.55rem;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 1;
-    }
+    .tool-mini{
+      font-size: 0.92rem;
+      opacity: 0.9;
+      margin-top: 0.85rem;
+      line-height: 1.4;
+      position: relative;
+      z-index: 1;
+    }
 
-    .seg button{
-      background: rgba(21,21,21,0.65);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #fff;
-      border-radius: var(--radius-pill);
-      padding: 0.6rem 0.95rem;
-      cursor: pointer;
-      transition:
-        transform 160ms cubic-bezier(.2,.9,.2,1),
-        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
-        border-color 200ms ease,
-        background-color 200ms ease;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-    }
-    .seg button:hover{ transform: translateY(-1px); }
-    .seg button:active{ transform: translateY(1px) scale(0.985); }
-    .seg button.active{
-      border-color: rgba(0,240,255,0.55);
-      background: rgba(0,240,255,0.08);
-      box-shadow: 0 12px 22px rgba(0,0,0,0.42);
-    }
+    .save-row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      margin-top: 0.85rem;
+      position: relative;
+      z-index: 1;
+    }
+    @media (max-width: 640px){
+      .save-row{ grid-template-columns: 1fr; }
+    }
 
-    .tool-mini{
-      font-size: 0.92rem;
-      opacity: 0.9;
-      margin-top: 0.85rem;
-      line-height: 1.4;
-      position: relative;
-      z-index: 1;
-    }
+    /* REVISED Save Button (Action buttons) */
+    .save-btn{
+      width: 100%;
+      /* Darker, cleaner glass base */
+      background: rgba(30,30,30,0.70);
+      border: 1px solid rgba(255,255,255,0.06);
+      /* Color Pop for Text */
+      color: var(--accent-main); 
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      border-radius: 16px;
+      padding: 0.78rem 0.95rem;
+      cursor: pointer;
+      transition:
+        transform 160ms cubic-bezier(.2,.9,.2,1),
+        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
+        border-color 200ms ease,
+        background-color 200ms ease;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.40);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+    }
+    .save-btn:hover{
+      transform: translateY(-2px); 
+      color: #fff; /* White text on hover */
+      background: rgba(30,30,30,0.85); /* Slightly less transparent */
+    }
+    .save-btn:active{
+      transform: translateY(1px) scale(0.985);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.4) inset, 0 -2px 4px rgba(255,255,255,0.02) inset;
+    }
 
-    .save-row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.85rem;
-      margin-top: 0.85rem;
-      position: relative;
-      z-index: 1;
-    }
-    @media (max-width: 640px){
-      .save-row{ grid-template-columns: 1fr; }
-    }
+    .activity-list{
+      margin-top: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-height: 320px;
+      overflow: auto;
+      padding-right: 0.25rem;
+      position: relative;
+      z-index: 1;
+    }
 
-    .save-btn{
-      width: 100%;
-      background: rgba(30,30,30,0.62);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #fff;
-      border-radius: 16px;
-      padding: 0.78rem 0.95rem;
-      cursor: pointer;
-      transition:
-        transform 160ms cubic-bezier(.2,.9,.2,1),
-        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
-        border-color 200ms ease,
-        background-color 200ms ease;
-      box-shadow: 0 10px 22px rgba(0,0,0,0.40);
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-    }
-    .save-btn:hover{ transform: translateY(-1px); }
-    .save-btn:active{ transform: translateY(1px) scale(0.985); }
+    .activity-item{
+      background: rgba(21,21,21,0.68);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 0.8rem 0.9rem;
+      font-size: 0.95rem;
+      line-height: 1.35;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+    }
+    .activity-item .right{
+      opacity: 0.75;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
 
-    .activity-list{
-      margin-top: 0.85rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      max-height: 320px;
-      overflow: auto;
-      padding-right: 0.25rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    .activity-item{
-      background: rgba(21,21,21,0.68);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 16px;
-      padding: 0.8rem 0.9rem;
-      font-size: 0.95rem;
-      line-height: 1.35;
-      display: flex;
-      justify-content: space-between;
-      gap: 0.8rem;
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-    }
-    .activity-item .right{
-      opacity: 0.75;
-      font-size: 0.85rem;
-      white-space: nowrap;
-    }
-
-    .hidden{ display: none !important; }
-  </style>
+    .hidden{ display: none !important; }
+  </style>
 </head>
 
 <body>
-  <div id="boot"></div>
-
-  <main id="app">
-
-    <h1 class="heading">DM All<br />Seasons & Movies</h1>
-
-    <!-- DM: Top buttons -->
-    <div class="grid menu-grid">
-      <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-seasons')"><span class="label">Seasons</span></a>
-      <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-movies')"><span class="label">Movies</span></a>
-    </div>
-
-    <!-- DM: Seasons panel -->
-    <div class="panel-wrap">
-      <div id="dm-seasons" class="grid panel dm-panel">
-        <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
-        <a href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)"><span class="label">DM_S2</span></a>
-        <a href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)"><span class="label">DM_S3</span></a>
-        <a href="https://archive.org/details/DM-S4-MAK" onclick="ripple(event)"><span class="label">DM_S4</span></a>
-        <a href="https://archive.org/details/DM-S5-MAK" onclick="ripple(event)"><span class="label">DM_S5</span></a>
-        <a href="https://archive.org/details/DM-S6-MAK2" onclick="ripple(event)"><span class="label">DM_S6</span></a>
-        <a href="https://archive.org/details/DM-S7-MAK" onclick="ripple(event)"><span class="label">DM_S7</span></a>
-        <a href="https://archive.org/details/DM-S8-MAK" onclick="ripple(event)"><span class="label">DM_S8</span></a>
-        <a href="https://archive.org/details/DM-S12-MAK" onclick="ripple(event)"><span class="label">DM_S12</span></a>
-        <a href="https://archive.org/details/DM_S14_MAK" onclick="ripple(event)"><span class="label">DM_S14</span></a>
-        <a href="https://archive.org/details/DM_S15_MAK" onclick="ripple(event)"><span class="label">DM_S15</span></a>
-        <a href="https://archive.org/details/DM_S16_MAK" onclick="ripple(event)"><span class="label">DM_S16</span></a>
-        <a href="https://archive.org/details/DM_S17_MAK" onclick="ripple(event)"><span class="label">DM_S17</span></a>
-        <a href="https://archive.org/details/DM_S18_MAK" onclick="ripple(event)"><span class="label">DM_S18</span></a>
-        <a href="https://archive.org/details/DM_S19_MAK" onclick="ripple(event)"><span class="label">DM_S19</span></a>
-        <a href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)"><span class="label">DM_S20</span></a>
-      </div>
-
-      <!-- DM: Movies panel -->
-      <div id="dm-movies" class="panel dm-panel">
-        <div class="grid-2">
-          <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
-          <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
-        </div>
-      </div>
-    </div>
-
-    <h1 class="heading section-gap">B10 All<br />Seasons</h1>
-
-    <!-- B10: Top series buttons (2 rows x 2 cols) -->
-    <div class="grid menu-grid">
-      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-classic')"><span class="label">Classic</span></a>
-      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-af')"><span class="label">Alien Force</span></a>
-      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-ua')"><span class="label">Ultimate Alien</span></a>
-      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-ov')"><span class="label">Omniverse</span></a>
-    </div>
-
-    <div class="panel-wrap">
-      <!-- B10: Classic -->
-      <div id="b10-classic" class="grid panel b10-panel">
-        <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
-        <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
-        <a href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)"><span class="label">CL_S3</span></a>
-        <a href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)"><span class="label">CL_S4</span></a>
-      </div>
-
-      <!-- B10: Alien Force -->
-      <div id="b10-af" class="grid panel b10-panel">
-        <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
-        <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
-        <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
-      </div>
-
-      <!-- B10: Ultimate Alien -->
-      <div id="b10-ua" class="grid panel b10-panel">
-        <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
-        <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
-        <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
-      </div>
-
-      <!-- B10: Omniverse -->
-      <div id="b10-ov" class="grid panel b10-panel">
-        <a href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)"><span class="label">OV_S1</span></a>
-        <a href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)"><span class="label">OV_S2</span></a>
-        <a href="https://archive.org/details/B10_OV_S03_MAK" onclick="ripple(event)"><span class="label">OV_S3</span></a>
-        <a href="https://archive.org/details/B10_OV_S04_MAK" onclick="ripple(event)"><span class="label">OV_S4</span></a>
-        <a href="https://archive.org/details/B10_OV_S05_MAK" onclick="ripple(event)"><span class="label">OV_S5</span></a>
-        <a href="https://archive.org/details/B10_OV_S06_MAK" onclick="ripple(event)"><span class="label">OV_S6</span></a>
-        <a href="https://archive.org/details/B10_OV_S07_MAK" onclick="ripple(event)"><span class="label">OV_S7</span></a>
-        <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
-      </div>
-    </div>
-
-    <h1 class="heading section-gap">Progress Tracker</h1>
-
-    <div style="text-align:center; margin-top:-1rem; opacity:0.8;" id="syncStatus">
-      Sync: OFF (local only)
-    </div>
-
-    <div class="tools-wrap">
-      <div class="tool-card">
-        <h2 class="tool-title">Sync</h2>
-        <div class="tool-row">
-          <div class="tool-field">
-            <input id="roomInput" class="tool-input" type="text" placeholder="Example: Asim123">
-          </div>
-          <div class="tool-field">
-            <button class="save-btn" id="roomSaveBtn" type="button">Save Room Code</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="tool-card">
-        <h2 class="tool-title">Profile</h2>
-        <div class="seg" id="profileSeg">
-          <button type="button" data-profile="Asim">Asim</button>
-          <button type="button" data-profile="Marwa">Marwa</button>
-        </div>
-      </div>
-
-      <div class="tool-card">
-        <h2 class="tool-title">Mode</h2>
-        <div class="seg" id="modeSeg">
-          <button type="button" data-mode="save">Save</button>
-          <button type="button" data-mode="recent">Recent Activity</button>
-        </div>
-
-        <div id="savePanel">
-          <div class="tool-row" style="margin-top:0.9rem;">
-            <div class="tool-field">
-              <div class="tool-label">Cartoon</div>
-              <select id="cartoonSelect" class="tool-select"></select>
-            </div>
-
-            <div class="tool-field" id="seriesField">
-              <div class="tool-label">Series</div>
-              <select id="seriesSelect" class="tool-select"></select>
-            </div>
-          </div>
-
-          <div class="tool-row" style="margin-top:0.8rem;">
-            <div class="tool-field">
-              <div class="tool-label">Type</div>
-              <select id="typeSelect" class="tool-select">
-                <option value="season">Season</option>
-                <option value="movie">Movies</option>
-              </select>
-            </div>
-
-            <div class="tool-field">
-              <div class="tool-label" id="seasonLabel">Season</div>
-              <select id="seasonOrMovieSelect" class="tool-select"></select>
-            </div>
-          </div>
-
-          <div class="save-row">
-            <div class="tool-field">
-              <div class="tool-label">Episode / Movie Number</div>
-              <select id="numSelect" class="tool-select"></select>
-            </div>
-
-            <div class="tool-field">
-              <div class="tool-label">Actions</div>
-              <button class="save-btn" id="saveBtn" type="button">Save</button>
-            </div>
-          </div>
-
-          <div class="tool-mini" id="saveHint"></div>
-        </div>
-
-        <div id="recentPanel" class="hidden">
-          <div class="tool-row" style="margin-top:0.9rem;">
-            <div class="tool-field">
-              <div class="tool-label">Cartoon</div>
-              <select id="recentCartoonSelect" class="tool-select"></select>
-            </div>
-            <div class="tool-field">
-              <div class="tool-label">Info</div>
-              <div class="tool-mini" id="recentInfo">Select a cartoon to view full activity.</div>
-            </div>
-          </div>
-
-          <div class="activity-list" id="activityList"></div>
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <script>
-    /* ===== Smooth panel animation (no "instant pop") ===== */
-    function setPanelOpen(panel, open){
-      if(!panel) return;
-
-      if(open){
-        panel.classList.add('open');
-
-        // reset then measure for smooth transition
-        panel.style.maxHeight = '0px';
-        // force reflow
-        panel.offsetHeight;
-
-        const target = panel.scrollHeight;
-        panel.style.maxHeight = target + 'px';
-      } else {
-        // collapse smoothly from current height
-        const current = panel.scrollHeight;
-        panel.style.maxHeight = current + 'px';
-        panel.offsetHeight;
-        panel.style.maxHeight = '0px';
-        panel.classList.remove('open');
-      }
-    }
-
-    function closeAllPanels(selector){
-      document.querySelectorAll(selector).forEach(p => setPanelOpen(p, false));
-    }
-
-    function toggleGroup(e, targetId, groupSelector){
-      e.preventDefault();
-      const target = document.getElementById(targetId);
-      if(!target) return;
-
-      const isOpen = target.classList.contains('open');
-
-      // close all in the group first
-      document.querySelectorAll(groupSelector).forEach(p => setPanelOpen(p, false));
-
-      // open only if it was closed
-      if(!isOpen) setPanelOpen(target, true);
-
-      ripple(e);
-    }
-
-    function toggleDM(e, targetId){
-      toggleGroup(e, targetId, '.dm-panel');
-    }
-
-    function toggleB10(e, targetId){
-      toggleGroup(e, targetId, '.b10-panel');
-    }
-
-    // keep opened panels correct on resize (prevents weird gaps)
-    window.addEventListener('resize', () => {
-      document.querySelectorAll('.panel.open').forEach(p => {
-        p.style.maxHeight = p.scrollHeight + 'px';
-      });
-    });
-
-    // =========================
-    // CONFIG
-    // =========================
-    const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
-    const TABLE_NAME = "toonie_progress";
-
-    const ROOM_KEY  = "toonie_room_code_v1";
-    const STORE_KEY = "toonie_progress_tracker_v2";
-
-    const SYNC_POLL_MS = 10000;
-
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const MODEL = {
-      "Doraemon": {
-        label: "DM",
-        hasSeries: false,
-        seasons: ["S1","S2","S3","S4","S5","S6","S7","S8","S12","S14","S15","S16","S17","S18","S19","S20"],
-        hasMovies: true
-      },
-      "Ben 10": {
-        label: "B10",
-        hasSeries: true,
-        series: ["Classic","Alien Force","Ultimate Alien","Omniverse"],
-        seasonsBySeries: {
-          "Classic": ["S1","S2","S3","S4"],
-          "Alien Force": ["S1","S2","S3"],
-          "Ultimate Alien": ["S1","S2","S3"],
-          "Omniverse": ["S1","S2","S3","S4","S5","S6","S7","S8"]
-        },
-        hasMovies: true
-      }
-    };
-
-    // =========================
-    // UI HELPERS
-    // =========================
-    function setSyncStatus(text) {
-      const el = document.getElementById("syncStatus");
-      if (el) el.textContent = text;
-    }
-
-    function ripple(e) {
-      if (navigator.vibrate) navigator.vibrate(30);
-      const target = e.currentTarget;
-      if(!target) return;
-
-      // If click is triggered without coordinates, skip ripple positioning
-      const rect = target.getBoundingClientRect();
-      const cx = (typeof e.clientX === 'number' && e.clientX !== 0) ? e.clientX : (rect.left + rect.width / 2);
-      const cy = (typeof e.clientY === 'number' && e.clientY !== 0) ? e.clientY : (rect.top + rect.height / 2);
-
-      const rp = document.createElement('span');
-      rp.classList.add('ripple');
-      rp.style.width = rp.style.height = Math.max(target.offsetWidth, target.offsetHeight) + 'px';
-      rp.style.left = cx - rect.left - rp.offsetWidth / 2 + 'px';
-      rp.style.top = cy - rect.top - rp.offsetHeight / 2 + 'px';
-      target.appendChild(rp);
-      setTimeout(() => rp.remove(), 600);
-    }
-
-    // Boot overlay fade
-    const bootStart = performance.now();
-    window.addEventListener('load', () => {
-      const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--boot-min-show')) || 3500;
-      const elapsed = performance.now() - bootStart;
-      const wait = Math.max(0, MIN_SHOW - elapsed);
-
-      setTimeout(() => {
-        const b = document.getElementById('boot');
-        if (b) {
-          b.classList.add('hide');
-          document.body.classList.add('boot-done');
-          const bootFade = (parseFloat(getComputedStyle(b).transitionDuration) || 1.2) * 1000;
-          setTimeout(() => b.remove(), bootFade + 50);
-        }
-      }, wait);
-    });
-
-    // =========================
-    // STORAGE (ROOM + LOCAL)
-    // =========================
-    function getRoomCode() {
-      return (localStorage.getItem(ROOM_KEY) || "").trim();
-    }
-
-    function setRoomCode(code) {
-      const clean = String(code || "").trim();
-      if (clean) localStorage.setItem(ROOM_KEY, clean);
-      else localStorage.removeItem(ROOM_KEY);
-      return clean;
-    }
-
-    function nowISO(){
-      return new Date().toISOString();
-    }
-
-    function displayLocal(ts){
-      if(!ts) return "";
-      const d = new Date(ts);
-      if (isNaN(d.getTime())) return String(ts).slice(0,16);
-
-      const fmt = new Intl.DateTimeFormat(undefined, {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      });
-
-      const parts = fmt.formatToParts(d).reduce((acc, p) => {
-        acc[p.type] = p.value;
-        return acc;
-      }, {});
-      return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
-    }
-
-    // Normalize seriesLabel: keep local as null (never "-")
-    function normalizeSeriesLocal(x){
-      const v = (x == null) ? null : String(x).trim();
-      if(!v) return null;
-      if(v === "-") return null;
-      return v;
-    }
-
-    function ensurePath(store, profile, cartoonLabel){
-      if(!store.data[profile][cartoonLabel]){
-        store.data[profile][cartoonLabel] = { last: null, history: [] };
-      }
-      if(!store.data[profile][cartoonLabel].history){
-        store.data[profile][cartoonLabel].history = [];
-      }
-      return store.data[profile][cartoonLabel];
-    }
-
-    // Clean old local data so we don't keep duplicates from the old null vs "-" switch
-    function normalizeAndDedupeStore(store){
-      const profiles = ["Asim","Marwa"];
-      for(const p of profiles){
-        if(!store.data[p]) store.data[p] = {};
-        for(const cartoonLabel of Object.keys(store.data[p] || {})){
-          const node = ensurePath(store, p, cartoonLabel);
-
-          if(node.last){
-            node.last.seriesLabel = normalizeSeriesLocal(node.last.seriesLabel);
-          }
-
-          // normalize + dedupe by (type, seasonOrMovie, seriesLabel), keep newest ts
-          const map = new Map();
-          const arr = Array.isArray(node.history) ? node.history : [];
-          for(const it of arr){
-            if(!it) continue;
-            it.seriesLabel = normalizeSeriesLocal(it.seriesLabel);
-            const key = `${it.type}|${it.seasonOrMovie}|${it.seriesLabel || ""}`;
-            const prev = map.get(key);
-            if(!prev || (String(it.ts) > String(prev.ts))){
-              map.set(key, it);
-            }
-          }
-
-          const merged = Array.from(map.values())
-            .sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
-
-          node.history = merged;
-
-          // make sure node.last is the real latest event for that cartoon
-          if(merged.length){
-            const latest = merged[0];
-            if(!node.last || String(latest.ts) > String(node.last.ts)){
-              node.last = latest;
-            }
-          }
-        }
-      }
-      return store;
-    }
-
-    function loadStore(){
-      try{
-        const raw = localStorage.getItem(STORE_KEY);
-        if(!raw){
-          return normalizeAndDedupeStore({ activeProfile: "Asim", data: { Asim: {}, Marwa: {} } });
-        }
-        const obj = JSON.parse(raw);
-        if(!obj.data) obj.data = { Asim: {}, Marwa: {} };
-        if(!obj.data.Asim) obj.data.Asim = {};
-        if(!obj.data.Marwa) obj.data.Marwa = {};
-        if(!obj.activeProfile) obj.activeProfile = "Asim";
-        return normalizeAndDedupeStore(obj);
-      } catch {
-        return normalizeAndDedupeStore({ activeProfile: "Asim", data: { Asim: {}, Marwa: {} } });
-      }
-    }
-
-    function saveStore(store){
-      localStorage.setItem(STORE_KEY, JSON.stringify(store));
-    }
-
-    function formatLine(entry){
-      const parts = [];
-      parts.push(entry.cartoonLabel);
-
-      // Only show series if it's a real series (Ben 10). Doraemon stays clean.
-      if(entry.seriesLabel) parts.push(entry.seriesLabel);
-
-      if(entry.type === "season"){
-        parts.push(entry.seasonOrMovie);
-        parts.push(`EP ${entry.num}`);
-      } else {
-        parts.push("MOVIES");
-        parts.push(`M${entry.num}`);
-      }
-      return parts.join(" ");
-    }
-
-    function upsertEntry(store, profile, entry){
-      const node = ensurePath(store, profile, entry.cartoonLabel);
-
-      // local seriesLabel should always be normalized
-      entry.seriesLabel = normalizeSeriesLocal(entry.seriesLabel);
-
-      // Keep "global last" for the cartoon = newest ts
-      if(!node.last || String(entry.ts) >= String(node.last.ts)){
-        node.last = entry;
-      }
-
-      const keySeries = entry.seriesLabel || null;
-
-      const idx = node.history.findIndex(h =>
-        (h.type === entry.type) &&
-        (h.seasonOrMovie === entry.seasonOrMovie) &&
-        (normalizeSeriesLocal(h.seriesLabel) === keySeries)
-      );
-
-      if(idx >= 0){
-        // replace if newer
-        const old = node.history[idx];
-        if(!old || String(entry.ts) >= String(old.ts)){
-          node.history[idx] = entry;
-        }
-      } else {
-        node.history.unshift(entry);
-      }
-
-      // keep history ordered
-      node.history.sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
-    }
-
-    // =========================
-    // SUPABASE HELPERS (CLOUD)
-    // =========================
-    function supabaseEnabled(){
-      return !!(SUPABASE_URL && SUPABASE_ANON_KEY && supabaseClient);
-    }
-
-    async function sbUpsertProgress(row){
-      const room = getRoomCode();
-      if(!room) return { ok: false, skipped: true };
-
-      // IMPORTANT: cloud series_label must be NOT NULL => send "-" if no series
-      const cloudSeries = (row.series_label == null || String(row.series_label).trim() === "")
-        ? "-"
-        : String(row.series_label);
-
-      const payload = {
-        room_code: room,
-        profile: row.profile,
-        cartoon_label: row.cartoon_label,
-        series_label: cloudSeries,
-        type: row.type,
-        season_or_movie: row.season_or_movie,
-        num: Number(row.num) || 0,
-        ts: row.ts
-      };
-
-      const { error } = await supabaseClient
-        .from(TABLE_NAME)
-        .upsert(payload, {
-          onConflict: "room_code,profile,cartoon_label,series_label,type,season_or_movie"
-        });
-
-      if(error){
-        console.error("Cloud upsert error:", error);
-        return { ok: false, error: error.message || "Cloud upsert failed" };
-      }
-      return { ok: true };
-    }
-
-    async function sbFetchProgress(room, profile, limit = 250){
-      if(!room) return { ok: false, skipped: true, rows: [] };
-
-      const { data, error } = await supabaseClient
-        .from(TABLE_NAME)
-        .select("room_code,profile,cartoon_label,series_label,type,season_or_movie,num,ts")
-        .eq("room_code", room)
-        .eq("profile", profile)
-        .order("ts", { ascending: false })
-        .limit(limit);
-
-      if(error){
-        console.error("Cloud fetch error:", error);
-        return { ok: false, error: error.message || "Cloud fetch failed", rows: [] };
-      }
-      return { ok: true, rows: data || [] };
-    }
-
-    // =========================
-    // APP
-    // =========================
-    function initTracker(){
-      const profileSeg = document.getElementById("profileSeg");
-      const modeSeg = document.getElementById("modeSeg");
-
-      const savePanel = document.getElementById("savePanel");
-      const recentPanel = document.getElementById("recentPanel");
-
-      const cartoonSelect = document.getElementById("cartoonSelect");
-      const seriesField = document.getElementById("seriesField");
-      const seriesSelect = document.getElementById("seriesSelect");
-      const typeSelect = document.getElementById("typeSelect");
-      const seasonLabel = document.getElementById("seasonLabel");
-      const seasonOrMovieSelect = document.getElementById("seasonOrMovieSelect");
-      const numSelect = document.getElementById("numSelect");
-
-      const saveBtn = document.getElementById("saveBtn");
-      const saveHint = document.getElementById("saveHint");
-
-      const recentCartoonSelect = document.getElementById("recentCartoonSelect");
-      const recentInfo = document.getElementById("recentInfo");
-      const activityList = document.getElementById("activityList");
-
-      const roomInput = document.getElementById("roomInput");
-      const roomSaveBtn = document.getElementById("roomSaveBtn");
-      const roomStatus = document.getElementById("roomStatus");
-
-      if(!profileSeg || !modeSeg) return;
-
-      let store = loadStore();
-      // write back cleaned store so duplicates are gone immediately
-      saveStore(store);
-
-      let activeProfile = store.activeProfile || "Asim";
-      let activeMode = "save";
-      let pollTimer = null;
-      let lastCloudOk = true;
-
-      function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
-
-      function updateRoomStatus(msg){
-        if(roomStatus) roomStatus.textContent = msg;
-      }
-
-      function refreshRoomUI(){
-        const room = getRoomCode();
-        if(roomInput) roomInput.value = room;
-
-        if(!room){
-          setSyncStatus("Sync: OFF (local only)");
-          updateRoomStatus("Sync: OFF (no room code). Local save only.");
-          return;
-        }
-
-        if(!supabaseEnabled()){
-          setSyncStatus(`Sync: OFF (Room: ${room})`);
-          updateRoomStatus(`Room: ${room} → Sync OFF (Supabase not available).`);
-          return;
-        }
-
-        setSyncStatus(`Sync: ON (Room: ${room})`);
-      }
-
-      function setProfileUI(){
-        [...profileSeg.querySelectorAll("button")].forEach(b => {
-          b.classList.toggle("active", b.dataset.profile === activeProfile);
-        });
-      }
-
-      function setModeUI(){
-        [...modeSeg.querySelectorAll("button")].forEach(b => {
-          b.classList.toggle("active", b.dataset.mode === activeMode);
-        });
-
-        if(activeMode === "save"){
-          savePanel.classList.remove("hidden");
-          recentPanel.classList.add("hidden");
-        } else {
-          savePanel.classList.add("hidden");
-          recentPanel.classList.remove("hidden");
-          renderRecent();
-        }
-      }
-
-      function cartoonsList(){ return Object.keys(MODEL); }
-      function getCartoonCfg(name){ return MODEL[name]; }
-
-      function fillCartoonSelects(){
-        const opts = cartoonsList().map(c => `<option value="${c}">${c}</option>`).join("");
-        cartoonSelect.innerHTML = opts;
-        recentCartoonSelect.innerHTML = opts;
-      }
-
-      function fillSeries(){
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        if(!cfg || !cfg.hasSeries){
-          seriesField.classList.add("hidden");
-          seriesSelect.innerHTML = "";
-          return;
-        }
-        seriesField.classList.remove("hidden");
-        seriesSelect.innerHTML = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
-      }
-
-      function fillSeasonOrMovie(){
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        const type = typeSelect.value;
-
-        if(type === "movie"){
-          seasonLabel.textContent = "Movies";
-          seasonOrMovieSelect.innerHTML = `<option value="Movies">Movies</option>`;
-          return;
-        }
-
-        seasonLabel.textContent = "Season";
-
-        let seasons = [];
-        if(cfg.hasSeries){
-          const s = seriesSelect.value;
-          seasons = (cfg.seasonsBySeries && cfg.seasonsBySeries[s]) ? cfg.seasonsBySeries[s] : [];
-        } else {
-          seasons = cfg.seasons || [];
-        }
-
-        seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
-      }
-
-      function fillEpisodeDropdown(max = 100){
-        let html = "";
-        for(let i=1; i<=max; i++){
-          html += `<option value="${i}">${i}</option>`;
-        }
-        numSelect.innerHTML = html;
-        numSelect.value = "1";
-      }
-
-      function currentKeyLabels(){
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        const cartoonLabel = cfg.label;
-
-        const type = typeSelect.value;
-
-        // LOCAL: Doraemon has no series => keep null locally
-        let seriesLabel = null;
-
-        if(cfg.hasSeries){
-          const s = seriesSelect.value;
-          seriesLabel = (s === "Classic") ? "CL" :
-                        (s === "Alien Force") ? "AF" :
-                        (s === "Ultimate Alien") ? "UA" :
-                        (s === "Omniverse") ? "OV" : s;
-        }
-
-        const seasonOrMovie = seasonOrMovieSelect.value;
-
-        return { cartoonLabel, seriesLabel, type, seasonOrMovie };
-      }
-
-      function updateSaveHintForCartoon(){
-        store = loadStore();
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        const cartoonLabel = cfg.label;
-        const node = ensurePath(store, activeProfile, cartoonLabel);
-
-        if(node.last){
-          saveHint.textContent = `Last Watched: ${formatLine(node.last)} (${displayLocal(node.last.ts)})`;
-        } else {
-          saveHint.textContent = "No activity yet for this cartoon.";
-        }
-      }
-
-      function renderRecent(){
-        store = loadStore();
-        const cartoonName = recentCartoonSelect.value;
-        const cfg = getCartoonCfg(cartoonName);
-        const cartoonLabel = cfg.label;
-
-        const node = ensurePath(store, activeProfile, cartoonLabel);
-        const list = node.history || [];
-
-        if(list.length === 0){
-          recentInfo.textContent = "No activity yet.";
-          activityList.innerHTML = "";
-          return;
-        }
-
-        recentInfo.textContent = `Showing all activity for ${cartoonLabel} (${activeProfile})`;
-        activityList.innerHTML = list
-          .map(item => `
-            <div class="activity-item">
-              <div>${formatLine(item)}</div>
-              <div class="right">${displayLocal(item.ts)}</div>
-            </div>
-          `)
-          .join("");
-      }
-
-      async function pollFromCloud(){
-        const room = getRoomCode();
-        if(!room || !supabaseEnabled()) return;
-
-        const res = await sbFetchProgress(room, activeProfile, 250);
-        if(!res.ok){
-          if(lastCloudOk){
-            updateRoomStatus(`Room: ${room} → Sync ON, but fetch failed. (Will keep trying)`);
-          }
-          lastCloudOk = false;
-          return;
-        }
-
-        lastCloudOk = true;
-
-        store = loadStore();
-
-        for(const r of res.rows){
-          const entry = {
-            cartoonLabel: r.cartoon_label,
-            // CLOUD "-" => LOCAL null
-            seriesLabel: normalizeSeriesLocal(r.series_label),
-            type: r.type,
-            seasonOrMovie: r.season_or_movie,
-            num: Number(r.num) || 1,
-            ts: r.ts
-          };
-          upsertEntry(store, activeProfile, entry);
-        }
-
-        store = normalizeAndDedupeStore(store);
-        saveStore(store);
-
-        updateSaveHintForCartoon();
-        if(activeMode === "recent") renderRecent();
-        refreshRoomUI();
-      }
-
-      function startPolling(){
-        stopPolling();
-        const room = getRoomCode();
-        if(!room || !supabaseEnabled()) return;
-
-        pollTimer = setInterval(() => {
-          pollFromCloud().catch(() => {});
-        }, SYNC_POLL_MS);
-
-        pollFromCloud().catch(() => {});
-      }
-
-      function stopPolling(){
-        if(pollTimer){
-          clearInterval(pollTimer);
-          pollTimer = null;
-        }
-      }
-
-      async function doSave(){
-        vib();
-        store = loadStore();
-
-        const cur = currentKeyLabels();
-        const num = Math.max(1, Math.min(100, Number(numSelect.value) || 1));
-
-        const entry = {
-          cartoonLabel: cur.cartoonLabel,
-          seriesLabel: normalizeSeriesLocal(cur.seriesLabel), // local normalized
-          type: cur.type,
-          seasonOrMovie: cur.seasonOrMovie,
-          num,
-          ts: nowISO()
-        };
-
-        // LOCAL SAVE ALWAYS
-        upsertEntry(store, activeProfile, entry);
-        store = normalizeAndDedupeStore(store);
-        saveStore(store);
-
-        saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
-
-        // CLOUD SAVE IF POSSIBLE
-        const room = getRoomCode();
-        if(!room || !supabaseEnabled()){
-          return;
-        }
-
-        const push = await sbUpsertProgress({
-          profile: activeProfile,
-          cartoon_label: entry.cartoonLabel,
-          // only cloud gets "-"
-          series_label: entry.seriesLabel || "-",
-          type: entry.type,
-          season_or_movie: entry.seasonOrMovie,
-          num: entry.num,
-          ts: entry.ts
-        });
-
-        if(push.ok){
-          pollFromCloud().catch(() => {});
-        } else {
-          saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
-        }
-      }
-
-      // ===== INIT =====
-      fillCartoonSelects();
-      fillSeries();
-      fillSeasonOrMovie();
-      fillEpisodeDropdown(100);
-
-      setProfileUI();
-      setModeUI();
-
-      recentCartoonSelect.value = cartoonSelect.value;
-
-      refreshRoomUI();
-      updateSaveHintForCartoon();
-      startPolling();
-
-      // ===== EVENTS =====
-      profileSeg.addEventListener("click", (e) => {
-        const btn = e.target.closest("button");
-        if(!btn) return;
-        vib();
-
-        activeProfile = btn.dataset.profile;
-
-        store = loadStore();
-        store.activeProfile = activeProfile;
-        saveStore(store);
-
-        setProfileUI();
-        updateSaveHintForCartoon();
-        if(activeMode === "recent") renderRecent();
-        startPolling();
-      });
-
-      modeSeg.addEventListener("click", (e) => {
-        const btn = e.target.closest("button");
-        if(!btn) return;
-        vib();
-        activeMode = btn.dataset.mode;
-        setModeUI();
-      });
-
-      cartoonSelect.addEventListener("change", () => {
-        fillSeries();
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        if(!cfg.hasMovies) typeSelect.value = "season";
-
-        fillSeasonOrMovie();
-        updateSaveHintForCartoon();
-
-        recentCartoonSelect.value = cartoonSelect.value;
-        if(activeMode === "recent") renderRecent();
-      });
-
-      seriesSelect.addEventListener("change", () => {
-        fillSeasonOrMovie();
-        updateSaveHintForCartoon();
-      });
-
-      typeSelect.addEventListener("change", () => {
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        if(typeSelect.value === "movie" && !cfg.hasMovies) typeSelect.value = "season";
-        fillSeasonOrMovie();
-        updateSaveHintForCartoon();
-      });
-
-      seasonOrMovieSelect.addEventListener("change", () => {
-        updateSaveHintForCartoon();
-      });
-
-      saveBtn.addEventListener("click", () => { doSave().catch(() => {}); });
-
-      recentCartoonSelect.addEventListener("change", renderRecent);
-
-      if(roomSaveBtn && roomInput){
-        roomSaveBtn.addEventListener("click", () => {
-          vib();
-          const code = (roomInput.value || "").trim();
-          setRoomCode(code);
-          refreshRoomUI();
-          startPolling();
-        });
-      }
-
-      if(roomInput){
-        roomInput.addEventListener("keydown", (e) => {
-          if(e.key === "Enter"){
-            e.preventDefault();
-            if(roomSaveBtn) roomSaveBtn.click();
-          }
-        });
-      }
-    }
-
-    window.addEventListener("load", initTracker);
-  </script>
+  <div id="boot"></div>
+
+  <main id="app">
+
+        <h1 class="heading">DM All<br /><span>Seasons & Movies</span></h1>
+
+        <div class="grid menu-grid">
+      <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-seasons')"><span class="label">Seasons</span></a>
+      <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-movies')"><span class="label">Movies</span></a>
+    </div>
+
+        <div class="panel-wrap">
+      <div id="dm-seasons" class="grid panel dm-panel">
+        <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
+        <a href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)"><span class="label">DM_S2</span></a>
+        <a href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)"><span class="label">DM_S3</span></a>
+        <a href="https://archive.org/details/DM-S4-MAK" onclick="ripple(event)"><span class="label">DM_S4</span></a>
+        <a href="https://archive.org/details/DM-S5-MAK" onclick="ripple(event)"><span class="label">DM_S5</span></a>
+        <a href="https://archive.org/details/DM-S6-MAK2" onclick="ripple(event)"><span class="label">DM_S6</span></a>
+        <a href="https://archive.org/details/DM-S7-MAK" onclick="ripple(event)"><span class="label">DM_S7</span></a>
+        <a href="https://archive.org/details/DM-S8-MAK" onclick="ripple(event)"><span class="label">DM_S8</span></a>
+        <a href="https://archive.org/details/DM-S12-MAK" onclick="ripple(event)"><span class="label">DM_S12</span></a>
+        <a href="https://archive.org/details/DM_S14_MAK" onclick="ripple(event)"><span class="label">DM_S14</span></a>
+        <a href="https://archive.org/details/DM_S15_MAK" onclick="ripple(event)"><span class="label">DM_S15</span></a>
+        <a href="https://archive.org/details/DM_S16_MAK" onclick="ripple(event)"><span class="label">DM_S16</span></a>
+        <a href="https://archive.org/details/DM_S17_MAK" onclick="ripple(event)"><span class="label">DM_S17</span></a>
+        <a href="https://archive.org/details/DM_S18_MAK" onclick="ripple(event)"><span class="label">DM_S18</span></a>
+        <a href="https://archive.org/details/DM_S19_MAK" onclick="ripple(event)"><span class="label">DM_S19</span></a>
+        <a href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)"><span class="label">DM_S20</span></a>
+      </div>
+
+            <div id="dm-movies" class="panel dm-panel">
+        <div class="grid-2">
+          <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
+          <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
+        </div>
+      </div>
+    </div>
+
+        <h1 class="heading section-gap">B10 All<br /><span>Seasons</span></h1>
+
+        <div class="grid menu-grid">
+      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-classic')"><span class="label">Classic</span></a>
+      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-af')"><span class="label">Alien Force</span></a>
+      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-ua')"><span class="label">Ultimate Alien</span></a>
+      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-ov')"><span class="label">Omniverse</span></a>
+    </div>
+
+    <div class="panel-wrap">
+            <div id="b10-classic" class="grid panel b10-panel">
+        <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
+        <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
+        <a href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)"><span class="label">CL_S3</span></a>
+        <a href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)"><span class="label">CL_S4</span></a>
+      </div>
+
+            <div id="b10-af" class="grid panel b10-panel">
+        <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
+        <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
+        <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
+      </div>
+
+            <div id="b10-ua" class="grid panel b10-panel">
+        <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
+        <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
+        <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
+      </div>
+
+            <div id="b10-ov" class="grid panel b10-panel">
+        <a href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)"><span class="label">OV_S1</span></a>
+        <a href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)"><span class="label">OV_S2</span></a>
+        <a href="https://archive.org/details/B10_OV_S03_MAK" onclick="ripple(event)"><span class="label">OV_S3</span></a>
+        <a href="https://archive.org/details/B10_OV_S04_MAK" onclick="ripple(event)"><span class="label">OV_S4</span></a>
+        <a href="https://archive.org/details/B10_OV_S05_MAK" onclick="ripple(event)"><span class="label">OV_S5</span></a>
+        <a href="https://archive.org/details/B10_OV_S06_MAK" onclick="ripple(event)"><span class="label">OV_S6</span></a>
+        <a href="https://archive.org/details/B10_OV_S07_MAK" onclick="ripple(event)"><span class="label">OV_S7</span></a>
+        <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
+      </div>
+    </div>
+
+    <h1 class="heading section-gap">Progress Tracker</h1>
+
+    <div style="text-align:center; margin-top:-1rem; opacity:0.8;" id="syncStatus">
+      Sync: OFF (local only)
+    </div>
+
+    <div class="tools-wrap">
+      <div class="tool-card">
+        <h2 class="tool-title">Sync</h2>
+        <div class="tool-row">
+          <div class="tool-field">
+            <input id="roomInput" class="tool-input" type="text" placeholder="Example: Asim123">
+          </div>
+          <div class="tool-field">
+            <button class="save-btn" id="roomSaveBtn" type="button">Save Room Code</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <h2 class="tool-title">Profile</h2>
+        <div class="seg" id="profileSeg">
+          <button type="button" data-profile="Asim">Asim</button>
+          <button type="button" data-profile="Marwa">Marwa</button>
+        </div>
+              </div>
+
+      <div class="tool-card">
+        <h2 class="tool-title">Mode</h2>
+        <div class="seg" id="modeSeg">
+          <button type="button" data-mode="save">Save</button>
+          <button type="button" data-mode="recent">Recent Activity</button>
+        </div>
+
+        <div id="savePanel">
+          <div class="tool-row" style="margin-top:0.9rem;">
+            <div class="tool-field">
+              <div class="tool-label">Cartoon</div>
+              <select id="cartoonSelect" class="tool-select"></select>
+            </div>
+
+            <div class="tool-field" id="seriesField">
+              <div class="tool-label">Series</div>
+              <select id="seriesSelect" class="tool-select"></select>
+            </div>
+          </div>
+
+          <div class="tool-row" style="margin-top:0.8rem;">
+            <div class="tool-field">
+              <div class="tool-label">Type</div>
+              <select id="typeSelect" class="tool-select">
+                <option value="season">Season</option>
+                <option value="movie">Movies</option>
+              </select>
+            </div>
+
+            <div class="tool-field">
+              <div class="tool-label" id="seasonLabel">Season</div>
+              <select id="seasonOrMovieSelect" class="tool-select"></select>
+            </div>
+          </div>
+
+          <div class="save-row">
+            <div class="tool-field">
+              <div class="tool-label">Episode / Movie Number</div>
+              <select id="numSelect" class="tool-select"></select>
+            </div>
+
+            <div class="tool-field">
+              <div class="tool-label">Actions</div>
+              <button class="save-btn" id="saveBtn" type="button">Save</button>
+            </div>
+          </div>
+
+          <div class="tool-mini" id="saveHint"></div>
+        </div>
+
+        <div id="recentPanel" class="hidden">
+          <div class="tool-row" style="margin-top:0.9rem;">
+            <div class="tool-field">
+              <div class="tool-label">Cartoon</div>
+              <select id="recentCartoonSelect" class="tool-select"></select>
+            </div>
+            <div class="tool-field">
+              <div class="tool-label">Info</div>
+              <div class="tool-mini" id="recentInfo">Select a cartoon to view full activity.</div>
+            </div>
+          </div>
+
+          <div class="activity-list" id="activityList"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /* ===== Smooth panel animation (no "instant pop") ===== */
+    function setPanelOpen(panel, open){
+      if(!panel) return;
+
+      if(open){
+        panel.classList.add('open');
+
+        // reset then measure for smooth transition
+        panel.style.maxHeight = '0px';
+        // force reflow
+        panel.offsetHeight;
+
+        const target = panel.scrollHeight;
+        panel.style.maxHeight = target + 'px';
+      } else {
+        // collapse smoothly from current height
+        const current = panel.scrollHeight;
+        panel.style.maxHeight = current + 'px';
+        panel.offsetHeight;
+        panel.style.maxHeight = '0px';
+        panel.classList.remove('open');
+      }
+    }
+
+    function closeAllPanels(selector){
+      document.querySelectorAll(selector).forEach(p => setPanelOpen(p, false));
+    }
+
+    function toggleGroup(e, targetId, groupSelector){
+      e.preventDefault();
+      const target = document.getElementById(targetId);
+      if(!target) return;
+
+      const isOpen = target.classList.contains('open');
+
+      // close all in the group first
+      document.querySelectorAll(groupSelector).forEach(p => setPanelOpen(p, false));
+
+      // open only if it was closed
+      if(!isOpen) setPanelOpen(target, true);
+
+      ripple(e);
+    }
+
+    function toggleDM(e, targetId){
+      toggleGroup(e, targetId, '.dm-panel');
+    }
+
+    function toggleB10(e, targetId){
+      toggleGroup(e, targetId, '.b10-panel');
+    }
+
+    // keep opened panels correct on resize (prevents weird gaps)
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.panel.open').forEach(p => {
+        p.style.maxHeight = p.scrollHeight + 'px';
+      });
+    });
+
+    // =========================
+    // CONFIG
+    // =========================
+    const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
+    const TABLE_NAME = "toonie_progress";
+
+    const ROOM_KEY  = "toonie_room_code_v1";
+    const STORE_KEY = "toonie_progress_tracker_v2";
+
+    const SYNC_POLL_MS = 10000;
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const MODEL = {
+      "Doraemon": {
+        label: "DM",
+        hasSeries: false,
+        seasons: ["S1","S2","S3","S4","S5","S6","S7","S8","S12","S14","S15","S16","S17","S18","S19","S20"],
+        hasMovies: true
+      },
+      "Ben 10": {
+        label: "B10",
+        hasSeries: true,
+        series: ["Classic","Alien Force","Ultimate Alien","Omniverse"],
+        seasonsBySeries: {
+          "Classic": ["S1","S2","S3","S4"],
+          "Alien Force": ["S1","S2","S3"],
+          "Ultimate Alien": ["S1","S2","S3"],
+          "Omniverse": ["S1","S2","S3","S4","S5","S6","S7","S8"]
+        },
+        hasMovies: true
+      }
+    };
+
+    // =========================
+    // UI HELPERS
+    // =========================
+    function setSyncStatus(text) {
+      const el = document.getElementById("syncStatus");
+      if (el) el.textContent = text;
+    }
+
+    function ripple(e) {
+      if (navigator.vibrate) navigator.vibrate(30);
+      const target = e.currentTarget;
+      if(!target) return;
+
+      // If click is triggered without coordinates, skip ripple positioning
+      const rect = target.getBoundingClientRect();
+      const cx = (typeof e.clientX === 'number' && e.clientX !== 0) ? e.clientX : (rect.left + rect.width / 2);
+      const cy = (typeof e.clientY === 'number' && e.clientY !== 0) ? e.clientY : (rect.top + rect.height / 2);
+
+      const rp = document.createElement('span');
+      rp.classList.add('ripple');
+      rp.style.width = rp.style.height = Math.max(target.offsetWidth, target.offsetHeight) + 'px';
+      rp.style.left = cx - rect.left - rp.offsetWidth / 2 + 'px';
+      rp.style.top = cy - rect.top - rp.offsetHeight / 2 + 'px';
+      target.appendChild(rp);
+      setTimeout(() => rp.remove(), 600);
+    }
+
+    // Boot overlay fade
+    const bootStart = performance.now();
+    window.addEventListener('load', () => {
+      const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--boot-min-show')) || 3500;
+      const elapsed = performance.now() - bootStart;
+      const wait = Math.max(0, MIN_SHOW - elapsed);
+
+      setTimeout(() => {
+        const b = document.getElementById('boot');
+        if (b) {
+          b.classList.add('hide');
+          document.body.classList.add('boot-done');
+          const bootFade = (parseFloat(getComputedStyle(b).transitionDuration) || 1.2) * 1000;
+          setTimeout(() => b.remove(), bootFade + 50);
+        }
+      }, wait);
+    });
+
+    // =========================
+    // STORAGE (ROOM + LOCAL)
+    // =========================
+    function getRoomCode() {
+      return (localStorage.getItem(ROOM_KEY) || "").trim();
+    }
+
+    function setRoomCode(code) {
+      const clean = String(code || "").trim();
+      if (clean) localStorage.setItem(ROOM_KEY, clean);
+      else localStorage.removeItem(ROOM_KEY);
+      return clean;
+    }
+
+    function nowISO(){
+      return new Date().toISOString();
+    }
+
+    function displayLocal(ts){
+      if(!ts) return "";
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return String(ts).slice(0,16);
+
+      const fmt = new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+
+      const parts = fmt.formatToParts(d).reduce((acc, p) => {
+        acc[p.type] = p.value;
+        return acc;
+      }, {});
+      return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+    }
+
+    // Normalize seriesLabel: keep local as null (never "-")
+    function normalizeSeriesLocal(x){
+      const v = (x == null) ? null : String(x).trim();
+      if(!v) return null;
+      if(v === "-") return null;
+      return v;
+    }
+
+    function ensurePath(store, profile, cartoonLabel){
+      if(!store.data[profile][cartoonLabel]){
+        store.data[profile][cartoonLabel] = { last: null, history: [] };
+      }
+      if(!store.data[profile][cartoonLabel].history){
+        store.data[profile][cartoonLabel].history = [];
+      }
+      return store.data[profile][cartoonLabel];
+    }
+
+    // Clean old local data so we don't keep duplicates from the old null vs "-" switch
+    function normalizeAndDedupeStore(store){
+      const profiles = ["Asim","Marwa"];
+      for(const p of profiles){
+        if(!store.data[p]) store.data[p] = {};
+        for(const cartoonLabel of Object.keys(store.data[p] || {})){
+          const node = ensurePath(store, p, cartoonLabel);
+
+          if(node.last){
+            node.last.seriesLabel = normalizeSeriesLocal(node.last.seriesLabel);
+          }
+
+          // normalize + dedupe by (type, seasonOrMovie, seriesLabel), keep newest ts
+          const map = new Map();
+          const arr = Array.isArray(node.history) ? node.history : [];
+          for(const it of arr){
+            if(!it) continue;
+            it.seriesLabel = normalizeSeriesLocal(it.seriesLabel);
+            const key = `${it.type}|${it.seasonOrMovie}|${it.seriesLabel || ""}`;
+            const prev = map.get(key);
+            if(!prev || (String(it.ts) > String(prev.ts))){
+              map.set(key, it);
+            }
+          }
+
+          const merged = Array.from(map.values())
+            .sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
+
+          node.history = merged;
+
+          // make sure node.last is the real latest event for that cartoon
+          if(merged.length){
+            const latest = merged[0];
+            if(!node.last || String(latest.ts) > String(node.last.ts)){
+              node.last = latest;
+            }
+          }
+        }
+      }
+      return store;
+    }
+
+    function loadStore(){
+      try{
+        const raw = localStorage.getItem(STORE_KEY);
+        if(!raw){
+          return normalizeAndDedupeStore({ activeProfile: "Asim", data: { Asim: {}, Marwa: {} } });
+        }
+        const obj = JSON.parse(raw);
+        if(!obj.data) obj.data = { Asim: {}, Marwa: {} };
+        if(!obj.data.Asim) obj.data.Asim = {};
+        if(!obj.data.Marwa) obj.data.Marwa = {};
+        if(!obj.activeProfile) obj.activeProfile = "Asim";
+        return normalizeAndDedupeStore(obj);
+      } catch {
+        return normalizeAndDedupeStore({ activeProfile: "Asim", data: { Asim: {}, Marwa: {} } });
+      }
+    }
+
+    function saveStore(store){
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    }
+
+    function formatLine(entry){
+      const parts = [];
+      parts.push(entry.cartoonLabel);
+
+      // Only show series if it's a real series (Ben 10). Doraemon stays clean.
+      if(entry.seriesLabel) parts.push(entry.seriesLabel);
+
+      if(entry.type === "season"){
+        parts.push(entry.seasonOrMovie);
+        parts.push(`EP ${entry.num}`);
+      } else {
+        parts.push("MOVIES");
+        parts.push(`M${entry.num}`);
+      }
+      return parts.join(" ");
+    }
+
+    function upsertEntry(store, profile, entry){
+      const node = ensurePath(store, profile, entry.cartoonLabel);
+
+      // local seriesLabel should always be normalized
+      entry.seriesLabel = normalizeSeriesLocal(entry.seriesLabel);
+
+      // Keep "global last" for the cartoon = newest ts
+      if(!node.last || String(entry.ts) >= String(node.last.ts)){
+        node.last = entry;
+      }
+
+      const keySeries = entry.seriesLabel || null;
+
+      const idx = node.history.findIndex(h =>
+        (h.type === entry.type) &&
+        (h.seasonOrMovie === entry.seasonOrMovie) &&
+        (normalizeSeriesLocal(h.seriesLabel) === keySeries)
+      );
+
+      if(idx > -1){
+        // Update existing entry (keeps its original ts, if newer)
+        const existing = node.history[idx];
+        if (String(entry.ts) >= String(existing.ts)) {
+          node.history[idx] = entry; // Replace with the newer entry
+        }
+      } else {
+        // Insert new entry
+        node.history.unshift(entry);
+      }
+      
+      // Re-sort history by timestamp (newest first)
+      node.history.sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
+    }
+  </script>
 </body>
 </html>
