@@ -334,6 +334,37 @@ a:hover::after{
   grid-template-columns: repeat(2, 1fr);
 }
 
+/* Main menu buttons (Seasons/Movies + Ben10 series) */
+.menu-grid{
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.menu-btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 54px;
+}
+
+/* Animated expand/collapse panels (instead of display:none) */
+.panel{
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: max-height 280ms ease, opacity 220ms ease, transform 220ms ease;
+}
+
+.panel.open{
+  max-height: 1200px; /* big enough for your grids */
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+    
     .hidden{ display: none !important; }
     
   </style>
@@ -347,13 +378,15 @@ a:hover::after{
   <main id="app">
     <h1 class="heading">DM All<br />Seasons & Movies</h1>
    <!-- DM: Top buttons -->
-<div class="grid grid-2">
-  <a href="#" onclick="toggleDM(event, 'dm-seasons')"><span class="label">Seasons</span></a>
-  <a href="#" onclick="toggleDM(event, 'dm-movies')"><span class="label">Movies</span></a>
+<div class="grid menu-grid">
+  <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-seasons')"><span class="label">Seasons</span></a>
+  <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-movies')"><span class="label">Movies</span></a>
 </div>
 
+
 <!-- DM: Seasons (hidden by default) -->
-<div id="dm-seasons" class="grid hidden dm-panel">
+<div id="dm-seasons" class="grid panel dm-panel">
+
   <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
   <a href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)"><span class="label">DM_S2</span></a>
   <a href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)"><span class="label">DM_S3</span></a>
@@ -373,7 +406,8 @@ a:hover::after{
 </div>
 
 <!-- DM: Movies (hidden by default) -->
-<div id="dm-movies" class="hidden dm-panel">
+<div id="dm-movies" class="panel dm-panel">
+
   <div class="movies-row">
     <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
     <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
@@ -383,15 +417,17 @@ a:hover::after{
 
     <h1 class="heading section-gap">B10 All<br />Seasons</h1>
   <!-- B10: Top series buttons -->
-<div class="grid">
-  <a href="#" onclick="toggleB10(event, 'b10-classic')"><span class="label">Classic</span></a>
-  <a href="#" onclick="toggleB10(event, 'b10-af')"><span class="label">Alien Force</span></a>
-  <a href="#" onclick="toggleB10(event, 'b10-ua')"><span class="label">Ultimate Alien</span></a>
-  <a href="#" onclick="toggleB10(event, 'b10-ov')"><span class="label">Omniverse</span></a>
+<div class="grid menu-grid">
+  <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-classic')"><span class="label">Classic</span></a>
+  <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-af')"><span class="label">Alien Force</span></a>
+  <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-ua')"><span class="label">Ultimate Alien</span></a>
+  <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-ov')"><span class="label">Omniverse</span></a>
 </div>
 
+
 <!-- B10: Classic -->
-<div id="b10-classic" class="grid hidden b10-panel">
+<div id="b10-classic" class="grid panel b10-panel">
+
   <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
   <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
   <a href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)"><span class="label">CL_S3</span></a>
@@ -534,13 +570,13 @@ function toggleDM(e, targetId){
   const target = document.getElementById(targetId);
   if(!target) return;
 
-  const isHidden = target.classList.contains('hidden');
+  const isOpen = target.classList.contains('open');
 
-  // collapse all first
-  panels.forEach(p => p.classList.add('hidden'));
+  // close all first
+  panels.forEach(p => p.classList.remove('open'));
 
-  // if it was hidden, open it. if it was open, leave everything collapsed.
-  if(isHidden) target.classList.remove('hidden');
+  // open only if it was closed
+  if(!isOpen) target.classList.add('open');
 
   ripple(e);
 }
@@ -552,13 +588,13 @@ function toggleB10(e, targetId){
   const target = document.getElementById(targetId);
   if(!target) return;
 
-  const isHidden = target.classList.contains('hidden');
+  const isOpen = target.classList.contains('open');
 
-  // collapse all first
-  panels.forEach(p => p.classList.add('hidden'));
+  // close all first
+  panels.forEach(p => p.classList.remove('open'));
 
-  // open only if it was hidden
-  if(isHidden) target.classList.remove('hidden');
+  // open only if it was closed
+  if(!isOpen) target.classList.add('open');
 
   ripple(e);
 }
