@@ -330,6 +330,10 @@ a:hover::after{
       white-space: nowrap;
     }
 
+    .grid-2{
+  grid-template-columns: repeat(2, 1fr);
+}
+
     .hidden{ display: none !important; }
     
   </style>
@@ -342,53 +346,84 @@ a:hover::after{
 
   <main id="app">
     <h1 class="heading">DM All<br />Seasons & Movies</h1>
-    <div class="grid">
-      <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
-      <a href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)"><span class="label">DM_S2</span></a>
-      <a href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)"><span class="label">DM_S3</span></a>
-      <a href="https://archive.org/details/DM-S4-MAK" onclick="ripple(event)"><span class="label">DM_S4</span></a>
-      <a href="https://archive.org/details/DM-S5-MAK" onclick="ripple(event)"><span class="label">DM_S5</span></a>
-      <a href="https://archive.org/details/DM-S6-MAK2" onclick="ripple(event)"><span class="label">DM_S6</span></a>
-      <a href="https://archive.org/details/DM-S7-MAK" onclick="ripple(event)"><span class="label">DM_S7</span></a>
-      <a href="https://archive.org/details/DM-S8-MAK" onclick="ripple(event)"><span class="label">DM_S8</span></a>
-      <a href="https://archive.org/details/DM-S12-MAK" onclick="ripple(event)"><span class="label">DM_S12</span></a>
-      <a href="https://archive.org/details/DM_S14_MAK" onclick="ripple(event)"><span class="label">DM_S14</span></a>
-      <a href="https://archive.org/details/DM_S15_MAK" onclick="ripple(event)"><span class="label">DM_S15</span></a>
-      <a href="https://archive.org/details/DM_S16_MAK" onclick="ripple(event)"><span class="label">DM_S16</span></a>
-      <a href="https://archive.org/details/DM_S17_MAK" onclick="ripple(event)"><span class="label">DM_S17</span></a>
-      <a href="https://archive.org/details/DM_S18_MAK" onclick="ripple(event)"><span class="label">DM_S18</span></a>
-      <a href="https://archive.org/details/DM_S19_MAK" onclick="ripple(event)"><span class="label">DM_S19</span></a>
-      <a href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)"><span class="label">DM_S20</span></a>
-      <div class="movies-row">
-        <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
-        <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
-      </div>
-    </div>
+   <!-- DM: Top buttons -->
+<div class="grid grid-2">
+  <a href="#" onclick="toggleDM(event, 'dm-seasons')"><span class="label">Seasons</span></a>
+  <a href="#" onclick="toggleDM(event, 'dm-movies')"><span class="label">Movies</span></a>
+</div>
+
+<!-- DM: Seasons (hidden by default) -->
+<div id="dm-seasons" class="grid hidden dm-panel">
+  <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
+  <a href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)"><span class="label">DM_S2</span></a>
+  <a href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)"><span class="label">DM_S3</span></a>
+  <a href="https://archive.org/details/DM-S4-MAK" onclick="ripple(event)"><span class="label">DM_S4</span></a>
+  <a href="https://archive.org/details/DM-S5-MAK" onclick="ripple(event)"><span class="label">DM_S5</span></a>
+  <a href="https://archive.org/details/DM-S6-MAK2" onclick="ripple(event)"><span class="label">DM_S6</span></a>
+  <a href="https://archive.org/details/DM-S7-MAK" onclick="ripple(event)"><span class="label">DM_S7</span></a>
+  <a href="https://archive.org/details/DM-S8-MAK" onclick="ripple(event)"><span class="label">DM_S8</span></a>
+  <a href="https://archive.org/details/DM-S12-MAK" onclick="ripple(event)"><span class="label">DM_S12</span></a>
+  <a href="https://archive.org/details/DM_S14_MAK" onclick="ripple(event)"><span class="label">DM_S14</span></a>
+  <a href="https://archive.org/details/DM_S15_MAK" onclick="ripple(event)"><span class="label">DM_S15</span></a>
+  <a href="https://archive.org/details/DM_S16_MAK" onclick="ripple(event)"><span class="label">DM_S16</span></a>
+  <a href="https://archive.org/details/DM_S17_MAK" onclick="ripple(event)"><span class="label">DM_S17</span></a>
+  <a href="https://archive.org/details/DM_S18_MAK" onclick="ripple(event)"><span class="label">DM_S18</span></a>
+  <a href="https://archive.org/details/DM_S19_MAK" onclick="ripple(event)"><span class="label">DM_S19</span></a>
+  <a href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)"><span class="label">DM_S20</span></a>
+</div>
+
+<!-- DM: Movies (hidden by default) -->
+<div id="dm-movies" class="hidden dm-panel">
+  <div class="movies-row">
+    <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
+    <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
+  </div>
+</div>
+
 
     <h1 class="heading section-gap">B10 All<br />Seasons</h1>
-    <div class="grid">
-      <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
-      <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
-      <a href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)"><span class="label">CL_S3</span></a>
-      <a href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)"><span class="label">CL_S4</span></a>
+  <!-- B10: Top series buttons -->
+<div class="grid">
+  <a href="#" onclick="toggleB10(event, 'b10-classic')"><span class="label">Classic</span></a>
+  <a href="#" onclick="toggleB10(event, 'b10-af')"><span class="label">Alien Force</span></a>
+  <a href="#" onclick="toggleB10(event, 'b10-ua')"><span class="label">Ultimate Alien</span></a>
+  <a href="#" onclick="toggleB10(event, 'b10-ov')"><span class="label">Omniverse</span></a>
+</div>
 
-      <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
-      <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
-      <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
+<!-- B10: Classic -->
+<div id="b10-classic" class="grid hidden b10-panel">
+  <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
+  <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
+  <a href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)"><span class="label">CL_S3</span></a>
+  <a href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)"><span class="label">CL_S4</span></a>
+</div>
 
-      <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
-      <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
-      <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
+<!-- B10: Alien Force -->
+<div id="b10-af" class="grid hidden b10-panel">
+  <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
+  <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
+  <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
+</div>
 
-      <a href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)"><span class="label">OV_S1</span></a>
-      <a href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)"><span class="label">OV_S2</span></a>
-      <a href="https://archive.org/details/B10_OV_S03_MAK" onclick="ripple(event)"><span class="label">OV_S3</span></a>
-      <a href="https://archive.org/details/B10_OV_S04_MAK" onclick="ripple(event)"><span class="label">OV_S4</span></a>
-      <a href="https://archive.org/details/B10_OV_S05_MAK" onclick="ripple(event)"><span class="label">OV_S5</span></a>
-      <a href="https://archive.org/details/B10_OV_S06_MAK" onclick="ripple(event)"><span class="label">OV_S6</span></a>
-      <a href="https://archive.org/details/B10_OV_S07_MAK" onclick="ripple(event)"><span class="label">OV_S7</span></a>
-      <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
-    </div>
+<!-- B10: Ultimate Alien -->
+<div id="b10-ua" class="grid hidden b10-panel">
+  <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
+  <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
+  <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
+</div>
+
+<!-- B10: Omniverse -->
+<div id="b10-ov" class="grid hidden b10-panel">
+  <a href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)"><span class="label">OV_S1</span></a>
+  <a href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)"><span class="label">OV_S2</span></a>
+  <a href="https://archive.org/details/B10_OV_S03_MAK" onclick="ripple(event)"><span class="label">OV_S3</span></a>
+  <a href="https://archive.org/details/B10_OV_S04_MAK" onclick="ripple(event)"><span class="label">OV_S4</span></a>
+  <a href="https://archive.org/details/B10_OV_S05_MAK" onclick="ripple(event)"><span class="label">OV_S5</span></a>
+  <a href="https://archive.org/details/B10_OV_S06_MAK" onclick="ripple(event)"><span class="label">OV_S6</span></a>
+  <a href="https://archive.org/details/B10_OV_S07_MAK" onclick="ripple(event)"><span class="label">OV_S7</span></a>
+  <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
+</div>
+
 
     <h1 class="heading section-gap">Progress Tracker</h1>
 
@@ -489,6 +524,48 @@ a:hover::after{
   </main>
 
   <script>
+
+
+    
+function toggleDM(e, targetId){
+  e.preventDefault();
+
+  const panels = document.querySelectorAll('.dm-panel');
+  const target = document.getElementById(targetId);
+  if(!target) return;
+
+  const isHidden = target.classList.contains('hidden');
+
+  // collapse all first
+  panels.forEach(p => p.classList.add('hidden'));
+
+  // if it was hidden, open it. if it was open, leave everything collapsed.
+  if(isHidden) target.classList.remove('hidden');
+
+  ripple(e);
+}
+
+function toggleB10(e, targetId){
+  e.preventDefault();
+
+  const panels = document.querySelectorAll('.b10-panel');
+  const target = document.getElementById(targetId);
+  if(!target) return;
+
+  const isHidden = target.classList.contains('hidden');
+
+  // collapse all first
+  panels.forEach(p => p.classList.add('hidden'));
+
+  // open only if it was hidden
+  if(isHidden) target.classList.remove('hidden');
+
+  ripple(e);
+}
+
+
+
+    
     // =========================
     // CONFIG
     // =========================
