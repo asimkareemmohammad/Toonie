@@ -119,8 +119,8 @@
       contain: layout style;
     }
 
-    /* Center 3-item grids */
-    .grid-three-items {
+    /* FIXED: Simple class for 3-item grids (no :has selector) */
+    .grid-3 {
       grid-template-columns: repeat(3, 1fr);
       max-width: 420px;       /* Reduced from 480px */
       margin: 0 auto;
@@ -290,13 +290,12 @@
         grid-template-columns: repeat(3, 1fr);
       }
       
-      .menu-grid {
-        max-width: 400px;
+      .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
       }
       
-      .grid-three-items {
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 280px;
+      .menu-grid {
+        max-width: 400px;
       }
       
       .heading {
@@ -311,7 +310,7 @@
         gap: 0.6rem;
       }
       
-      .grid-three-items {
+      .grid-3 {
         grid-template-columns: repeat(2, 1fr);
         max-width: 240px;
       }
@@ -337,7 +336,7 @@
       }
     }
 
-    /* ===== OPTIMIZED PANEL ANIMATIONS ===== */
+    /* ===== FIXED PANEL ANIMATIONS (No disappearing issue) ===== */
     .panel{
       overflow: hidden;
       margin: 0;
@@ -360,6 +359,8 @@
       transform: translateY(0);
       pointer-events: auto;
       margin-top: 10px; /* Reduced from 14px */
+      /* FIXED: Ensure max-height is set properly */
+      max-height: 5000px; /* Large enough for all content */
       /* Remove will-change after animation */
       will-change: auto;
     }
@@ -710,14 +711,14 @@
       </div>
 
       <!-- B10: Alien Force -->
-      <div id="b10-af" class="grid panel b10-panel grid-three-items">
+      <div id="b10-af" class="grid grid-3 panel b10-panel">
         <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
         <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
         <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
       </div>
 
       <!-- B10: Ultimate Alien -->
-      <div id="b10-ua" class="grid panel b10-panel grid-three-items">
+      <div id="b10-ua" class="grid grid-3 panel b10-panel">
         <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
         <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
         <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
@@ -868,18 +869,16 @@
       };
     }
 
-    /* ===== Smooth panel animation (optimized) ===== */
-    let panelAnimations = new Map(); // Cache for panel heights
+    /* ===== FIXED: Smooth panel animation (no disappearing issue) ===== */
+    let panelAnimations = new Map();
     
     function calculatePanelHeight(panel) {
       if (!panel) return 0;
       
-      // Use cached height if available
       if (panelAnimations.has(panel)) {
         return panelAnimations.get(panel);
       }
       
-      // Temporarily make visible to measure
       const originalStyle = {
         display: panel.style.display,
         visibility: panel.style.visibility,
@@ -892,10 +891,8 @@
       
       const height = panel.scrollHeight;
       
-      // Restore original styles
       Object.assign(panel.style, originalStyle);
       
-      // Cache the height
       panelAnimations.set(panel, height);
       
       return height;
@@ -907,26 +904,33 @@
       if(open){
         panel.classList.add('open');
         
-        // Use requestAnimationFrame for smooth animation
         requestAnimationFrame(() => {
-          // Reset then measure for smooth transition
           panel.style.maxHeight = '0px';
           
           requestAnimationFrame(() => {
             const target = calculatePanelHeight(panel);
+            // FIXED: Set max-height properly and keep it
             panel.style.maxHeight = target + 'px';
+            
+            // FIXED: Ensure it stays open by setting overflow to visible after animation
+            setTimeout(() => {
+              if (panel.classList.contains('open')) {
+                panel.style.overflow = 'visible';
+                panel.style.maxHeight = 'none';
+              }
+            }, 320);
           });
         });
       } else {
-        // Get current height
         const current = panel.scrollHeight;
         panel.style.maxHeight = current + 'px';
+        panel.style.overflow = 'hidden';
         
         requestAnimationFrame(() => {
           panel.style.maxHeight = '0px';
           setTimeout(() => {
             panel.classList.remove('open');
-          }, 320); // Match CSS transition duration
+          }, 320);
         });
       }
     }
@@ -945,10 +949,8 @@
 
       const isOpen = target.classList.contains('open');
 
-      // close all in the group first
       closeAllPanels(groupSelector);
 
-      // open only if it was closed
       if(!isOpen) setPanelOpen(target, true);
 
       if (e) ripple(e);
@@ -967,21 +969,13 @@
       const openPanels = document.querySelectorAll('.panel.open');
       for (let i = 0; i < openPanels.length; i++) {
         const panel = openPanels[i];
-        // Clear cache and recalculate
         panelAnimations.delete(panel);
         const height = calculatePanelHeight(panel);
         panel.style.maxHeight = height + 'px';
       }
     }, 150);
 
-    // Throttled scroll handler
-    const handleScroll = throttle(() => {
-      // Add any scroll-based optimizations here
-    }, 100);
-
-    // Add optimized event listeners
     window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleScroll, { passive: true });
 
     // =========================
     // CONFIG
@@ -993,7 +987,7 @@
     const ROOM_KEY  = "toonie_room_code_v1";
     const STORE_KEY = "toonie_progress_tracker_v2";
 
-    const SYNC_POLL_MS = 15000; // Increased from 10000 to reduce network calls
+    const SYNC_POLL_MS = 15000;
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -1026,7 +1020,7 @@
       if (el) el.textContent = text;
     }
 
-    // Optimized ripple with requestAnimationFrame
+    // Optimized ripple
     function ripple(e) {
       if (navigator.vibrate) {
         try { navigator.vibrate(20); } catch(e) {}
@@ -1035,7 +1029,6 @@
       const target = e.currentTarget;
       if(!target) return;
 
-      // Create ripple only if needed
       if (target.querySelector('.ripple')) return;
 
       const rect = target.getBoundingClientRect();
@@ -1045,7 +1038,6 @@
       const rp = document.createElement('span');
       rp.classList.add('ripple');
       
-      // Use smaller size for performance
       const size = Math.max(target.offsetWidth, target.offsetHeight) * 0.8;
       rp.style.width = rp.style.height = size + 'px';
       rp.style.left = cx - rect.left - size / 2 + 'px';
@@ -1053,7 +1045,6 @@
       
       target.appendChild(rp);
       
-      // Remove after animation completes
       setTimeout(() => {
         if (rp.parentNode === target) {
           target.removeChild(rp);
@@ -1066,7 +1057,7 @@
     const bootStart = performance.now();
     
     function initBoot() {
-      const MIN_SHOW = 1500; // Hardcoded for performance
+      const MIN_SHOW = 1500;
       const elapsed = performance.now() - bootStart;
       const wait = Math.max(0, MIN_SHOW - elapsed);
 
@@ -1076,24 +1067,20 @@
           b.classList.add('hide');
           document.body.classList.add('boot-done');
           
-          // Remove from DOM after animation
           setTimeout(() => {
             if (b.parentNode) {
               b.parentNode.removeChild(b);
             }
-            // Start animations after boot
             document.querySelectorAll('.heading, .tool-title, a span.label').forEach(el => {
               if (el.style) el.style.animationPlayState = 'running';
             });
           }, 800);
         }
         
-        // Clear timeout reference
         bootTimeout = null;
       }, wait);
     }
 
-    // Clean up on page hide
     window.addEventListener('pagehide', () => {
       if (bootTimeout) {
         clearTimeout(bootTimeout);
@@ -1124,7 +1111,6 @@
       return new Date().toISOString();
     }
 
-    // Cached date formatter for performance
     let dateFormatter;
     function getDateFormatter() {
       if (!dateFormatter) {
@@ -1153,7 +1139,6 @@
       return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
     }
 
-    // Normalize seriesLabel: keep local as null (never "-")
     function normalizeSeriesLocal(x){
       if (x == null) return null;
       const v = String(x).trim();
@@ -1171,7 +1156,6 @@
       return store.data[profile][cartoonLabel];
     }
 
-    // Optimized store normalization
     function normalizeAndDedupeStore(store){
       const profiles = ["Asim","Marwa"];
       for(const p of profiles){
@@ -1185,7 +1169,6 @@
             node.last.seriesLabel = normalizeSeriesLocal(node.last.seriesLabel);
           }
 
-          // Use Map for deduplication (faster than array operations)
           const map = new Map();
           const arr = Array.isArray(node.history) ? node.history : [];
           
@@ -1205,7 +1188,6 @@
 
           node.history = merged;
 
-          // Update last if needed
           if(merged.length > 0){
             const latest = merged[0];
             if(!node.last || String(latest.ts) > String(node.last.ts)){
@@ -1265,7 +1247,6 @@
       const keySeries = entry.seriesLabel || null;
       const history = node.history;
       
-      // Find existing entry
       let foundIndex = -1;
       for(let i = 0; i < history.length; i++){
         const h = history[i];
@@ -1286,10 +1267,8 @@
         history.unshift(entry);
       }
 
-      // Keep sorted (newest first)
       history.sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
       
-      // Limit history size to prevent memory issues
       if (history.length > 50) {
         node.history = history.slice(0, 50);
       }
@@ -1339,7 +1318,7 @@
       }
     }
 
-    async function sbFetchProgress(room, profile, limit = 100){ // Reduced from 250
+    async function sbFetchProgress(room, profile, limit = 100){
       if(!room) return { ok: false, skipped: true, rows: [] };
 
       try {
@@ -1366,7 +1345,6 @@
     // APP (OPTIMIZED)
     // =========================
     function initTracker(){
-      // Cache DOM elements
       const profileSeg = document.getElementById("profileSeg");
       const modeSeg = document.getElementById("modeSeg");
       const savePanel = document.getElementById("savePanel");
@@ -1389,18 +1367,17 @@
       if(!profileSeg || !modeSeg) return;
 
       let store = loadStore();
-      saveStore(store); // Initial save to clean data
+      saveStore(store);
 
       let activeProfile = store.activeProfile || "Asim";
       let activeMode = "save";
       let pollTimer = null;
       let lastCloudOk = true;
-      let isSaving = false; // Prevent double saves
+      let isSaving = false;
 
-      // Optimized vibrate
       function vib(){ 
         if (navigator.vibrate && !isSaving) {
-          try { navigator.vibrate(15); } catch(e) {} // Reduced duration
+          try { navigator.vibrate(15); } catch(e) {}
         }
       }
 
@@ -1444,10 +1421,9 @@
         }
       }
 
-      function cartoonsList(){ return ["Doraemon", "Ben 10"]; } // Hardcoded for performance
+      function cartoonsList(){ return ["Doraemon", "Ben 10"]; }
       function getCartoonCfg(name){ return MODEL[name]; }
 
-      // Cached options HTML
       let cartoonOptionsHtml = null;
       function fillCartoonSelects(){
         if (!cartoonOptionsHtml) {
@@ -1466,7 +1442,6 @@
         }
         seriesField.classList.remove("hidden");
         
-        // Cache series options
         if (!cfg._seriesOptionsHtml) {
           cfg._seriesOptionsHtml = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
         }
@@ -1496,7 +1471,6 @@
         seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
       }
 
-      // Pre-render episode options for performance
       let episodeOptionsHtml = null;
       function fillEpisodeDropdown(max = 100){
         if (!episodeOptionsHtml) {
@@ -1542,7 +1516,6 @@
         }
       }
 
-      // Optimized render with document fragment
       function renderRecent(){
         store = loadStore();
         const cartoonName = recentCartoonSelect.value;
@@ -1560,7 +1533,6 @@
 
         recentInfo.textContent = `Showing activity for ${cartoonLabel} (${activeProfile})`;
         
-        // Use document fragment for batch DOM updates
         const fragment = document.createDocumentFragment();
         for (let i = 0; i < list.length; i++) {
           const item = list[i];
@@ -1577,7 +1549,6 @@
         activityList.appendChild(fragment);
       }
 
-      // Optimized cloud polling with exponential backoff
       let pollFailCount = 0;
       const MAX_POLL_FAILURES = 3;
       
@@ -1631,7 +1602,6 @@
           pollFromCloud().catch(() => {});
         }, SYNC_POLL_MS);
 
-        // Initial poll
         setTimeout(() => pollFromCloud().catch(() => {}), 1000);
       }
 
@@ -1642,7 +1612,6 @@
         }
       }
 
-      // Debounced save function
       const debouncedSave = debounce(async function() {
         if (isSaving) return;
         isSaving = true;
@@ -1663,14 +1632,12 @@
             ts: nowISO()
           };
 
-          // LOCAL SAVE
           upsertEntry(store, activeProfile, entry);
           store = normalizeAndDedupeStore(store);
           saveStore(store);
 
           saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
 
-          // CLOUD SAVE
           const room = getRoomCode();
           if(room && supabaseEnabled()){
             const push = await sbUpsertProgress({
@@ -1683,9 +1650,7 @@
               ts: entry.ts
             });
 
-            if(push.ok){
-              // Don't immediately poll - let normal polling handle it
-            } else {
+            if(!push.ok){
               saveHint.textContent = `Saved locally. (Cloud: ${push.error || "failed"})`;
             }
           }
@@ -1716,9 +1681,7 @@
       updateSaveHintForCartoon();
       startPolling();
 
-      // ===== OPTIMIZED EVENT HANDLERS =====
-      
-      // Event delegation for profile buttons
+      // ===== EVENT HANDLERS =====
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
@@ -1734,7 +1697,6 @@
         startPolling();
       });
 
-      // Event delegation for mode buttons
       modeSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
@@ -1743,7 +1705,6 @@
         setModeUI();
       });
 
-      // Debounced change handlers
       const debouncedFillSeries = debounce(fillSeries, 50);
       const debouncedUpdateHint = debounce(updateSaveHintForCartoon, 100);
       const debouncedFillSeason = debounce(fillSeasonOrMovie, 50);
@@ -1801,16 +1762,13 @@
         });
       }
       
-      // Cleanup on page unload
       window.addEventListener('beforeunload', () => {
         stopPolling();
         panelAnimations.clear();
       });
     }
 
-    // Defer initialization
     window.addEventListener("load", () => {
-      // Wait for boot to complete
       setTimeout(initTracker, 500);
     });
   </script>
