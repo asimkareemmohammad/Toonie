@@ -350,6 +350,8 @@ a:hover::after{
 /* Animated expand/collapse panels (instead of display:none) */
 .panel{
   overflow: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
   max-height: 0;
   opacity: 0;
   transform: translateY(-6px);
@@ -360,6 +362,8 @@ a:hover::after{
 .panel.open{
   max-height: 1200px; /* big enough for your grids */
   opacity: 1;
+   margin-top: 16px !important;   /* controls the gap when open */
+  padding-top: 0 !important;
   transform: translateY(0);
   pointer-events: auto;
 }
@@ -408,10 +412,10 @@ a:hover::after{
 <!-- DM: Movies (hidden by default) -->
 <div id="dm-movies" class="panel dm-panel">
 
-  <div class="movies-row">
-    <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
-    <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
-  </div>
+  <div class="grid grid-2">
+  <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
+  <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
+</div>
 </div>
 
 
