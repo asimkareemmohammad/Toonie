@@ -18,6 +18,22 @@
   <meta name="mobile-web-app-capable" content="yes">
 
   <style>
+    /* Add to your CSS in the <style> section */
+
+/* Center grid items when there are only 3 */
+.grid:has(> a:nth-child(3):last-child) {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 480px; /* Adjust based on your preference */
+    margin: 0 auto;
+}
+
+/* Or if you want to be more specific for B10 panels */
+#b10-af.grid:has(> a:nth-child(3):last-child),
+#b10-ua.grid:has(> a:nth-child(3):last-child) {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 480px;
+    margin: 0 auto;
+}
     :root{
       --boot-min-show: 3500ms;
       --boot-fade: 1200ms;
