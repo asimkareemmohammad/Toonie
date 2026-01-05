@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Toonie</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,7 +23,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
-  
+
+
+  html, body {
+  height: 100%;
+  background: var(--md-bg);
+}
+
+body {
+  min-height: 100svh;
+  min-height: 100dvh;
+  margin: 0;
+  overscroll-behavior-y: none;
+}
+
+#app {
+  min-height: 100svh;
+  min-height: 100dvh;
+  background: var(--md-bg);
+  padding-bottom: calc(36px + env(safe-area-inset-bottom, 0px));
+}
+
     :root{
       /* Boot */
       --boot-min-show: 900ms;
