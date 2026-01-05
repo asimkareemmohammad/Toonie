@@ -3,7 +3,7 @@
   "short_name": "Toonie",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
   "icons": [
