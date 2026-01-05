@@ -23,13 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
-    body {
-  min-height: 100svh;
-}
-
-#app {
-  padding-bottom: env(safe-area-inset-bottom);
-}
+  
     :root{
       /* Boot */
       --boot-min-show: 900ms;
@@ -462,6 +456,25 @@
       color: var(--md-text-soft);
       font-size: 12px;
     }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  min-height: -webkit-fill-available;
+}
+
+#app {
+  min-height: 100svh;
+  min-height: -webkit-fill-available;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1px);
+}
+
+
+    
   </style>
 </head>
 
