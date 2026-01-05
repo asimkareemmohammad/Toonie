@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-title" content="Toonie">
   <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- room-ish Typography -->
+  <!-- Material-ish Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -318,21 +318,19 @@
 
     /* ===== Panels (your existing open/close logic) ===== */
     .panel{
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-      max-height: 0;
-      opacity: 0;
-      transform: translateY(-6px);
-      pointer-events: none;
-      transition:
-        max-height 420ms cubic-bezier(.2,.9,.2,1),
-        opacity 220ms ease,
-        transform 220ms ease;
-      display: none;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
 
-      will-change: max-height, opacity, transform;
-    }
+  display: none; /* 🔥 THIS kills the empty space */
+}
+
+    
    .panel.open{
   display: block;   /* 🔥 bring it back only when open */
   opacity: 1;
@@ -342,7 +340,7 @@
 }
 
 
-    /* ===== style (Material-ish form styling) ===== */
+    /* ===== Progress tracker (Material-ish form styling) ===== */
     .form-row{
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -453,36 +451,6 @@
       border: 1px solid var(--md-outline);
       color: var(--md-text-soft);
       font-size: 12px;
-
-
-/* Section card header (title inside the box) */
-.card-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 16px 18px 10px;
-}
-
-.card-title{
-  font-family: "Roboto", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  color: #fff;
-}
-
-/* tighten overall card padding so it doesn't feel tall */
-.section-card{
-  padding: 0;              /* IMPORTANT: card-head handles top padding now */
-}
-
-/* add inner spacing for the content area inside the card */
-.section-card .card-body{
-  padding: 0 18px 18px;
-}
-
-
-      
     }
   </style>
 </head>
@@ -496,6 +464,7 @@
       <div class="appbar-inner">
         <div class="brand">
           <p class="brand-title">Toonie</p>
+          <p class="brand-sub">Material-style UI • Clean buttons • Same functionality</p>
         </div>
 
         <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
@@ -503,12 +472,9 @@
     </header>
 
     <!-- Doraemon -->
-    <div class="card-body">
-    <div class="section-card">
-  <div class="card-head">
-    <div class="card-title">Doraemon</div>
-  </div>
-
+    <section class="section">
+      <h2 class="section-title">Doraemon</h2>
+      <p class="section-hint">Open Seasons or Movies. Same links, just Material look.</p>
 
       <div class="card">
         <div class="menu-row">
@@ -547,12 +513,10 @@
     </section>
 
     <!-- Ben 10 -->
-      <div class="card-body">
-    <div class="section-card">
-  <div class="card-head">
-    <div class="card-title">Ben 10</div>
-  </div>
-      
+    <section class="section">
+      <h2 class="section-title">Ben 10</h2>
+      <p class="section-hint">Pick a series, then open seasons. Links stay the same.</p>
+
       <div class="card">
         <div class="menu-row">
           <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-classic')">Classic</a>
@@ -601,12 +565,11 @@
       </div>
     </section>
 
-    <!-- style -->
-      <div class="card-body">
-   <div class="section-card">
-  <div class="card-head">
-    <div class="card-title">Progress Tracker</div>
-  </div>
+    <!-- Progress Tracker -->
+    <section class="section">
+      <h2 class="section-title">Progress Tracker</h2>
+      <p class="section-hint">Same tracker logic. Material-style cards + fields.</p>
+
       <div class="card">
         <p class="card-title">Sync</p>
         <div class="form-row">
@@ -746,14 +709,14 @@
       if (el) el.textContent = text;
     }
 
-    /* room-ish ripple */
+    /* Material-ish ripple */
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(18);
 
       const target = e.currentTarget;
       if(!target) return;
 
-      // only ripple room buttons/links
+      // only ripple Material buttons/links
       if(!target.classList || !target.classList.contains('md-btn')) return;
 
       const rect = target.getBoundingClientRect();
