@@ -457,25 +457,7 @@
       font-size: 12px;
     }
 
-/* ===== Mobile full-height + kill bottom gap ===== */
-html, body {
-  height: 100%;
-}
 
-body {
-  margin: 0;
-  height: 100dvh;
-  overflow: hidden;              /* body won't scroll, app will */
-  background: var(--md-bg);
-}
-
-#app {
-  min-height: 100dvh;
-  height: 100dvh;
-  overflow-y: auto;              /* scroll inside app */
-  padding-bottom: env(safe-area-inset-bottom) !important; /* OVERRIDES your 36px */
-  background: var(--md-bg);
-}
     
   </style>
 </head>
