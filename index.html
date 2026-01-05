@@ -18,19 +18,28 @@
   <meta name="mobile-web-app-capable" content="yes">
 
   <style>
-    /* PERFORMANCE OPTIMIZATIONS APPLIED:
-    1. Reduced compositor layers
-    2. Optimized CSS animations
-    3. Removed expensive filters on low-end devices
-    4. Added will-change only where needed
-    5. Reduced paint complexity
-    */
+/* Add to your CSS in the <style> section */
 
+/* Center grid items when there are only 3 */
+.grid:has(> a:nth-child(3):last-child) {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 480px; /* Adjust based on your preference */
+    margin: 0 auto;
+}
+
+/* Or if you want to be more specific for B10 panels */
+#b10-af.grid:has(> a:nth-child(3):last-child),
+#b10-ua.grid:has(> a:nth-child(3):last-child) {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 480px;
+    margin: 0 auto;
+}
+    
     :root{
-      --boot-min-show: 1500ms; /* Reduced from 3500ms */
-      --boot-fade: 800ms;      /* Reduced from 1200ms */
-      --app-fade: 500ms;       /* Reduced from 700ms */
-      --app-fade-delay: 50ms;  /* Reduced from 150ms */
+      --boot-min-show: 3500ms;
+      --boot-fade: 1200ms;
+      --app-fade: 700ms;
+      --app-fade-delay: 150ms;
 
       /* ===== Unified Glass Theme ===== */
       --bg: #0f0f0f;
@@ -38,15 +47,15 @@
       --glass-strong: rgba(30,30,30,0.78);
       --border: rgba(255,255,255,0.08);
       --border-soft: rgba(255,255,255,0.06);
-      --shadow: 0 8px 20px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.03) inset;
-      --shadow-soft: 0 6px 15px rgba(0,0,0,0.25);
+      --shadow: 0 12px 26px rgba(0,0,0,0.46), 0 2px 0 rgba(255,255,255,0.05) inset;
+      --shadow-soft: 0 10px 25px rgba(0,0,0,0.35);
       --radius-pill: 999px;
-      --radius-card: 18px;     /* Reduced from 22px */
-      --blur: blur(8px);       /* Reduced from 12px */
+      --radius-card: 22px;
+      --blur: blur(12px);
 
       --accentA: #facc15;
       --accentB: #00f0ff;
-      --shineSpeed: 4s;        /* Slowed down for performance */
+      --shineSpeed: 3s;
     }
 
     body {
@@ -56,94 +65,69 @@
       color: #fff;
       min-height: 100vh;
       overflow-x: hidden;
-      /* Prevent expensive overscroll behavior */
-      overscroll-behavior-y: none;
-      /* Hardware acceleration */
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      overflow-y: auto;
     }
 
     #app {
       opacity: 0;
-      transform: scale(0.99);
+      transform: scale(0.985);
       transition:
         opacity var(--app-fade) ease var(--app-fade-delay),
         transform var(--app-fade) ease var(--app-fade-delay);
-      padding-bottom: 2rem; /* Reduced from 3rem */
+      padding-bottom: 3rem;
     }
     .boot-done #app { opacity: 1; transform: scale(1); }
 
     .heading {
-      font-size: 1.8rem;      /* Reduced from 2rem */
-      margin: 1.5rem auto;    /* Reduced from 2rem */
+      font-size: 2rem;
+      margin: 2rem auto;
       text-align: center;
-      line-height: 1.3;
+      line-height: 1.4;
       width: 100%;
       background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentA));
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      /* Only animate if user prefers motion */
-      animation: shine var(--shineSpeed) linear infinite paused;
+      animation: shine var(--shineSpeed) linear infinite;
     }
-    
-    /* Start animation only after page is ready */
-    .boot-done .heading {
-      animation-play-state: running;
-    }
-    
-    @keyframes shine { 
-      0% { background-position: 200% center; }
-      100% { background-position: -200% center; }
-    }
+    @keyframes shine { 0% {background-position:0% center;} 100% {background-position:-200% center;} }
 
-    .section-gap { margin-top: 1.2rem; } /* Reduced from 1.5rem */
+    .section-gap { margin-top: 1.5rem; }
 
     /* Layout wrappers */
     .panel-wrap{
-      max-width: 780px;       /* Reduced from 820px */
+      max-width: 820px;
       margin: 0 auto;
-      padding: 0 1.5rem;      /* Reduced from 2rem */
+      padding: 0 2rem;
       box-sizing: border-box;
     }
 
-    /* OPTIMIZED GRID - Fixed columns for better performance */
+    /* FIXED: Proper grid layout for consistent alignment */
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.8rem;            /* Reduced from 1rem */
+      grid-template-columns: repeat(4, 1fr); /* Fixed 4 columns for consistency */
+      gap: 1rem;
       width: 100%;
       box-sizing: border-box;
-      margin: 0 auto;
-      /* Prevent expensive layout calculations */
-      contain: layout style;
-    }
-
-    /* FIXED: Simple class for 3-item grids (no :has selector) */
-    .grid-3 {
-      grid-template-columns: repeat(3, 1fr);
-      max-width: 420px;       /* Reduced from 480px */
       margin: 0 auto;
     }
 
     /* For movie grid (2 items) */
     .grid-2 {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.8rem;
+      grid-template-columns: repeat(2, 1fr); /* 2 columns for movies */
+      gap: 1rem;
       width: 100%;
-      max-width: 320px;       /* Reduced from 400px */
+      max-width: 400px;
       margin: 0 auto;
-      contain: layout style;
     }
 
     /* Menu buttons grid */
     .menu-grid{
-      grid-template-columns: repeat(2, 1fr);
-      max-width: 520px;       /* Reduced from 640px */
-      padding-bottom: 1rem;   /* Reduced from 1.2rem */
+      grid-template-columns: repeat(2, 1fr); /* 2 columns for menu buttons */
+      max-width: 640px;
+      padding-bottom: 1.2rem;
       margin: 0 auto;
-      contain: layout style;
     }
 
     .menu-btn{
@@ -151,45 +135,36 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      min-height: 48px;       /* Reduced from 56px */
+      min-height: 56px;
     }
 
-    /* OPTIMIZED BUTTONS - Reduced paint complexity */
+    /* Unified pill buttons (anchors) */
     a {
       display: flex;
       align-items: center;
       justify-content: center;
       background: var(--glass-strong);
       border: 1px solid var(--border);
-      padding: 0.65rem 0.4rem; /* Reduced padding */
+      padding: 0.78rem 0.5rem; /* Reduced padding for better fit */
       text-align: center;
       border-radius: var(--radius-pill);
       text-decoration: none;
       position: relative;
       overflow: hidden;
       transition:
-        transform 120ms cubic-bezier(.2,.8,.2,1), /* Faster transition */
-        box-shadow 120ms cubic-bezier(.2,.8,.2,1),
-        filter 120ms ease;
+        transform 160ms cubic-bezier(.2,.9,.2,1),
+        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
+        filter 160ms ease,
+        background-color 200ms ease,
+        border-color 200ms ease;
       -webkit-tap-highlight-color: transparent;
       color: inherit;
-      transform: translateZ(0); /* Hardware acceleration */
+      transform: translateZ(0);
       box-shadow: var(--shadow);
-      /* Conditional backdrop-filter for performance */
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
-      min-height: 42px;       /* Reduced from 48px */
-      word-break: break-word;
-      /* Reduce paint area */
-      contain: layout style paint;
-    }
-
-    /* Disable expensive effects on low-end devices */
-    @media (prefers-reduced-motion: reduce), (max-width: 768px) {
-      a {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-      }
+      min-height: 48px; /* Consistent height */
+      word-break: break-word; /* Handle long text */
     }
 
     a span.label {
@@ -198,171 +173,115 @@
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: shine var(--shineSpeed) linear infinite paused;
-      letter-spacing: 0.1px;
-      font-size: 0.9rem;      /* Slightly smaller */
+      animation: shine var(--shineSpeed) linear infinite;
+      letter-spacing: 0.2px;
+      font-size: 0.95rem; /* Slightly smaller font for better fit */
       text-align: center;
       width: 100%;
     }
-    
-    .boot-done a span.label {
-      animation-play-state: running;
-    }
 
-    /* OPTIMIZED RIPPLE - Reduced animation complexity */
     a span.ripple {
       position: absolute;
       border-radius: 50%;
       transform: scale(0);
-      animation: ripple 1s ease-out; /* Faster and simpler */
-      background-color: rgba(0, 240, 255, 0.2); /* More transparent */
+      animation: ripple 3.5s linear;
+      background-color: rgba(0, 240, 255, 0.3);
       pointer-events: none;
-      /* Isolate ripple to prevent repaints */
-      isolation: isolate;
     }
-    @keyframes ripple { 
-      to { 
-        transform: scale(3); /* Reduced from scale(4) */
-        opacity: 0; 
-      } 
-    }
+    @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
     a:active{
-      transform: translateY(1px) scale(0.99);
+      transform: translateY(1px) scale(0.985);
       box-shadow:
-        0 4px 12px rgba(0,0,0,0.35),
-        0 1px 0 rgba(255,255,255,0.03) inset;
-      filter: brightness(1.04); /* Reduced from 1.06 */
+        0 8px 18px rgba(0,0,0,0.42),
+        0 1px 0 rgba(255,255,255,0.04) inset;
+      filter: brightness(1.06);
     }
     a:hover{
-      transform: translateY(-1px) scale(1.005); /* Reduced movement */
+      transform: translateY(-2px) scale(1.01);
       box-shadow:
-        0 10px 22px rgba(0,0,0,0.45),
-        0 1px 0 rgba(255,255,255,0.04) inset;
+        0 16px 30px rgba(0,0,0,0.54),
+        0 2px 0 rgba(255,255,255,0.06) inset;
     }
 
-    /* Optimized pseudo-elements */
     a::before{
       content:"";
       position:absolute;
       inset: 0;
       pointer-events:none;
-      /* Simplified gradient for performance */
-      background: radial-gradient(80px 60px at 25% 15%, rgba(255,255,255,0.07), transparent 50%);
-      opacity: 0.8;
-      /* Don't trigger repaints */
-      will-change: opacity;
+      background: radial-gradient(120px 80px at 25% 15%, rgba(255,255,255,0.10), transparent 60%);
+      opacity: 0.9;
     }
 
     a::after{
       content:"";
       position:absolute;
-      inset:-1px;            /* Reduced from -2px */
+      inset:-2px;
       border-radius: var(--radius-pill);
       pointer-events:none;
-      border: 1px solid rgba(0,240,255,0.08); /* Thinner border */
+      border: 2px solid rgba(0,240,255,0.10);
       opacity: 0;
-      transform: scale(0.99);
-      transition: opacity 150ms ease, transform 150ms ease;
-      will-change: opacity, transform;
+      transform: scale(0.985);
+      transition: opacity 200ms ease, transform 200ms ease;
     }
     a:hover::after{
       opacity: 1;
       transform: scale(1);
     }
 
-    /* Motion preferences */
     @media (prefers-reduced-motion: reduce){
-      * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-      
-      a:hover, a:active {
-        transform: none !important;
-      }
+      a{ transition:none; }
+      a:hover{ transform:none; }
     }
 
-    /* Responsive adjustments - Optimized breakpoints */
+    /* Responsive adjustments */
     @media (max-width: 768px) {
       .grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      
-      .grid-3 {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr); /* 3 columns on medium screens */
       }
       
       .menu-grid {
-        max-width: 400px;
-      }
-      
-      .heading {
-        font-size: 1.5rem;
-        margin: 1.2rem auto;
+        max-width: 500px;
       }
     }
 
     @media (max-width: 480px) {
       .grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.6rem;
-      }
-      
-      .grid-3 {
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 240px;
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on small screens */
       }
       
       .menu-grid {
         max-width: 100%;
-        padding: 0 0.8rem 0.8rem; /* Reduced padding */
+        padding: 0 1rem 1.2rem;
       }
       
       .panel-wrap {
-        padding: 0 0.8rem; /* Reduced padding */
+        padding: 0 1rem;
       }
       
       a {
-        padding: 0.6rem 0.3rem;
-        font-size: 0.85rem;
-        min-height: 38px;
-      }
-      
-      .heading {
-        font-size: 1.3rem;
-        margin: 1rem auto;
+        padding: 0.7rem 0.4rem;
+        font-size: 0.9rem;
       }
     }
 
-    /* ===== FIXED PANEL ANIMATIONS (No disappearing issue) ===== */
+    /* ===== Animated expand/collapse panels (smooth JS-driven max-height) ===== */
     .panel{
       overflow: hidden;
       margin: 0;
       padding: 0;
       max-height: 0;
       opacity: 0;
-      transform: translateY(-4px); /* Reduced from -6px */
+      transform: translateY(-6px);
       pointer-events: none;
-      /* Faster transitions with simpler timing */
-      transition: max-height 320ms cubic-bezier(.1,.8,.1,1), 
-                  opacity 180ms ease, 
-                  transform 180ms ease;
-      /* Only will-change when animating */
-      will-change: max-height;
-      /* Contain for performance */
-      contain: layout style;
+      transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
+      will-change: max-height, opacity, transform;
     }
     .panel.open{
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
-      margin-top: 10px; /* Reduced from 14px */
-      /* FIXED: Ensure max-height is set properly */
-      max-height: 5000px; /* Large enough for all content */
-      /* Remove will-change after animation */
-      will-change: auto;
+      margin-top: 14px;
     }
 
     /* ===== Boot Overlay ===== */
@@ -373,22 +292,21 @@
       z-index: 9999;
       opacity: 1;
       transition: opacity var(--boot-fade) ease;
-      /* Prevent interaction during boot */
-      pointer-events: all;
     }
-    #boot.hide { 
-      opacity: 0; 
-      pointer-events: none; 
-      /* Don't keep in DOM after hiding */
-      display: none;
+    #boot.hide { opacity: 0; pointer-events: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #boot { transition: none; }
+      #app { transition: none; }
+      .panel{ transition: none; }
     }
 
-    /* ===== OPTIMIZED PROGRESS TRACKER ===== */
+    /* ===== Progress Tracker (re-skinned to match) ===== */
     .tools-wrap{
       width: 100%;
-      max-width: 780px;      /* Reduced from 820px */
-      margin: 0 auto 2rem;   /* Reduced from 3rem */
-      padding: 0 1.5rem;     /* Reduced from 2rem */
+      max-width: 820px;
+      margin: 0 auto 3rem;
+      padding: 0 2rem;
       box-sizing: border-box;
     }
 
@@ -396,111 +314,84 @@
       background: var(--glass);
       border: 1px solid var(--border-soft);
       border-radius: var(--radius-card);
-      padding: 1rem;         /* Reduced from 1.25rem */
+      padding: 1.25rem;
       box-shadow: var(--shadow-soft);
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
-      margin-top: 0.8rem;    /* Reduced from 1rem */
+      margin-top: 1rem;
       position: relative;
       overflow: hidden;
-      contain: layout style;
     }
-    
-    @media (prefers-reduced-motion: reduce), (max-width: 768px) {
-      .tool-card {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-      }
-    }
-
     .tool-card::before{
       content:"";
       position:absolute;
       inset:0;
       pointer-events:none;
-      background: radial-gradient(120px 70px at 20% 10%, rgba(255,255,255,0.08), transparent 55%);
-      opacity: 0.8;
+      background: radial-gradient(160px 90px at 20% 10%, rgba(255,255,255,0.10), transparent 62%);
+      opacity: 0.9;
     }
 
     .tool-title{
-      font-size: 1.1rem;     /* Reduced from 1.15rem */
-      margin: 0 0 0.7rem 0;  /* Reduced from 0.85rem */
+      font-size: 1.15rem;
+      margin: 0 0 0.85rem 0;
       background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentA));
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: shine var(--shineSpeed) linear infinite paused;
+      animation: shine var(--shineSpeed) linear infinite;
       position: relative;
       z-index: 1;
-    }
-    
-    .boot-done .tool-title {
-      animation-play-state: running;
     }
 
     .tool-row{
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.7rem;           /* Reduced from 0.85rem */
+      gap: 0.85rem;
       align-items: end;
       position: relative;
       z-index: 1;
     }
     @media (max-width: 640px){
-      .tool-row{ 
-        grid-template-columns: 1fr;
-        gap: 0.6rem;
-      }
+      .tool-row{ grid-template-columns: 1fr; }
     }
 
     .tool-field{
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;           /* Reduced from 0.35rem */
+      gap: 0.35rem;
       position: relative;
       z-index: 1;
     }
 
     .tool-label{
-      font-size: 0.85rem;    /* Reduced from 0.9rem */
+      font-size: 0.9rem;
       opacity: 0.85;
     }
 
     .tool-input, .tool-select{
       width: 100%;
-      background: rgba(21,21,21,0.7);
+      background: rgba(21,21,21,0.70);
       border: 1px solid rgba(255,255,255,0.08);
       color: #fff;
-      border-radius: 12px;   /* Reduced from 14px */
-      padding: 0.65rem 0.8rem; /* Reduced padding */
+      border-radius: 14px;
+      padding: 0.75rem 0.9rem;
       outline: none;
-      font-size: 0.9rem;     /* Reduced from 0.95rem */
+      font-size: 0.95rem;
       box-sizing: border-box;
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
-      transition: border-color 150ms ease, 
-                  box-shadow 150ms ease, 
-                  transform 120ms ease;
-      /* Prevent layout shifts */
-      min-height: 42px;
-    }
-    
-    @media (prefers-reduced-motion: reduce), (max-width: 768px) {
-      .tool-input, .tool-select {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-      }
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 160ms ease;
     }
 
     .tool-input:focus, .tool-select:focus{
       border-color: rgba(0,240,255,0.55);
-      box-shadow: 0 0 0 2px rgba(0,240,255,0.1); /* Reduced from 3px */
+      box-shadow: 0 0 0 3px rgba(0,240,255,0.10);
       transform: translateY(-1px);
     }
 
     .seg{
       display: flex;
-      gap: 0.45rem;          /* Reduced from 0.55rem */
+      gap: 0.55rem;
       flex-wrap: wrap;
       position: relative;
       z-index: 1;
@@ -511,38 +402,29 @@
       border: 1px solid rgba(255,255,255,0.08);
       color: #fff;
       border-radius: var(--radius-pill);
-      padding: 0.5rem 0.8rem; /* Reduced padding */
+      padding: 0.6rem 0.95rem;
       cursor: pointer;
       transition:
-        transform 120ms cubic-bezier(.2,.8,.2,1),
-        box-shadow 120ms cubic-bezier(.2,.8,.2,1),
-        border-color 150ms ease,
-        background-color 150ms ease;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.3); /* Reduced shadow */
+        transform 160ms cubic-bezier(.2,.9,.2,1),
+        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
+        border-color 200ms ease,
+        background-color 200ms ease;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
-      min-height: 36px;
     }
-    
-    @media (prefers-reduced-motion: reduce), (max-width: 768px) {
-      .seg button {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-      }
-    }
-    
     .seg button:hover{ transform: translateY(-1px); }
-    .seg button:active{ transform: translateY(1px) scale(0.99); }
+    .seg button:active{ transform: translateY(1px) scale(0.985); }
     .seg button.active{
       border-color: rgba(0,240,255,0.55);
       background: rgba(0,240,255,0.08);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.35); /* Reduced shadow */
+      box-shadow: 0 12px 22px rgba(0,0,0,0.42);
     }
 
     .tool-mini{
-      font-size: 0.85rem;    /* Reduced from 0.92rem */
+      font-size: 0.92rem;
       opacity: 0.9;
-      margin-top: 0.7rem;    /* Reduced from 0.85rem */
+      margin-top: 0.85rem;
       line-height: 1.4;
       position: relative;
       z-index: 1;
@@ -551,16 +433,13 @@
     .save-row{
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.7rem;           /* Reduced from 0.85rem */
-      margin-top: 0.7rem;    /* Reduced from 0.85rem */
+      gap: 0.85rem;
+      margin-top: 0.85rem;
       position: relative;
       z-index: 1;
     }
     @media (max-width: 640px){
-      .save-row{ 
-        grid-template-columns: 1fr;
-        gap: 0.6rem;
-      }
+      .save-row{ grid-template-columns: 1fr; }
     }
 
     .save-btn{
@@ -568,83 +447,53 @@
       background: rgba(30,30,30,0.62);
       border: 1px solid rgba(255,255,255,0.08);
       color: #fff;
-      border-radius: 14px;   /* Reduced from 16px */
-      padding: 0.65rem 0.8rem; /* Reduced padding */
+      border-radius: 16px;
+      padding: 0.78rem 0.95rem;
       cursor: pointer;
       transition:
-        transform 120ms cubic-bezier(.2,.8,.2,1),
-        box-shadow 120ms cubic-bezier(.2,.8,.2,1),
-        border-color 150ms ease,
-        background-color 150ms ease;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.35); /* Reduced shadow */
+        transform 160ms cubic-bezier(.2,.9,.2,1),
+        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
+        border-color 200ms ease,
+        background-color 200ms ease;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.40);
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
-      min-height: 42px;
     }
-    
-    @media (prefers-reduced-motion: reduce), (max-width: 768px) {
-      .save-btn {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-      }
-    }
-    
     .save-btn:hover{ transform: translateY(-1px); }
-    .save-btn:active{ transform: translateY(1px) scale(0.99); }
+    .save-btn:active{ transform: translateY(1px) scale(0.985); }
 
     .activity-list{
-      margin-top: 0.7rem;    /* Reduced from 0.85rem */
+      margin-top: 0.85rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;           /* Reduced from 0.6rem */
-      max-height: 280px;     /* Reduced from 320px */
+      gap: 0.6rem;
+      max-height: 320px;
       overflow: auto;
-      padding-right: 0.2rem; /* Reduced from 0.25rem */
+      padding-right: 0.25rem;
       position: relative;
       z-index: 1;
-      /* Smooth scrolling */
-      scroll-behavior: smooth;
-      /* Better scroll performance */
-      -webkit-overflow-scrolling: touch;
     }
 
     .activity-item{
       background: rgba(21,21,21,0.68);
       border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 14px;   /* Reduced from 16px */
-      padding: 0.7rem 0.8rem; /* Reduced padding */
-      font-size: 0.9rem;     /* Reduced from 0.95rem */
-      line-height: 1.3;
+      border-radius: 16px;
+      padding: 0.8rem 0.9rem;
+      font-size: 0.95rem;
+      line-height: 1.35;
       display: flex;
       justify-content: space-between;
-      gap: 0.6rem;           /* Reduced from 0.8rem */
+      gap: 0.8rem;
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
-      /* Prevent expensive repaints */
-      contain: layout style;
     }
-    
-    @media (prefers-reduced-motion: reduce), (max-width: 768px) {
-      .activity-item {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-      }
-    }
-    
     .activity-item .right{
       opacity: 0.75;
-      font-size: 0.8rem;     /* Reduced from 0.85rem */
+      font-size: 0.85rem;
       white-space: nowrap;
-      flex-shrink: 0;
     }
 
     .hidden{ display: none !important; }
-    
-    /* Performance helper class */
-    .perf-optimize {
-      /* Prevent expensive background painting */
-      background-attachment: fixed;
-    }
   </style>
 </head>
 
@@ -653,8 +502,8 @@
 
   <main id="app">
 
-   <h1 class="heading">Doraemon</h1>
-
+<h1 class="heading">Doraemon</h1>
+    
     <!-- DM: Top buttons -->
     <div class="grid menu-grid">
       <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-seasons')"><span class="label">Seasons</span></a>
@@ -691,7 +540,7 @@
       </div>
     </div>
 
-  <h1 class="heading section-gap">Ben 10</h1>
+<h1 class="heading section-gap">Ben 10</h1>
 
     <!-- B10: Top series buttons (2 rows x 2 cols) -->
     <div class="grid menu-grid">
@@ -711,14 +560,14 @@
       </div>
 
       <!-- B10: Alien Force -->
-      <div id="b10-af" class="grid grid-3 panel b10-panel">
+      <div id="b10-af" class="grid panel b10-panel">
         <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
         <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
         <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
       </div>
 
       <!-- B10: Ultimate Alien -->
-      <div id="b10-ua" class="grid grid-3 panel b10-panel">
+      <div id="b10-ua" class="grid panel b10-panel">
         <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
         <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
         <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
@@ -739,7 +588,7 @@
 
     <h1 class="heading section-gap">Progress Tracker</h1>
 
-    <div style="text-align:center; margin-top:-0.8rem; opacity:0.8;" id="syncStatus">
+    <div style="text-align:center; margin-top:-1rem; opacity:0.8;" id="syncStatus">
       Sync: OFF (local only)
     </div>
 
@@ -772,7 +621,7 @@
         </div>
 
         <div id="savePanel">
-          <div class="tool-row" style="margin-top:0.7rem;">
+          <div class="tool-row" style="margin-top:0.9rem;">
             <div class="tool-field">
               <div class="tool-label">Cartoon</div>
               <select id="cartoonSelect" class="tool-select"></select>
@@ -784,7 +633,7 @@
             </div>
           </div>
 
-          <div class="tool-row" style="margin-top:0.7rem;">
+          <div class="tool-row" style="margin-top:0.8rem;">
             <div class="tool-field">
               <div class="tool-label">Type</div>
               <select id="typeSelect" class="tool-select">
@@ -815,7 +664,7 @@
         </div>
 
         <div id="recentPanel" class="hidden">
-          <div class="tool-row" style="margin-top:0.7rem;">
+          <div class="tool-row" style="margin-top:0.9rem;">
             <div class="tool-field">
               <div class="tool-label">Cartoon</div>
               <select id="recentCartoonSelect" class="tool-select"></select>
@@ -834,126 +683,48 @@
   </main>
 
   <script>
-    // PERFORMANCE OPTIMIZATIONS APPLIED:
-    // 1. Debounced resize event
-    // 2. Optimized DOM queries and caching
-    // 3. Reduced forced reflows
-    // 4. Memory leak prevention
-    // 5. Efficient event delegation
-    // 6. Batch DOM operations
-
-    /* ===== Debounce utility ===== */
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    }
-
-    /* ===== Throttle utility ===== */
-    function throttle(func, limit) {
-      let inThrottle;
-      return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-          func.apply(context, args);
-          inThrottle = true;
-          setTimeout(() => inThrottle = false, limit);
-        }
-      };
-    }
-
-    /* ===== FIXED: Smooth panel animation (no disappearing issue) ===== */
-    let panelAnimations = new Map();
-    
-    function calculatePanelHeight(panel) {
-      if (!panel) return 0;
-      
-      if (panelAnimations.has(panel)) {
-        return panelAnimations.get(panel);
-      }
-      
-      const originalStyle = {
-        display: panel.style.display,
-        visibility: panel.style.visibility,
-        position: panel.style.position
-      };
-      
-      panel.style.display = 'block';
-      panel.style.visibility = 'hidden';
-      panel.style.position = 'absolute';
-      
-      const height = panel.scrollHeight;
-      
-      Object.assign(panel.style, originalStyle);
-      
-      panelAnimations.set(panel, height);
-      
-      return height;
-    }
-
+    /* ===== Smooth panel animation (no "instant pop") ===== */
     function setPanelOpen(panel, open){
       if(!panel) return;
 
       if(open){
         panel.classList.add('open');
-        
-        requestAnimationFrame(() => {
-          panel.style.maxHeight = '0px';
-          
-          requestAnimationFrame(() => {
-            const target = calculatePanelHeight(panel);
-            // FIXED: Set max-height properly and keep it
-            panel.style.maxHeight = target + 'px';
-            
-            // FIXED: Ensure it stays open by setting overflow to visible after animation
-            setTimeout(() => {
-              if (panel.classList.contains('open')) {
-                panel.style.overflow = 'visible';
-                panel.style.maxHeight = 'none';
-              }
-            }, 320);
-          });
-        });
+
+        // reset then measure for smooth transition
+        panel.style.maxHeight = '0px';
+        // force reflow
+        panel.offsetHeight;
+
+        const target = panel.scrollHeight;
+        panel.style.maxHeight = target + 'px';
       } else {
+        // collapse smoothly from current height
         const current = panel.scrollHeight;
         panel.style.maxHeight = current + 'px';
-        panel.style.overflow = 'hidden';
-        
-        requestAnimationFrame(() => {
-          panel.style.maxHeight = '0px';
-          setTimeout(() => {
-            panel.classList.remove('open');
-          }, 320);
-        });
+        panel.offsetHeight;
+        panel.style.maxHeight = '0px';
+        panel.classList.remove('open');
       }
     }
 
     function closeAllPanels(selector){
-      const panels = document.querySelectorAll(selector);
-      for (let i = 0; i < panels.length; i++) {
-        setPanelOpen(panels[i], false);
-      }
+      document.querySelectorAll(selector).forEach(p => setPanelOpen(p, false));
     }
 
     function toggleGroup(e, targetId, groupSelector){
-      if (e) e.preventDefault();
+      e.preventDefault();
       const target = document.getElementById(targetId);
       if(!target) return;
 
       const isOpen = target.classList.contains('open');
 
-      closeAllPanels(groupSelector);
+      // close all in the group first
+      document.querySelectorAll(groupSelector).forEach(p => setPanelOpen(p, false));
 
+      // open only if it was closed
       if(!isOpen) setPanelOpen(target, true);
 
-      if (e) ripple(e);
+      ripple(e);
     }
 
     function toggleDM(e, targetId){
@@ -964,18 +735,12 @@
       toggleGroup(e, targetId, '.b10-panel');
     }
 
-    // Debounced resize handler
-    const handleResize = debounce(() => {
-      const openPanels = document.querySelectorAll('.panel.open');
-      for (let i = 0; i < openPanels.length; i++) {
-        const panel = openPanels[i];
-        panelAnimations.delete(panel);
-        const height = calculatePanelHeight(panel);
-        panel.style.maxHeight = height + 'px';
-      }
-    }, 150);
-
-    window.addEventListener('resize', handleResize);
+    // keep opened panels correct on resize (prevents weird gaps)
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.panel.open').forEach(p => {
+        p.style.maxHeight = p.scrollHeight + 'px';
+      });
+    });
 
     // =========================
     // CONFIG
@@ -987,7 +752,7 @@
     const ROOM_KEY  = "toonie_room_code_v1";
     const STORE_KEY = "toonie_progress_tracker_v2";
 
-    const SYNC_POLL_MS = 15000;
+    const SYNC_POLL_MS = 10000;
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -1013,85 +778,52 @@
     };
 
     // =========================
-    // UI HELPERS (OPTIMIZED)
+    // UI HELPERS
     // =========================
     function setSyncStatus(text) {
       const el = document.getElementById("syncStatus");
       if (el) el.textContent = text;
     }
 
-    // Optimized ripple
     function ripple(e) {
-      if (navigator.vibrate) {
-        try { navigator.vibrate(20); } catch(e) {}
-      }
-      
+      if (navigator.vibrate) navigator.vibrate(30);
       const target = e.currentTarget;
       if(!target) return;
 
-      if (target.querySelector('.ripple')) return;
-
+      // If click is triggered without coordinates, skip ripple positioning
       const rect = target.getBoundingClientRect();
       const cx = (typeof e.clientX === 'number' && e.clientX !== 0) ? e.clientX : (rect.left + rect.width / 2);
       const cy = (typeof e.clientY === 'number' && e.clientY !== 0) ? e.clientY : (rect.top + rect.height / 2);
 
       const rp = document.createElement('span');
       rp.classList.add('ripple');
-      
-      const size = Math.max(target.offsetWidth, target.offsetHeight) * 0.8;
-      rp.style.width = rp.style.height = size + 'px';
-      rp.style.left = cx - rect.left - size / 2 + 'px';
-      rp.style.top = cy - rect.top - size / 2 + 'px';
-      
+      rp.style.width = rp.style.height = Math.max(target.offsetWidth, target.offsetHeight) + 'px';
+      rp.style.left = cx - rect.left - rp.offsetWidth / 2 + 'px';
+      rp.style.top = cy - rect.top - rp.offsetHeight / 2 + 'px';
       target.appendChild(rp);
-      
-      setTimeout(() => {
-        if (rp.parentNode === target) {
-          target.removeChild(rp);
-        }
-      }, 1000);
+      setTimeout(() => rp.remove(), 600);
     }
 
-    // Optimized boot sequence
-    let bootTimeout;
+    // Boot overlay fade
     const bootStart = performance.now();
-    
-    function initBoot() {
-      const MIN_SHOW = 1500;
+    window.addEventListener('load', () => {
+      const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--boot-min-show')) || 3500;
       const elapsed = performance.now() - bootStart;
       const wait = Math.max(0, MIN_SHOW - elapsed);
 
-      bootTimeout = setTimeout(() => {
+      setTimeout(() => {
         const b = document.getElementById('boot');
         if (b) {
           b.classList.add('hide');
           document.body.classList.add('boot-done');
-          
-          setTimeout(() => {
-            if (b.parentNode) {
-              b.parentNode.removeChild(b);
-            }
-            document.querySelectorAll('.heading, .tool-title, a span.label').forEach(el => {
-              if (el.style) el.style.animationPlayState = 'running';
-            });
-          }, 800);
+          const bootFade = (parseFloat(getComputedStyle(b).transitionDuration) || 1.2) * 1000;
+          setTimeout(() => b.remove(), bootFade + 50);
         }
-        
-        bootTimeout = null;
       }, wait);
-    }
-
-    window.addEventListener('pagehide', () => {
-      if (bootTimeout) {
-        clearTimeout(bootTimeout);
-        bootTimeout = null;
-      }
     });
 
-    window.addEventListener('load', initBoot);
-
     // =========================
-    // STORAGE (OPTIMIZED)
+    // STORAGE (ROOM + LOCAL)
     // =========================
     function getRoomCode() {
       return (localStorage.getItem(ROOM_KEY) || "").trim();
@@ -1099,11 +831,8 @@
 
     function setRoomCode(code) {
       const clean = String(code || "").trim();
-      if (clean) {
-        localStorage.setItem(ROOM_KEY, clean);
-      } else {
-        localStorage.removeItem(ROOM_KEY);
-      }
+      if (clean) localStorage.setItem(ROOM_KEY, clean);
+      else localStorage.removeItem(ROOM_KEY);
       return clean;
     }
 
@@ -1111,27 +840,20 @@
       return new Date().toISOString();
     }
 
-    let dateFormatter;
-    function getDateFormatter() {
-      if (!dateFormatter) {
-        dateFormatter = new Intl.DateTimeFormat(undefined, {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false
-        });
-      }
-      return dateFormatter;
-    }
-
     function displayLocal(ts){
       if(!ts) return "";
       const d = new Date(ts);
       if (isNaN(d.getTime())) return String(ts).slice(0,16);
 
-      const fmt = getDateFormatter();
+      const fmt = new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+
       const parts = fmt.formatToParts(d).reduce((acc, p) => {
         acc[p.type] = p.value;
         return acc;
@@ -1139,10 +861,11 @@
       return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
     }
 
+    // Normalize seriesLabel: keep local as null (never "-")
     function normalizeSeriesLocal(x){
-      if (x == null) return null;
-      const v = String(x).trim();
-      if(!v || v === "-") return null;
+      const v = (x == null) ? null : String(x).trim();
+      if(!v) return null;
+      if(v === "-") return null;
       return v;
     }
 
@@ -1156,24 +879,22 @@
       return store.data[profile][cartoonLabel];
     }
 
+    // Clean old local data so we don't keep duplicates from the old null vs "-" switch
     function normalizeAndDedupeStore(store){
       const profiles = ["Asim","Marwa"];
       for(const p of profiles){
         if(!store.data[p]) store.data[p] = {};
-        const profileData = store.data[p];
-        
-        for(const cartoonLabel of Object.keys(profileData)){
+        for(const cartoonLabel of Object.keys(store.data[p] || {})){
           const node = ensurePath(store, p, cartoonLabel);
 
           if(node.last){
             node.last.seriesLabel = normalizeSeriesLocal(node.last.seriesLabel);
           }
 
+          // normalize + dedupe by (type, seasonOrMovie, seriesLabel), keep newest ts
           const map = new Map();
           const arr = Array.isArray(node.history) ? node.history : [];
-          
-          for(let i = 0; i < arr.length; i++){
-            const it = arr[i];
+          for(const it of arr){
             if(!it) continue;
             it.seriesLabel = normalizeSeriesLocal(it.seriesLabel);
             const key = `${it.type}|${it.seasonOrMovie}|${it.seriesLabel || ""}`;
@@ -1188,7 +909,8 @@
 
           node.history = merged;
 
-          if(merged.length > 0){
+          // make sure node.last is the real latest event for that cartoon
+          if(merged.length){
             const latest = merged[0];
             if(!node.last || String(latest.ts) > String(node.last.ts)){
               node.last = latest;
@@ -1217,65 +939,61 @@
     }
 
     function saveStore(store){
-      try {
-        localStorage.setItem(STORE_KEY, JSON.stringify(store));
-      } catch (e) {
-        console.warn("Failed to save store:", e);
-      }
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
     }
 
     function formatLine(entry){
-      const parts = [entry.cartoonLabel];
+      const parts = [];
+      parts.push(entry.cartoonLabel);
+
+      // Only show series if it's a real series (Ben 10). Doraemon stays clean.
       if(entry.seriesLabel) parts.push(entry.seriesLabel);
-      
+
       if(entry.type === "season"){
-        parts.push(entry.seasonOrMovie, `EP ${entry.num}`);
+        parts.push(entry.seasonOrMovie);
+        parts.push(`EP ${entry.num}`);
       } else {
-        parts.push("MOVIES", `M${entry.num}`);
+        parts.push("MOVIES");
+        parts.push(`M${entry.num}`);
       }
       return parts.join(" ");
     }
 
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
+
+      // local seriesLabel should always be normalized
       entry.seriesLabel = normalizeSeriesLocal(entry.seriesLabel);
 
+      // Keep "global last" for the cartoon = newest ts
       if(!node.last || String(entry.ts) >= String(node.last.ts)){
         node.last = entry;
       }
 
       const keySeries = entry.seriesLabel || null;
-      const history = node.history;
-      
-      let foundIndex = -1;
-      for(let i = 0; i < history.length; i++){
-        const h = history[i];
-        if(h.type === entry.type && 
-           h.seasonOrMovie === entry.seasonOrMovie && 
-           normalizeSeriesLocal(h.seriesLabel) === keySeries){
-          foundIndex = i;
-          break;
-        }
-      }
 
-      if(foundIndex >= 0){
-        const old = history[foundIndex];
+      const idx = node.history.findIndex(h =>
+        (h.type === entry.type) &&
+        (h.seasonOrMovie === entry.seasonOrMovie) &&
+        (normalizeSeriesLocal(h.seriesLabel) === keySeries)
+      );
+
+      if(idx >= 0){
+        // replace if newer
+        const old = node.history[idx];
         if(!old || String(entry.ts) >= String(old.ts)){
-          history[foundIndex] = entry;
+          node.history[idx] = entry;
         }
       } else {
-        history.unshift(entry);
+        node.history.unshift(entry);
       }
 
-      history.sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
-      
-      if (history.length > 50) {
-        node.history = history.slice(0, 50);
-      }
+      // keep history ordered
+      node.history.sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
     }
 
     // =========================
-    // SUPABASE HELPERS (OPTIMIZED)
+    // SUPABASE HELPERS (CLOUD)
     // =========================
     function supabaseEnabled(){
       return !!(SUPABASE_URL && SUPABASE_ANON_KEY && supabaseClient);
@@ -1285,6 +1003,7 @@
       const room = getRoomCode();
       if(!room) return { ok: false, skipped: true };
 
+      // IMPORTANT: cloud series_label must be NOT NULL => send "-" if no series
       const cloudSeries = (row.series_label == null || String(row.series_label).trim() === "")
         ? "-"
         : String(row.series_label);
@@ -1300,55 +1019,47 @@
         ts: row.ts
       };
 
-      try {
-        const { error } = await supabaseClient
-          .from(TABLE_NAME)
-          .upsert(payload, {
-            onConflict: "room_code,profile,cartoon_label,series_label,type,season_or_movie"
-          });
+      const { error } = await supabaseClient
+        .from(TABLE_NAME)
+        .upsert(payload, {
+          onConflict: "room_code,profile,cartoon_label,series_label,type,season_or_movie"
+        });
 
-        if(error){
-          console.error("Cloud upsert error:", error);
-          return { ok: false, error: error.message || "Cloud upsert failed" };
-        }
-        return { ok: true };
-      } catch (error) {
-        console.error("Cloud upsert exception:", error);
-        return { ok: false, error: "Network error" };
+      if(error){
+        console.error("Cloud upsert error:", error);
+        return { ok: false, error: error.message || "Cloud upsert failed" };
       }
+      return { ok: true };
     }
 
-    async function sbFetchProgress(room, profile, limit = 100){
+    async function sbFetchProgress(room, profile, limit = 250){
       if(!room) return { ok: false, skipped: true, rows: [] };
 
-      try {
-        const { data, error } = await supabaseClient
-          .from(TABLE_NAME)
-          .select("room_code,profile,cartoon_label,series_label,type,season_or_movie,num,ts")
-          .eq("room_code", room)
-          .eq("profile", profile)
-          .order("ts", { ascending: false })
-          .limit(limit);
+      const { data, error } = await supabaseClient
+        .from(TABLE_NAME)
+        .select("room_code,profile,cartoon_label,series_label,type,season_or_movie,num,ts")
+        .eq("room_code", room)
+        .eq("profile", profile)
+        .order("ts", { ascending: false })
+        .limit(limit);
 
-        if(error){
-          console.error("Cloud fetch error:", error);
-          return { ok: false, error: error.message || "Cloud fetch failed", rows: [] };
-        }
-        return { ok: true, rows: data || [] };
-      } catch (error) {
-        console.error("Cloud fetch exception:", error);
-        return { ok: false, error: "Network error", rows: [] };
+      if(error){
+        console.error("Cloud fetch error:", error);
+        return { ok: false, error: error.message || "Cloud fetch failed", rows: [] };
       }
+      return { ok: true, rows: data || [] };
     }
 
     // =========================
-    // APP (OPTIMIZED)
+    // APP
     // =========================
     function initTracker(){
       const profileSeg = document.getElementById("profileSeg");
       const modeSeg = document.getElementById("modeSeg");
+
       const savePanel = document.getElementById("savePanel");
       const recentPanel = document.getElementById("recentPanel");
+
       const cartoonSelect = document.getElementById("cartoonSelect");
       const seriesField = document.getElementById("seriesField");
       const seriesSelect = document.getElementById("seriesSelect");
@@ -1356,29 +1067,33 @@
       const seasonLabel = document.getElementById("seasonLabel");
       const seasonOrMovieSelect = document.getElementById("seasonOrMovieSelect");
       const numSelect = document.getElementById("numSelect");
+
       const saveBtn = document.getElementById("saveBtn");
       const saveHint = document.getElementById("saveHint");
+
       const recentCartoonSelect = document.getElementById("recentCartoonSelect");
       const recentInfo = document.getElementById("recentInfo");
       const activityList = document.getElementById("activityList");
+
       const roomInput = document.getElementById("roomInput");
       const roomSaveBtn = document.getElementById("roomSaveBtn");
+      const roomStatus = document.getElementById("roomStatus");
 
       if(!profileSeg || !modeSeg) return;
 
       let store = loadStore();
+      // write back cleaned store so duplicates are gone immediately
       saveStore(store);
 
       let activeProfile = store.activeProfile || "Asim";
       let activeMode = "save";
       let pollTimer = null;
       let lastCloudOk = true;
-      let isSaving = false;
 
-      function vib(){ 
-        if (navigator.vibrate && !isSaving) {
-          try { navigator.vibrate(15); } catch(e) {}
-        }
+      function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
+
+      function updateRoomStatus(msg){
+        if(roomStatus) roomStatus.textContent = msg;
       }
 
       function refreshRoomUI(){
@@ -1387,11 +1102,13 @@
 
         if(!room){
           setSyncStatus("Sync: OFF (local only)");
+          updateRoomStatus("Sync: OFF (no room code). Local save only.");
           return;
         }
 
         if(!supabaseEnabled()){
           setSyncStatus(`Sync: OFF (Room: ${room})`);
+          updateRoomStatus(`Room: ${room} → Sync OFF (Supabase not available).`);
           return;
         }
 
@@ -1399,17 +1116,15 @@
       }
 
       function setProfileUI(){
-        const buttons = profileSeg.querySelectorAll("button");
-        for (let i = 0; i < buttons.length; i++) {
-          buttons[i].classList.toggle("active", buttons[i].dataset.profile === activeProfile);
-        }
+        [...profileSeg.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("active", b.dataset.profile === activeProfile);
+        });
       }
 
       function setModeUI(){
-        const buttons = modeSeg.querySelectorAll("button");
-        for (let i = 0; i < buttons.length; i++) {
-          buttons[i].classList.toggle("active", buttons[i].dataset.mode === activeMode);
-        }
+        [...modeSeg.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("active", b.dataset.mode === activeMode);
+        });
 
         if(activeMode === "save"){
           savePanel.classList.remove("hidden");
@@ -1421,16 +1136,13 @@
         }
       }
 
-      function cartoonsList(){ return ["Doraemon", "Ben 10"]; }
+      function cartoonsList(){ return Object.keys(MODEL); }
       function getCartoonCfg(name){ return MODEL[name]; }
 
-      let cartoonOptionsHtml = null;
       function fillCartoonSelects(){
-        if (!cartoonOptionsHtml) {
-          cartoonOptionsHtml = cartoonsList().map(c => `<option value="${c}">${c}</option>`).join("");
-        }
-        cartoonSelect.innerHTML = cartoonOptionsHtml;
-        recentCartoonSelect.innerHTML = cartoonOptionsHtml;
+        const opts = cartoonsList().map(c => `<option value="${c}">${c}</option>`).join("");
+        cartoonSelect.innerHTML = opts;
+        recentCartoonSelect.innerHTML = opts;
       }
 
       function fillSeries(){
@@ -1441,11 +1153,7 @@
           return;
         }
         seriesField.classList.remove("hidden");
-        
-        if (!cfg._seriesOptionsHtml) {
-          cfg._seriesOptionsHtml = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
-        }
-        seriesSelect.innerHTML = cfg._seriesOptionsHtml;
+        seriesSelect.innerHTML = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
       }
 
       function fillSeasonOrMovie(){
@@ -1471,23 +1179,22 @@
         seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
       }
 
-      let episodeOptionsHtml = null;
       function fillEpisodeDropdown(max = 100){
-        if (!episodeOptionsHtml) {
-          let html = "";
-          for(let i = 1; i <= max; i++){
-            html += `<option value="${i}">${i}</option>`;
-          }
-          episodeOptionsHtml = html;
+        let html = "";
+        for(let i=1; i<=max; i++){
+          html += `<option value="${i}">${i}</option>`;
         }
-        numSelect.innerHTML = episodeOptionsHtml;
+        numSelect.innerHTML = html;
         numSelect.value = "1";
       }
 
       function currentKeyLabels(){
         const cfg = getCartoonCfg(cartoonSelect.value);
         const cartoonLabel = cfg.label;
+
         const type = typeSelect.value;
+
+        // LOCAL: Doraemon has no series => keep null locally
         let seriesLabel = null;
 
         if(cfg.hasSeries){
@@ -1510,7 +1217,7 @@
         const node = ensurePath(store, activeProfile, cartoonLabel);
 
         if(node.last){
-          saveHint.textContent = `Last: ${formatLine(node.last)} (${displayLocal(node.last.ts)})`;
+          saveHint.textContent = `Last Watched: ${formatLine(node.last)} (${displayLocal(node.last.ts)})`;
         } else {
           saveHint.textContent = "No activity yet for this cartoon.";
         }
@@ -1531,52 +1238,38 @@
           return;
         }
 
-        recentInfo.textContent = `Showing activity for ${cartoonLabel} (${activeProfile})`;
-        
-        const fragment = document.createDocumentFragment();
-        for (let i = 0; i < list.length; i++) {
-          const item = list[i];
-          const div = document.createElement('div');
-          div.className = 'activity-item';
-          div.innerHTML = `
-            <div>${formatLine(item)}</div>
-            <div class="right">${displayLocal(item.ts)}</div>
-          `;
-          fragment.appendChild(div);
-        }
-        
-        activityList.innerHTML = '';
-        activityList.appendChild(fragment);
+        recentInfo.textContent = `Showing all activity for ${cartoonLabel} (${activeProfile})`;
+        activityList.innerHTML = list
+          .map(item => `
+            <div class="activity-item">
+              <div>${formatLine(item)}</div>
+              <div class="right">${displayLocal(item.ts)}</div>
+            </div>
+          `)
+          .join("");
       }
 
-      let pollFailCount = 0;
-      const MAX_POLL_FAILURES = 3;
-      
       async function pollFromCloud(){
         const room = getRoomCode();
         if(!room || !supabaseEnabled()) return;
 
-        const res = await sbFetchProgress(room, activeProfile, 100);
+        const res = await sbFetchProgress(room, activeProfile, 250);
         if(!res.ok){
-          pollFailCount++;
-          if(pollFailCount >= MAX_POLL_FAILURES) {
-            stopPolling();
-            setSyncStatus(`Sync: OFF (failed ${MAX_POLL_FAILURES} times)`);
+          if(lastCloudOk){
+            updateRoomStatus(`Room: ${room} → Sync ON, but fetch failed. (Will keep trying)`);
           }
           lastCloudOk = false;
           return;
         }
 
-        pollFailCount = 0;
         lastCloudOk = true;
 
         store = loadStore();
 
-        const rows = res.rows;
-        for(let i = 0; i < rows.length; i++){
-          const r = rows[i];
+        for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
+            // CLOUD "-" => LOCAL null
             seriesLabel: normalizeSeriesLocal(r.series_label),
             type: r.type,
             seasonOrMovie: r.season_or_movie,
@@ -1591,6 +1284,7 @@
 
         updateSaveHintForCartoon();
         if(activeMode === "recent") renderRecent();
+        refreshRoomUI();
       }
 
       function startPolling(){
@@ -1602,7 +1296,7 @@
           pollFromCloud().catch(() => {});
         }, SYNC_POLL_MS);
 
-        setTimeout(() => pollFromCloud().catch(() => {}), 1000);
+        pollFromCloud().catch(() => {});
       }
 
       function stopPolling(){
@@ -1612,58 +1306,51 @@
         }
       }
 
-      const debouncedSave = debounce(async function() {
-        if (isSaving) return;
-        isSaving = true;
-        
-        try {
-          vib();
-          store = loadStore();
-
-          const cur = currentKeyLabels();
-          const num = Math.max(1, Math.min(100, Number(numSelect.value) || 1));
-
-          const entry = {
-            cartoonLabel: cur.cartoonLabel,
-            seriesLabel: normalizeSeriesLocal(cur.seriesLabel),
-            type: cur.type,
-            seasonOrMovie: cur.seasonOrMovie,
-            num,
-            ts: nowISO()
-          };
-
-          upsertEntry(store, activeProfile, entry);
-          store = normalizeAndDedupeStore(store);
-          saveStore(store);
-
-          saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
-
-          const room = getRoomCode();
-          if(room && supabaseEnabled()){
-            const push = await sbUpsertProgress({
-              profile: activeProfile,
-              cartoon_label: entry.cartoonLabel,
-              series_label: entry.seriesLabel || "-",
-              type: entry.type,
-              season_or_movie: entry.seasonOrMovie,
-              num: entry.num,
-              ts: entry.ts
-            });
-
-            if(!push.ok){
-              saveHint.textContent = `Saved locally. (Cloud: ${push.error || "failed"})`;
-            }
-          }
-        } catch (error) {
-          console.error("Save error:", error);
-          saveHint.textContent = "Error saving. Please try again.";
-        } finally {
-          isSaving = false;
-        }
-      }, 300);
-
       async function doSave(){
-        debouncedSave();
+        vib();
+        store = loadStore();
+
+        const cur = currentKeyLabels();
+        const num = Math.max(1, Math.min(100, Number(numSelect.value) || 1));
+
+        const entry = {
+          cartoonLabel: cur.cartoonLabel,
+          seriesLabel: normalizeSeriesLocal(cur.seriesLabel), // local normalized
+          type: cur.type,
+          seasonOrMovie: cur.seasonOrMovie,
+          num,
+          ts: nowISO()
+        };
+
+        // LOCAL SAVE ALWAYS
+        upsertEntry(store, activeProfile, entry);
+        store = normalizeAndDedupeStore(store);
+        saveStore(store);
+
+        saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
+
+        // CLOUD SAVE IF POSSIBLE
+        const room = getRoomCode();
+        if(!room || !supabaseEnabled()){
+          return;
+        }
+
+        const push = await sbUpsertProgress({
+          profile: activeProfile,
+          cartoon_label: entry.cartoonLabel,
+          // only cloud gets "-"
+          series_label: entry.seriesLabel || "-",
+          type: entry.type,
+          season_or_movie: entry.seasonOrMovie,
+          num: entry.num,
+          ts: entry.ts
+        });
+
+        if(push.ok){
+          pollFromCloud().catch(() => {});
+        } else {
+          saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
+        }
       }
 
       // ===== INIT =====
@@ -1681,12 +1368,14 @@
       updateSaveHintForCartoon();
       startPolling();
 
-      // ===== EVENT HANDLERS =====
+      // ===== EVENTS =====
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
-        
+        vib();
+
         activeProfile = btn.dataset.profile;
+
         store = loadStore();
         store.activeProfile = activeProfile;
         saveStore(store);
@@ -1700,52 +1389,46 @@
       modeSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
-        
+        vib();
         activeMode = btn.dataset.mode;
         setModeUI();
       });
 
-      const debouncedFillSeries = debounce(fillSeries, 50);
-      const debouncedUpdateHint = debounce(updateSaveHintForCartoon, 100);
-      const debouncedFillSeason = debounce(fillSeasonOrMovie, 50);
-
       cartoonSelect.addEventListener("change", () => {
-        debouncedFillSeries();
+        fillSeries();
         const cfg = getCartoonCfg(cartoonSelect.value);
         if(!cfg.hasMovies) typeSelect.value = "season";
 
-        debouncedFillSeason();
-        debouncedUpdateHint();
+        fillSeasonOrMovie();
+        updateSaveHintForCartoon();
 
         recentCartoonSelect.value = cartoonSelect.value;
         if(activeMode === "recent") renderRecent();
       });
 
       seriesSelect.addEventListener("change", () => {
-        debouncedFillSeason();
-        debouncedUpdateHint();
+        fillSeasonOrMovie();
+        updateSaveHintForCartoon();
       });
 
       typeSelect.addEventListener("change", () => {
         const cfg = getCartoonCfg(cartoonSelect.value);
         if(typeSelect.value === "movie" && !cfg.hasMovies) typeSelect.value = "season";
-        debouncedFillSeason();
-        debouncedUpdateHint();
+        fillSeasonOrMovie();
+        updateSaveHintForCartoon();
       });
 
       seasonOrMovieSelect.addEventListener("change", () => {
-        debouncedUpdateHint();
+        updateSaveHintForCartoon();
       });
 
-      saveBtn.addEventListener("click", (e) => { 
-        e.preventDefault();
-        doSave().catch(() => {}); 
-      });
+      saveBtn.addEventListener("click", () => { doSave().catch(() => {}); });
 
-      recentCartoonSelect.addEventListener("change", debounce(renderRecent, 100));
+      recentCartoonSelect.addEventListener("change", renderRecent);
 
       if(roomSaveBtn && roomInput){
         roomSaveBtn.addEventListener("click", () => {
+          vib();
           const code = (roomInput.value || "").trim();
           setRoomCode(code);
           refreshRoomUI();
@@ -1761,16 +1444,9 @@
           }
         });
       }
-      
-      window.addEventListener('beforeunload', () => {
-        stopPolling();
-        panelAnimations.clear();
-      });
     }
 
-    window.addEventListener("load", () => {
-      setTimeout(initTracker, 500);
-    });
+    window.addEventListener("load", initTracker);
   </script>
 </body>
 </html>
