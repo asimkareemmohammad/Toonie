@@ -11,259 +11,312 @@
   <link rel="icon" href="icons/192.png" type="image/png" sizes="192x192">
   <link rel="icon" href="icons/512.png" type="image/png" sizes="512x512">
 
-  <meta name="theme-color" content="#0f0f0f">
+  <meta name="theme-color" content="#121212">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Toonie">
   <meta name="mobile-web-app-capable" content="yes">
 
+  <!-- Material-ish Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
   <style>
     :root{
-      --boot-min-show: 3500ms;
-      --boot-fade: 1200ms;
-      --app-fade: 700ms;
-      --app-fade-delay: 150ms;
+      /* Boot */
+      --boot-min-show: 900ms;
+      --boot-fade: 350ms;
+      --app-fade: 250ms;
+      --app-fade-delay: 80ms;
 
-      /* ===== Unified Glass Theme ===== */
-      --bg: #0f0f0f;
-      --glass: rgba(30,30,30,0.64);
-      --glass-strong: rgba(30,30,30,0.78);
-      --border: rgba(255,255,255,0.08);
-      --border-soft: rgba(255,255,255,0.06);
-      --shadow: 0 12px 26px rgba(0,0,0,0.46), 0 2px 0 rgba(255,255,255,0.05) inset;
-      --shadow-soft: 0 10px 25px rgba(0,0,0,0.35);
-      --radius-pill: 999px;
-      --radius-card: 22px;
-      --blur: blur(12px);
+      /* ===== Material 3 dark-ish token set (hand-tuned) ===== */
+      --md-bg: #121212;
+      --md-surface: #1E1E1E;
+      --md-surface-2: #232323;
+      --md-surface-3: #2A2A2A;
 
-      --accentA: #facc15;
-      --accentB: #00f0ff;
-      --shineSpeed: 3s;
+      --md-outline: rgba(255,255,255,0.12);
+      --md-outline-strong: rgba(255,255,255,0.16);
+
+      --md-text: rgba(255,255,255,0.92);
+      --md-text-soft: rgba(255,255,255,0.70);
+      --md-text-faint: rgba(255,255,255,0.54);
+
+      /* Material 3-ish purple in dark theme */
+      --md-primary: #D0BCFF;
+      --md-on-primary: #2B1B5A;
+
+      --md-secondary: #CCC2DC;
+      --md-on-secondary: #2B2637;
+
+      --md-tertiary: #EFB8C8;
+      --md-on-tertiary: #3A1A26;
+
+      --md-error: #F2B8B5;
+      --md-on-error: #601410;
+
+      /* Shape */
+      --md-radius-xs: 10px;
+      --md-radius-sm: 12px;
+      --md-radius-md: 16px;
+      --md-radius-lg: 20px;
+      --md-pill: 999px;
+
+      /* Elevation */
+      --e1: 0 1px 2px rgba(0,0,0,0.55), 0 1px 1px rgba(0,0,0,0.35);
+      --e2: 0 4px 10px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.35);
+      --e3: 0 10px 22px rgba(0,0,0,0.60), 0 2px 4px rgba(0,0,0,0.40);
+
+      /* Motion */
+      --t-fast: 140ms;
+      --t-med: 200ms;
+      --t-slow: 320ms;
+
+      /* Layout */
+      --max: 920px;
     }
+
+    *{ box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg);
-      color: #fff;
+      font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+      background: var(--md-bg);
+      color: var(--md-text);
       min-height: 100vh;
       overflow-x: hidden;
       overflow-y: auto;
     }
 
+    /* Boot */
+    #boot {
+      position: fixed;
+      inset: 0;
+      background: var(--md-bg);
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity var(--boot-fade) ease;
+    }
+    #boot.hide { opacity: 0; pointer-events: none; }
+
+    /* App fade-in */
     #app {
       opacity: 0;
-      transform: scale(0.985);
+      transform: translateY(4px);
       transition:
         opacity var(--app-fade) ease var(--app-fade-delay),
         transform var(--app-fade) ease var(--app-fade-delay);
-      padding-bottom: 3rem;
+      padding-bottom: 36px;
     }
-    .boot-done #app { opacity: 1; transform: scale(1); }
+    .boot-done #app { opacity: 1; transform: translateY(0); }
 
-    .heading {
-      font-size: 2rem;
-      margin: 2rem auto;
-      text-align: center;
-      line-height: 1.4;
-      width: 100%;
-      background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentA));
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine var(--shineSpeed) linear infinite;
+    /* ===== Top App Bar (Material-ish) ===== */
+    .appbar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(18,18,18,0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--md-outline);
     }
-    @keyframes shine { 0% {background-position:0% center;} 100% {background-position:-200% center;} }
 
-    .section-gap { margin-top: 1.5rem; }
-
-    /* Layout wrappers */
-    .panel-wrap{
-      max-width: 820px;
+    .appbar-inner{
+      max-width: var(--max);
       margin: 0 auto;
-      padding: 0 2rem;
-      box-sizing: border-box;
-    }
-
-    /* Grid layout */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      width: 100%;
-      box-sizing: border-box;
-      margin: 0 auto;
-    }
-
-    /* Movies grid */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    /* Menu buttons grid */
-    .menu-grid{
-      grid-template-columns: repeat(2, 1fr);
-      max-width: 640px;
-      padding-bottom: 1.2rem;
-      margin: 0 auto;
-    }
-
-    .menu-btn{
+      padding: 14px 16px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      min-height: 56px;
+      justify-content: space-between;
+      gap: 12px;
     }
 
-    /* ===== RECOMMENDED UPDATE (NO :has) =====
-       Keeps your nice symmetry, and also centers 3-item rows
-       without relying on :has() browser support. */
-    .grid.grid-3{
-      grid-template-columns: repeat(3, 1fr);
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    /* Unified pill buttons (anchors) */
-    a {
+    .brand{
       display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand-title{
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.15px;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .brand-sub{
+      font-size: 12px;
+      color: var(--md-text-soft);
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+
+    /* ===== Section titles ===== */
+    .section{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 18px 16px 8px;
+    }
+
+    .section-title{
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.1px;
+    }
+
+    .section-hint{
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--md-text-soft);
+      line-height: 1.45;
+    }
+
+    /* ===== Cards ===== */
+    .card{
+      background: var(--md-surface);
+      border: 1px solid var(--md-outline);
+      border-radius: var(--md-radius-lg);
+      box-shadow: var(--e1);
+      padding: 14px;
+    }
+
+    .card + .card{ margin-top: 12px; }
+
+    .card-title{
+      margin: 0 0 10px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: var(--md-text);
+    }
+
+    /* ===== Buttons (Material-ish) ===== */
+    .md-btn{
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: var(--glass-strong);
-      border: 1px solid var(--border);
-      padding: 0.78rem 0.5rem;
-      text-align: center;
-      border-radius: var(--radius-pill);
+      gap: 8px;
+      height: 40px;
+      padding: 0 16px;
+      border-radius: var(--md-pill);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
       text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      outline: none;
       position: relative;
       overflow: hidden;
       transition:
-        transform 160ms cubic-bezier(.2,.9,.2,1),
-        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
-        filter 160ms ease,
-        background-color 200ms ease,
-        border-color 200ms ease;
-      -webkit-tap-highlight-color: transparent;
-      color: inherit;
-      transform: translateZ(0);
-      box-shadow: var(--shadow);
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-      min-height: 48px;
-      word-break: break-word;
+        transform var(--t-fast) ease,
+        box-shadow var(--t-fast) ease,
+        filter var(--t-fast) ease,
+        background-color var(--t-fast) ease,
+        border-color var(--t-fast) ease;
+      box-shadow: none;
+      color: var(--md-text);
+      background: var(--md-surface-2);
     }
 
-    a span.label {
-      display: inline-block;
-      background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentA));
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine var(--shineSpeed) linear infinite;
-      letter-spacing: 0.2px;
-      font-size: 0.95rem;
-      text-align: center;
-      width: 100%;
+    .md-btn:active{
+      transform: translateY(1px);
+      filter: brightness(1.02);
     }
 
-    a span.ripple {
+    .md-btn:hover{
+      filter: brightness(1.05);
+    }
+
+    .md-filled{
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      border-color: transparent;
+      box-shadow: var(--e1);
+    }
+
+    .md-tonal{
+      background: rgba(208,188,255,0.16);
+      color: var(--md-primary);
+      border-color: rgba(208,188,255,0.28);
+    }
+
+    .md-outlined{
+      background: transparent;
+      border-color: var(--md-outline-strong);
+      color: var(--md-text);
+    }
+
+    .md-danger{
+      background: rgba(242,184,181,0.14);
+      border-color: rgba(242,184,181,0.25);
+      color: var(--md-error);
+    }
+
+    /* Ripple */
+    .md-btn .ripple{
       position: absolute;
       border-radius: 50%;
       transform: scale(0);
-      animation: ripple 3.5s linear;
-      background-color: rgba(0, 240, 255, 0.3);
+      animation: ripple 520ms ease-out;
+      background: rgba(255,255,255,0.30);
       pointer-events: none;
+      mix-blend-mode: overlay;
     }
-    @keyframes ripple { to { transform: scale(4); opacity: 0; } }
-
-    a:active{
-      transform: translateY(1px) scale(0.985);
-      box-shadow:
-        0 8px 18px rgba(0,0,0,0.42),
-        0 1px 0 rgba(255,255,255,0.04) inset;
-      filter: brightness(1.06);
-    }
-    a:hover{
-      transform: translateY(-2px) scale(1.01);
-      box-shadow:
-        0 16px 30px rgba(0,0,0,0.54),
-        0 2px 0 rgba(255,255,255,0.06) inset;
+    @keyframes ripple{
+      to { transform: scale(3.8); opacity: 0; }
     }
 
-    a::before{
-      content:"";
-      position:absolute;
-      inset: 0;
-      pointer-events:none;
-      background: radial-gradient(120px 80px at 25% 15%, rgba(255,255,255,0.10), transparent 60%);
-      opacity: 0.9;
+    /* ===== Grid for season buttons ===== */
+    .grid{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+    @media (min-width: 560px){
+      .grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (min-width: 860px){
+      .grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
 
-    a::after{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      border-radius: var(--radius-pill);
-      pointer-events:none;
-      border: 2px solid rgba(0,240,255,0.10);
-      opacity: 0;
-      transform: scale(0.985);
-      transition: opacity 200ms ease, transform 200ms ease;
-    }
-    a:hover::after{
-      opacity: 1;
-      transform: scale(1);
+    /* Menu row */
+    .menu-row{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
     }
 
-    @media (prefers-reduced-motion: reduce){
-      a{ transition:none; }
-      a:hover{ transform:none; }
+    /* Make grid items stretch nicely */
+    .grid .md-btn{
+      width: 100%;
+      height: 44px;
+      border-radius: var(--md-radius-md);
+      justify-content: center;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      .menu-grid {
-        max-width: 500px;
-      }
-      /* keep 3-item panels still nice on medium screens */
-      .grid.grid-3{
-        grid-template-columns: repeat(3, 1fr);
-        max-width: 520px;
-      }
+    /* Movies grid */
+    .grid-2{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (max-width: 420px){
+      .grid-2{ grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 480px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .menu-grid {
-        max-width: 100%;
-        padding: 0 1rem 1.2rem;
-      }
-      .panel-wrap {
-        padding: 0 1rem;
-      }
-      a {
-        padding: 0.7rem 0.4rem;
-        font-size: 0.9rem;
-      }
-      /* on small screens, don't force 3 columns */
-      .grid.grid-3{
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 100%;
-      }
-    }
-
-    /* Panels */
+    /* ===== Panels (your existing open/close logic) ===== */
     .panel{
       overflow: hidden;
       margin: 0;
@@ -272,226 +325,131 @@
       opacity: 0;
       transform: translateY(-6px);
       pointer-events: none;
-      transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
+      transition:
+        max-height 420ms cubic-bezier(.2,.9,.2,1),
+        opacity 220ms ease,
+        transform 220ms ease;
       will-change: max-height, opacity, transform;
     }
     .panel.open{
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
-      margin-top: 14px;
+      margin-top: 12px;
     }
 
-    /* Boot */
-    #boot {
-      position: fixed;
-      inset: 0;
-      background: #0f0f0f;
-      z-index: 9999;
-      opacity: 1;
-      transition: opacity var(--boot-fade) ease;
-    }
-    #boot.hide { opacity: 0; pointer-events: none; }
-
-    @media (prefers-reduced-motion: reduce) {
-      #boot { transition: none; }
-      #app { transition: none; }
-      .panel{ transition: none; }
-    }
-
-    /* Progress Tracker */
-    .tools-wrap{
-      width: 100%;
-      max-width: 820px;
-      margin: 0 auto 3rem;
-      padding: 0 2rem;
-      box-sizing: border-box;
-    }
-
-    .tool-card{
-      background: var(--glass);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius-card);
-      padding: 1.25rem;
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-      margin-top: 1rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .tool-card::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background: radial-gradient(160px 90px at 20% 10%, rgba(255,255,255,0.10), transparent 62%);
-      opacity: 0.9;
-    }
-
-    .tool-title{
-      font-size: 1.15rem;
-      margin: 0 0 0.85rem 0;
-      background: linear-gradient(90deg, var(--accentA), var(--accentB), var(--accentA));
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine var(--shineSpeed) linear infinite;
-      position: relative;
-      z-index: 1;
-    }
-
-    .tool-row{
+    /* ===== Progress tracker (Material-ish form styling) ===== */
+    .form-row{
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.85rem;
+      gap: 12px;
       align-items: end;
-      position: relative;
-      z-index: 1;
     }
-    @media (max-width: 640px){
-      .tool-row{ grid-template-columns: 1fr; }
+    @media (max-width: 700px){
+      .form-row{ grid-template-columns: 1fr; }
     }
 
-    .tool-field{
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      position: relative;
-      z-index: 1;
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
     }
 
-    .tool-label{
-      font-size: 0.9rem;
-      opacity: 0.85;
+    .label{
+      font-size: 12px;
+      color: var(--md-text-soft);
+      letter-spacing: 0.2px;
     }
 
-    .tool-input, .tool-select{
+    .input, .select{
       width: 100%;
-      background: rgba(21,21,21,0.70);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #fff;
-      border-radius: 14px;
-      padding: 0.75rem 0.9rem;
+      height: 44px;
+      border-radius: var(--md-radius-md);
+      border: 1px solid var(--md-outline);
+      background: var(--md-surface-2);
+      color: var(--md-text);
+      padding: 0 12px;
+      font-size: 14px;
       outline: none;
-      font-size: 0.95rem;
-      box-sizing: border-box;
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-      transition: border-color 180ms ease, box-shadow 180ms ease, transform 160ms ease;
+      transition: border-color var(--t-fast) ease, box-shadow var(--t-fast) ease, filter var(--t-fast) ease;
     }
 
-    .tool-input:focus, .tool-select:focus{
-      border-color: rgba(0,240,255,0.55);
-      box-shadow: 0 0 0 3px rgba(0,240,255,0.10);
-      transform: translateY(-1px);
+    .input:focus, .select:focus{
+      border-color: rgba(208,188,255,0.55);
+      box-shadow: 0 0 0 3px rgba(208,188,255,0.12);
+      filter: brightness(1.02);
     }
 
     .seg{
-      display: flex;
-      gap: 0.55rem;
+      display:flex;
+      gap: 10px;
       flex-wrap: wrap;
-      position: relative;
-      z-index: 1;
     }
 
-    .seg button{
-      background: rgba(21,21,21,0.65);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #fff;
-      border-radius: var(--radius-pill);
-      padding: 0.6rem 0.95rem;
-      cursor: pointer;
-      transition:
-        transform 160ms cubic-bezier(.2,.9,.2,1),
-        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
-        border-color 200ms ease,
-        background-color 200ms ease;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-    }
-    .seg button:hover{ transform: translateY(-1px); }
-    .seg button:active{ transform: translateY(1px) scale(0.985); }
-    .seg button.active{
-      border-color: rgba(0,240,255,0.55);
-      background: rgba(0,240,255,0.08);
-      box-shadow: 0 12px 22px rgba(0,0,0,0.42);
+    .seg .md-btn{
+      height: 38px;
+      padding: 0 14px;
+      border-radius: var(--md-pill);
+      background: transparent;
+      border-color: var(--md-outline-strong);
+      color: var(--md-text);
     }
 
-    .tool-mini{
-      font-size: 0.92rem;
-      opacity: 0.9;
-      margin-top: 0.85rem;
-      line-height: 1.4;
-      position: relative;
-      z-index: 1;
+    .seg .md-btn.active{
+      background: rgba(208,188,255,0.16);
+      border-color: rgba(208,188,255,0.35);
+      color: var(--md-primary);
     }
 
-    .save-row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.85rem;
-      margin-top: 0.85rem;
-      position: relative;
-      z-index: 1;
+    .mini{
+      font-size: 13px;
+      color: var(--md-text-soft);
+      line-height: 1.45;
+      margin-top: 8px;
     }
-    @media (max-width: 640px){
-      .save-row{ grid-template-columns: 1fr; }
-    }
-
-    .save-btn{
-      width: 100%;
-      background: rgba(30,30,30,0.62);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #fff;
-      border-radius: 16px;
-      padding: 0.78rem 0.95rem;
-      cursor: pointer;
-      transition:
-        transform 160ms cubic-bezier(.2,.9,.2,1),
-        box-shadow 160ms cubic-bezier(.2,.9,.2,1),
-        border-color 200ms ease,
-        background-color 200ms ease;
-      box-shadow: 0 10px 22px rgba(0,0,0,0.40);
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-    }
-    .save-btn:hover{ transform: translateY(-1px); }
-    .save-btn:active{ transform: translateY(1px) scale(0.985); }
 
     .activity-list{
-      margin-top: 0.85rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      max-height: 320px;
-      overflow: auto;
-      padding-right: 0.25rem;
-      position: relative;
-      z-index: 1;
+      margin-top: 10px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      max-height: 340px;
+      overflow:auto;
+      padding-right: 4px;
     }
 
     .activity-item{
-      background: rgba(21,21,21,0.68);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 16px;
-      padding: 0.8rem 0.9rem;
-      font-size: 0.95rem;
-      line-height: 1.35;
-      display: flex;
+      background: var(--md-surface-2);
+      border: 1px solid var(--md-outline);
+      border-radius: var(--md-radius-md);
+      padding: 10px 12px;
+      display:flex;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 0.8rem;
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
+      gap: 10px;
+      box-shadow: var(--e1);
     }
+
     .activity-item .right{
-      opacity: 0.75;
-      font-size: 0.85rem;
+      color: var(--md-text-faint);
+      font-size: 12px;
       white-space: nowrap;
     }
 
-    .hidden{ display: none !important; }
+    .hidden{ display:none !important; }
+
+    /* Sync status pill */
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: var(--md-pill);
+      background: var(--md-surface-2);
+      border: 1px solid var(--md-outline);
+      color: var(--md-text-soft);
+      font-size: 12px;
+    }
   </style>
 </head>
 
@@ -499,181 +457,210 @@
   <div id="boot"></div>
 
   <main id="app">
-
-    <h1 class="heading">Doraemon</h1>
-
-    <div class="grid menu-grid">
-      <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-seasons')"><span class="label">Seasons</span></a>
-      <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-movies')"><span class="label">Movies</span></a>
-    </div>
-
-    <div class="panel-wrap">
-      <div id="dm-seasons" class="grid panel dm-panel">
-        <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
-        <a href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)"><span class="label">DM_S2</span></a>
-        <a href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)"><span class="label">DM_S3</span></a>
-        <a href="https://archive.org/details/DM-S4-MAK" onclick="ripple(event)"><span class="label">DM_S4</span></a>
-        <a href="https://archive.org/details/DM-S5-MAK" onclick="ripple(event)"><span class="label">DM_S5</span></a>
-        <a href="https://archive.org/details/DM-S6-MAK2" onclick="ripple(event)"><span class="label">DM_S6</span></a>
-        <a href="https://archive.org/details/DM-S7-MAK" onclick="ripple(event)"><span class="label">DM_S7</span></a>
-        <a href="https://archive.org/details/DM-S8-MAK" onclick="ripple(event)"><span class="label">DM_S8</span></a>
-        <a href="https://archive.org/details/DM-S12-MAK" onclick="ripple(event)"><span class="label">DM_S12</span></a>
-        <a href="https://archive.org/details/DM_S14_MAK" onclick="ripple(event)"><span class="label">DM_S14</span></a>
-        <a href="https://archive.org/details/DM_S15_MAK" onclick="ripple(event)"><span class="label">DM_S15</span></a>
-        <a href="https://archive.org/details/DM_S16_MAK" onclick="ripple(event)"><span class="label">DM_S16</span></a>
-        <a href="https://archive.org/details/DM_S17_MAK" onclick="ripple(event)"><span class="label">DM_S17</span></a>
-        <a href="https://archive.org/details/DM_S18_MAK" onclick="ripple(event)"><span class="label">DM_S18</span></a>
-        <a href="https://archive.org/details/DM_S19_MAK" onclick="ripple(event)"><span class="label">DM_S19</span></a>
-        <a href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)"><span class="label">DM_S20</span></a>
-      </div>
-
-      <div id="dm-movies" class="panel dm-panel">
-        <div class="grid-2">
-          <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
-          <a href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)"><span class="label">MOVIES-2</span></a>
+    <!-- App Bar -->
+    <header class="appbar">
+      <div class="appbar-inner">
+        <div class="brand">
+          <p class="brand-title">Toonie</p>
+          <p class="brand-sub">Material-style UI • Clean buttons • Same functionality</p>
         </div>
+
+        <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
       </div>
-    </div>
+    </header>
 
-    <h1 class="heading section-gap">Ben 10</h1>
+    <!-- Doraemon -->
+    <section class="section">
+      <h2 class="section-title">Doraemon</h2>
+      <p class="section-hint">Open Seasons or Movies. Same links, just Material look.</p>
 
-    <div class="grid menu-grid">
-      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-classic')"><span class="label">Classic</span></a>
-      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-af')"><span class="label">Alien Force</span></a>
-      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-ua')"><span class="label">Ultimate Alien</span></a>
-      <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-ov')"><span class="label">Omniverse</span></a>
-    </div>
+      <div class="card">
+        <div class="menu-row">
+          <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-seasons')">Seasons</a>
+          <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-movies')">Movies</a>
+        </div>
 
-    <div class="panel-wrap">
-      <div id="b10-classic" class="grid panel b10-panel">
-        <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
-        <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
-        <a href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)"><span class="label">CL_S3</span></a>
-        <a href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)"><span class="label">CL_S4</span></a>
-      </div>
-
-      <div id="b10-af" class="grid panel b10-panel">
-        <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
-        <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
-        <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
-      </div>
-
-      <div id="b10-ua" class="grid panel b10-panel">
-        <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
-        <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
-        <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
-      </div>
-
-      <div id="b10-ov" class="grid panel b10-panel">
-        <a href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)"><span class="label">OV_S1</span></a>
-        <a href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)"><span class="label">OV_S2</span></a>
-        <a href="https://archive.org/details/B10_OV_S03_MAK" onclick="ripple(event)"><span class="label">OV_S3</span></a>
-        <a href="https://archive.org/details/B10_OV_S04_MAK" onclick="ripple(event)"><span class="label">OV_S4</span></a>
-        <a href="https://archive.org/details/B10_OV_S05_MAK" onclick="ripple(event)"><span class="label">OV_S5</span></a>
-        <a href="https://archive.org/details/B10_OV_S06_MAK" onclick="ripple(event)"><span class="label">OV_S6</span></a>
-        <a href="https://archive.org/details/B10_OV_S07_MAK" onclick="ripple(event)"><span class="label">OV_S7</span></a>
-        <a href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)"><span class="label">OV_S8</span></a>
-      </div>
-    </div>
-
-    <h1 class="heading section-gap">Progress Tracker</h1>
-
-    <div style="text-align:center; margin-top:-1rem; opacity:0.8;" id="syncStatus">
-      Sync: OFF (local only)
-    </div>
-
-    <div class="tools-wrap">
-      <div class="tool-card">
-        <h2 class="tool-title">Sync</h2>
-        <div class="tool-row">
-          <div class="tool-field">
-            <input id="roomInput" class="tool-input" type="text" placeholder="Example: Asim123">
+        <div id="dm-seasons" class="panel dm-panel" style="margin-top:12px;">
+          <div class="grid">
+            <a class="md-btn md-outlined" href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)">DM_S1</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)">DM_S2</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)">DM_S3</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S4-MAK" onclick="ripple(event)">DM_S4</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S5-MAK" onclick="ripple(event)">DM_S5</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S6-MAK2" onclick="ripple(event)">DM_S6</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S7-MAK" onclick="ripple(event)">DM_S7</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S8-MAK" onclick="ripple(event)">DM_S8</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S12-MAK" onclick="ripple(event)">DM_S12</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S14_MAK" onclick="ripple(event)">DM_S14</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S15_MAK" onclick="ripple(event)">DM_S15</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S16_MAK" onclick="ripple(event)">DM_S16</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S17_MAK" onclick="ripple(event)">DM_S17</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S18_MAK" onclick="ripple(event)">DM_S18</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S19_MAK" onclick="ripple(event)">DM_S19</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)">DM_S20</a>
           </div>
-          <div class="tool-field">
-            <button class="save-btn" id="roomSaveBtn" type="button">Save Room Code</button>
+        </div>
+
+        <div id="dm-movies" class="panel dm-panel" style="margin-top:12px;">
+          <div class="grid-2">
+            <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)">MOVIES-1</a>
+            <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)">MOVIES-2</a>
           </div>
         </div>
       </div>
+    </section>
 
-      <div class="tool-card">
-        <h2 class="tool-title">Profile</h2>
+    <!-- Ben 10 -->
+    <section class="section">
+      <h2 class="section-title">Ben 10</h2>
+      <p class="section-hint">Pick a series, then open seasons. Links stay the same.</p>
+
+      <div class="card">
+        <div class="menu-row">
+          <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-classic')">Classic</a>
+          <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-af')">Alien Force</a>
+          <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-ua')">Ultimate Alien</a>
+          <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-ov')">Omniverse</a>
+        </div>
+
+        <div id="b10-classic" class="panel b10-panel" style="margin-top:12px;">
+          <div class="grid">
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)">CL_S1</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)">CL_S2</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_CL_S03_MAK" onclick="ripple(event)">CL_S3</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)">CL_S4</a>
+          </div>
+        </div>
+
+        <div id="b10-af" class="panel b10-panel" style="margin-top:12px;">
+          <div class="grid">
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)">AF_S1</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)">AF_S2</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)">AF_S3</a>
+          </div>
+        </div>
+
+        <div id="b10-ua" class="panel b10-panel" style="margin-top:12px;">
+          <div class="grid">
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)">UA_S1</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)">UA_S2</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)">UA_S3</a>
+          </div>
+        </div>
+
+        <div id="b10-ov" class="panel b10-panel" style="margin-top:12px;">
+          <div class="grid">
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)">OV_S1</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)">OV_S2</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_OV_S03_MAK" onclick="ripple(event)">OV_S3</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_OV_S04_MAK" onclick="ripple(event)">OV_S4</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_OV_S05_MAK" onclick="ripple(event)">OV_S5</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_OV_S06_MAK" onclick="ripple(event)">OV_S6</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_OV_S07_MAK" onclick="ripple(event)">OV_S7</a>
+            <a class="md-btn md-outlined" href="https://archive.org/details/B10_OV_S08_MAK" onclick="ripple(event)">OV_S8</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress Tracker -->
+    <section class="section">
+      <h2 class="section-title">Progress Tracker</h2>
+      <p class="section-hint">Same tracker logic. Material-style cards + fields.</p>
+
+      <div class="card">
+        <p class="card-title">Sync</p>
+        <div class="form-row">
+          <div class="field">
+            <div class="label">Room Code</div>
+            <input id="roomInput" class="input" type="text" placeholder="Example: Asim123">
+          </div>
+          <div class="field">
+            <div class="label">Action</div>
+            <button class="md-btn md-filled" id="roomSaveBtn" type="button">Save Room Code</button>
+          </div>
+        </div>
+        <div class="mini" id="roomStatus"></div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Profile</p>
         <div class="seg" id="profileSeg">
-          <button type="button" data-profile="Asim">Asim</button>
-          <button type="button" data-profile="Marwa">Marwa</button>
+          <button class="md-btn md-outlined" type="button" data-profile="Asim">Asim</button>
+          <button class="md-btn md-outlined" type="button" data-profile="Marwa">Marwa</button>
         </div>
       </div>
 
-      <div class="tool-card">
-        <h2 class="tool-title">Mode</h2>
+      <div class="card">
+        <p class="card-title">Mode</p>
         <div class="seg" id="modeSeg">
-          <button type="button" data-mode="save">Save</button>
-          <button type="button" data-mode="recent">Recent Activity</button>
+          <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
+          <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
         </div>
 
-        <div id="savePanel">
-          <div class="tool-row" style="margin-top:0.9rem;">
-            <div class="tool-field">
-              <div class="tool-label">Cartoon</div>
-              <select id="cartoonSelect" class="tool-select"></select>
+        <div id="savePanel" style="margin-top:12px;">
+          <div class="form-row">
+            <div class="field">
+              <div class="label">Cartoon</div>
+              <select id="cartoonSelect" class="select"></select>
             </div>
 
-            <div class="tool-field" id="seriesField">
-              <div class="tool-label">Series</div>
-              <select id="seriesSelect" class="tool-select"></select>
+            <div class="field" id="seriesField">
+              <div class="label">Series</div>
+              <select id="seriesSelect" class="select"></select>
             </div>
           </div>
 
-          <div class="tool-row" style="margin-top:0.8rem;">
-            <div class="tool-field">
-              <div class="tool-label">Type</div>
-              <select id="typeSelect" class="tool-select">
+          <div class="form-row" style="margin-top:12px;">
+            <div class="field">
+              <div class="label">Type</div>
+              <select id="typeSelect" class="select">
                 <option value="season">Season</option>
                 <option value="movie">Movies</option>
               </select>
             </div>
 
-            <div class="tool-field">
-              <div class="tool-label" id="seasonLabel">Season</div>
-              <select id="seasonOrMovieSelect" class="tool-select"></select>
+            <div class="field">
+              <div class="label" id="seasonLabel">Season</div>
+              <select id="seasonOrMovieSelect" class="select"></select>
             </div>
           </div>
 
-          <div class="save-row">
-            <div class="tool-field">
-              <div class="tool-label">Episode / Movie Number</div>
-              <select id="numSelect" class="tool-select"></select>
+          <div class="form-row" style="margin-top:12px;">
+            <div class="field">
+              <div class="label">Episode / Movie Number</div>
+              <select id="numSelect" class="select"></select>
             </div>
 
-            <div class="tool-field">
-              <div class="tool-label">Actions</div>
-              <button class="save-btn" id="saveBtn" type="button">Save</button>
+            <div class="field">
+              <div class="label">Action</div>
+              <button class="md-btn md-filled" id="saveBtn" type="button">Save</button>
             </div>
           </div>
 
-          <div class="tool-mini" id="saveHint"></div>
+          <div class="mini" id="saveHint"></div>
         </div>
 
-        <div id="recentPanel" class="hidden">
-          <div class="tool-row" style="margin-top:0.9rem;">
-            <div class="tool-field">
-              <div class="tool-label">Cartoon</div>
-              <select id="recentCartoonSelect" class="tool-select"></select>
+        <div id="recentPanel" class="hidden" style="margin-top:12px;">
+          <div class="form-row">
+            <div class="field">
+              <div class="label">Cartoon</div>
+              <select id="recentCartoonSelect" class="select"></select>
             </div>
-            <div class="tool-field">
-              <div class="tool-label">Info</div>
-              <div class="tool-mini" id="recentInfo">Select a cartoon to view full activity.</div>
+            <div class="field">
+              <div class="label">Info</div>
+              <div class="mini" id="recentInfo">Select a cartoon to view full activity.</div>
             </div>
           </div>
 
           <div class="activity-list" id="activityList"></div>
         </div>
-
       </div>
-    </div>
+    </section>
   </main>
 
   <script>
-    /* ===== Smooth panel animation (no "instant pop") ===== */
+    /* ===== Smooth panel animation (same logic) ===== */
     function setPanelOpen(panel, open){
       if(!panel) return;
 
@@ -698,7 +685,6 @@
       if(!target) return;
 
       const isOpen = target.classList.contains('open');
-
       document.querySelectorAll(groupSelector).forEach(p => setPanelOpen(p, false));
       if(!isOpen) setPanelOpen(target, true);
 
@@ -715,13 +701,54 @@
       });
     });
 
-    // ===== RECOMMENDED UPDATE (auto-center 3-item panels, no :has) =====
-    function applyGridFixes(){
-      document.querySelectorAll('.b10-panel.grid').forEach(g => {
-        const count = g.querySelectorAll(':scope > a').length;
-        g.classList.toggle('grid-3', count === 3);
-      });
+    // UI
+    function setSyncStatus(text) {
+      const el = document.getElementById("syncStatus");
+      if (el) el.textContent = text;
     }
+
+    /* Material-ish ripple */
+    function ripple(e) {
+      if (navigator.vibrate) navigator.vibrate(18);
+
+      const target = e.currentTarget;
+      if(!target) return;
+
+      // only ripple Material buttons/links
+      if(!target.classList || !target.classList.contains('md-btn')) return;
+
+      const rect = target.getBoundingClientRect();
+      const cx = (typeof e.clientX === 'number' && e.clientX !== 0) ? e.clientX : (rect.left + rect.width / 2);
+      const cy = (typeof e.clientY === 'number' && e.clientY !== 0) ? e.clientY : (rect.top + rect.height / 2);
+
+      const rp = document.createElement('span');
+      rp.classList.add('ripple');
+      const size = Math.max(target.offsetWidth, target.offsetHeight);
+      rp.style.width = rp.style.height = (size * 1.2) + 'px';
+      rp.style.left = (cx - rect.left - (size*1.2)/2) + 'px';
+      rp.style.top = (cy - rect.top - (size*1.2)/2) + 'px';
+
+      target.appendChild(rp);
+      setTimeout(() => rp.remove(), 600);
+    }
+
+    // Boot overlay fade
+    const bootStart = performance.now();
+    window.addEventListener('load', () => {
+      const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--boot-min-show')) || 900;
+      const elapsed = performance.now() - bootStart;
+      const wait = Math.max(0, MIN_SHOW - elapsed);
+
+      setTimeout(() => {
+        const b = document.getElementById('boot');
+        if (b) {
+          b.classList.add('hide');
+          document.body.classList.add('boot-done');
+          const bootFade = (parseFloat(getComputedStyle(b).transitionDuration) || 0.35) * 1000;
+          setTimeout(() => b.remove(), bootFade + 60);
+        }
+      }, wait);
+    });
 
     // =========================
     // CONFIG
@@ -757,50 +784,6 @@
         hasMovies: true
       }
     };
-
-    // =========================
-    // UI HELPERS
-    // =========================
-    function setSyncStatus(text) {
-      const el = document.getElementById("syncStatus");
-      if (el) el.textContent = text;
-    }
-
-    function ripple(e) {
-      if (navigator.vibrate) navigator.vibrate(30);
-      const target = e.currentTarget;
-      if(!target) return;
-
-      const rect = target.getBoundingClientRect();
-      const cx = (typeof e.clientX === 'number' && e.clientX !== 0) ? e.clientX : (rect.left + rect.width / 2);
-      const cy = (typeof e.clientY === 'number' && e.clientY !== 0) ? e.clientY : (rect.top + rect.height / 2);
-
-      const rp = document.createElement('span');
-      rp.classList.add('ripple');
-      rp.style.width = rp.style.height = Math.max(target.offsetWidth, target.offsetHeight) + 'px';
-      rp.style.left = cx - rect.left - rp.offsetWidth / 2 + 'px';
-      rp.style.top = cy - rect.top - rp.offsetHeight / 2 + 'px';
-      target.appendChild(rp);
-      setTimeout(() => rp.remove(), 600);
-    }
-
-    // Boot overlay fade
-    const bootStart = performance.now();
-    window.addEventListener('load', () => {
-      const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--boot-min-show')) || 3500;
-      const elapsed = performance.now() - bootStart;
-      const wait = Math.max(0, MIN_SHOW - elapsed);
-
-      setTimeout(() => {
-        const b = document.getElementById('boot');
-        if (b) {
-          b.classList.add('hide');
-          document.body.classList.add('boot-done');
-          const bootFade = (parseFloat(getComputedStyle(b).transitionDuration) || 1.2) * 1000;
-          setTimeout(() => b.remove(), bootFade + 50);
-        }
-      }, wait);
-    });
 
     // =========================
     // STORAGE (ROOM + LOCAL)
@@ -1050,10 +1033,10 @@
       let pollTimer = null;
       let lastCloudOk = true;
 
-      function vib(){ if(navigator.vibrate) navigator.vibrate(20); }
+      function vib(){ if(navigator.vibrate) navigator.vibrate(16); }
 
       function updateRoomStatus(msg){
-        if(roomStatus) roomStatus.textContent = msg;
+        if(roomStatus) roomStatus.textContent = msg || "";
       }
 
       function refreshRoomUI(){
@@ -1062,7 +1045,7 @@
 
         if(!room){
           setSyncStatus("Sync: OFF (local only)");
-          updateRoomStatus("Sync: OFF (no room code). Local save only.");
+          updateRoomStatus("Sync is OFF (no room code). Local save only.");
           return;
         }
 
@@ -1073,6 +1056,7 @@
         }
 
         setSyncStatus(`Sync: ON (Room: ${room})`);
+        updateRoomStatus(`Room: ${room} → Sync ON`);
       }
 
       function setProfileUI(){
@@ -1399,9 +1383,7 @@
 
     window.addEventListener("load", () => {
       initTracker();
-      applyGridFixes(); // ensure AF/UA center properly everywhere
     });
   </script>
 </body>
 </html>
-
