@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Toonie</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,33 +23,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
-
-
-  html, body {
-  height: 100%;
-  background: var(--md-bg);
-}
-
-body {
-  min-height: 100svh;
-  min-height: 100dvh;
-  margin: 0;
-  overscroll-behavior-y: none;
-}
-
-#app {
-  min-height: 100svh;
-  min-height: 100dvh;
-  background: var(--md-bg);
-  padding-bottom: calc(36px + env(safe-area-inset-bottom, 0px));
-}
-
     :root{
       /* Boot */
       --boot-min-show: 900ms;
       --boot-fade: 350ms;
       --app-fade: 250ms;
       --app-fade-delay: 80ms;
+
+      /* Safe area helpers */
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
 
       /* ===== Material 3 dark-ish token set (hand-tuned) ===== */
       --md-bg: #121212;
@@ -100,14 +83,20 @@ body {
 
     *{ box-sizing: border-box; }
 
-    body {
+    html, body {
+      height: 100%;
       margin: 0;
-      font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
       background: var(--md-bg);
+    }
+
+    body {
+      font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
       color: var(--md-text);
-      min-height: 100vh;
+      min-height: 100svh;
+      min-height: 100dvh;
       overflow-x: hidden;
       overflow-y: auto;
+      overscroll-behavior-y: none;
     }
 
     /* Boot */
@@ -123,20 +112,30 @@ body {
 
     /* App fade-in */
     #app {
+      min-height: 100svh;
+      min-height: 100dvh;
+      background: var(--md-bg);
+
+      /* bottom safe area so content never sits under gesture bar */
+      padding-bottom: calc(36px + var(--sab));
+
       opacity: 0;
       transform: translateY(4px);
       transition:
         opacity var(--app-fade) ease var(--app-fade-delay),
         transform var(--app-fade) ease var(--app-fade-delay);
-      padding-bottom: 36px;
     }
     .boot-done #app { opacity: 1; transform: translateY(0); }
 
-    /* ===== Top App Bar (Material-ish) ===== */
+    /* ===== Top App Bar (Material-ish) =====
+       This is the main fix: extend the bar's background into the top safe area */
     .appbar{
       position: sticky;
       top: 0;
       z-index: 50;
+
+      padding-top: var(--sat);
+
       background: rgba(18,18,18,0.94);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -339,27 +338,24 @@ body {
 
     /* ===== Panels (your existing open/close logic) ===== */
     .panel{
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
+      display: none; /* kills empty space */
+    }
 
-  display: none; /* 🔥 THIS kills the empty space */
-}
-
-    
-   .panel.open{
-  display: block;   /* 🔥 bring it back only when open */
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-  margin-top: 14px;
-}
-
+    .panel.open{
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      margin-top: 14px;
+    }
 
     /* ===== Progress tracker (Material-ish form styling) ===== */
     .form-row{
@@ -383,9 +379,7 @@ body {
       color: var(--md-text-soft);
       letter-spacing: 0.2px;
     }
-.label.tight {
-  margin-bottom: 6px;
-}
+    .label.tight { margin-bottom: 6px; }
 
     .input, .select{
       width: 100%;
@@ -476,9 +470,6 @@ body {
       color: var(--md-text-soft);
       font-size: 12px;
     }
-
-
-    
   </style>
 </head>
 
@@ -499,13 +490,9 @@ body {
 
     <!-- Doraemon -->
     <section class="section">
-
-      
       <div class="card">
-         <h2 class="section-title">Doraemon</h2>
+        <h2 class="section-title">Doraemon</h2>
         <div class="menu-row">
-            
-
           <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-seasons')">Seasons</a>
           <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-movies')">Movies</a>
         </div>
@@ -542,10 +529,8 @@ body {
 
     <!-- Ben 10 -->
     <section class="section">
-     
-
       <div class="card">
-           <h2 class="section-title">Ben 10</h2>
+        <h2 class="section-title">Ben 10</h2>
         <div class="menu-row">
           <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-classic')">Classic</a>
           <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-af')">Alien Force</a>
@@ -595,8 +580,6 @@ body {
 
     <!-- Progress Tracker -->
     <section class="section">
-     
-
       <div class="card">
         <p class="card-title">Sync</p>
         <div class="form-row">
@@ -609,7 +592,6 @@ body {
             <button class="md-btn md-filled" id="roomSaveBtn" type="button">Save Room Code</button>
           </div>
         </div>
-       
       </div>
 
       <div class="card">
@@ -621,8 +603,8 @@ body {
       </div>
 
       <div class="card">
-         <h2 class="section-title">Progress Tracker</h2>
-<div class="label" style="margin-top:2px; margin-bottom:6px;">Mode</div>
+        <h2 class="section-title">Progress Tracker</h2>
+        <div class="label" style="margin-top:2px; margin-bottom:6px;">Mode</div>
         <div class="seg" id="modeSeg">
           <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
           <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
@@ -744,7 +726,6 @@ body {
       const target = e.currentTarget;
       if(!target) return;
 
-      // only ripple Material buttons/links
       if(!target.classList || !target.classList.contains('md-btn')) return;
 
       const rect = target.getBoundingClientRect();
@@ -1417,7 +1398,3 @@ body {
   </script>
 </body>
 </html>
-
-
-
-
