@@ -329,14 +329,18 @@
         max-height 420ms cubic-bezier(.2,.9,.2,1),
         opacity 220ms ease,
         transform 220ms ease;
+      display: none;
+
       will-change: max-height, opacity, transform;
     }
-    .panel.open{
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-      margin-top: 12px;
-    }
+   .panel.open{
+  display: block;   /* 🔥 bring it back only when open */
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  margin-top: 14px;
+}
+
 
     /* ===== Progress tracker (Material-ish form styling) ===== */
     .form-row{
