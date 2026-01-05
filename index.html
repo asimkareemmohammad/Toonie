@@ -79,22 +79,16 @@
     }
 
     *{ box-sizing: border-box; }
-    
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+
     body {
-  font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-  background: var(--md-bg);
-  color: var(--md-text);
-
-  min-height: 100dvh;
-  overflow-x: hidden;
-  overscroll-behavior: none;
-}
-
+      margin: 0;
+      font-family: "Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+      background: var(--md-bg);
+      color: var(--md-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
 
     /* Boot */
     #boot {
@@ -108,17 +102,14 @@ html, body {
     #boot.hide { opacity: 0; pointer-events: none; }
 
     /* App fade-in */
-   #app {
-  opacity: 0;
-  transform: translateY(4px);
-  transition:
-    opacity var(--app-fade) ease var(--app-fade-delay),
-    transform var(--app-fade) ease var(--app-fade-delay);
-
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-}
+    #app {
+      opacity: 0;
+      transform: translateY(4px);
+      transition:
+        opacity var(--app-fade) ease var(--app-fade-delay),
+        transform var(--app-fade) ease var(--app-fade-delay);
+      padding-bottom: 36px;
+    }
     .boot-done #app { opacity: 1; transform: translateY(0); }
 
     /* ===== Top App Bar (Material-ish) ===== */
@@ -1406,3 +1397,7 @@ html, body {
   </script>
 </body>
 </html>
+
+
+
+
