@@ -18,23 +18,6 @@
   <meta name="mobile-web-app-capable" content="yes">
 
   <style>
-/* Add to your CSS in the <style> section */
-
-/* Center grid items when there are only 3 */
-.grid:has(> a:nth-child(3):last-child) {
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 480px; /* Adjust based on your preference */
-    margin: 0 auto;
-}
-
-/* Or if you want to be more specific for B10 panels */
-#b10-af.grid:has(> a:nth-child(3):last-child),
-#b10-ua.grid:has(> a:nth-child(3):last-child) {
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 480px;
-    margin: 0 auto;
-}
-    
     :root{
       --boot-min-show: 3500ms;
       --boot-fade: 1200ms;
@@ -102,20 +85,20 @@
       box-sizing: border-box;
     }
 
-    /* FIXED: Proper grid layout for consistent alignment */
+    /* Grid layout */
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr); /* Fixed 4 columns for consistency */
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       width: 100%;
       box-sizing: border-box;
       margin: 0 auto;
     }
 
-    /* For movie grid (2 items) */
+    /* Movies grid */
     .grid-2 {
       display: grid;
-      grid-template-columns: repeat(2, 1fr); /* 2 columns for movies */
+      grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       width: 100%;
       max-width: 400px;
@@ -124,7 +107,7 @@
 
     /* Menu buttons grid */
     .menu-grid{
-      grid-template-columns: repeat(2, 1fr); /* 2 columns for menu buttons */
+      grid-template-columns: repeat(2, 1fr);
       max-width: 640px;
       padding-bottom: 1.2rem;
       margin: 0 auto;
@@ -138,6 +121,15 @@
       min-height: 56px;
     }
 
+    /* ===== RECOMMENDED UPDATE (NO :has) =====
+       Keeps your nice symmetry, and also centers 3-item rows
+       without relying on :has() browser support. */
+    .grid.grid-3{
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
     /* Unified pill buttons (anchors) */
     a {
       display: flex;
@@ -145,7 +137,7 @@
       justify-content: center;
       background: var(--glass-strong);
       border: 1px solid var(--border);
-      padding: 0.78rem 0.5rem; /* Reduced padding for better fit */
+      padding: 0.78rem 0.5rem;
       text-align: center;
       border-radius: var(--radius-pill);
       text-decoration: none;
@@ -163,8 +155,8 @@
       box-shadow: var(--shadow);
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
-      min-height: 48px; /* Consistent height */
-      word-break: break-word; /* Handle long text */
+      min-height: 48px;
+      word-break: break-word;
     }
 
     a span.label {
@@ -175,7 +167,7 @@
       -webkit-text-fill-color: transparent;
       animation: shine var(--shineSpeed) linear infinite;
       letter-spacing: 0.2px;
-      font-size: 0.95rem; /* Slightly smaller font for better fit */
+      font-size: 0.95rem;
       text-align: center;
       width: 100%;
     }
@@ -237,35 +229,41 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .grid {
-        grid-template-columns: repeat(3, 1fr); /* 3 columns on medium screens */
+        grid-template-columns: repeat(3, 1fr);
       }
-      
       .menu-grid {
         max-width: 500px;
+      }
+      /* keep 3-item panels still nice on medium screens */
+      .grid.grid-3{
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 520px;
       }
     }
 
     @media (max-width: 480px) {
       .grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns on small screens */
+        grid-template-columns: repeat(2, 1fr);
       }
-      
       .menu-grid {
         max-width: 100%;
         padding: 0 1rem 1.2rem;
       }
-      
       .panel-wrap {
         padding: 0 1rem;
       }
-      
       a {
         padding: 0.7rem 0.4rem;
         font-size: 0.9rem;
       }
+      /* on small screens, don't force 3 columns */
+      .grid.grid-3{
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 100%;
+      }
     }
 
-    /* ===== Animated expand/collapse panels (smooth JS-driven max-height) ===== */
+    /* Panels */
     .panel{
       overflow: hidden;
       margin: 0;
@@ -284,7 +282,7 @@
       margin-top: 14px;
     }
 
-    /* ===== Boot Overlay ===== */
+    /* Boot */
     #boot {
       position: fixed;
       inset: 0;
@@ -301,7 +299,7 @@
       .panel{ transition: none; }
     }
 
-    /* ===== Progress Tracker (re-skinned to match) ===== */
+    /* Progress Tracker */
     .tools-wrap{
       width: 100%;
       max-width: 820px;
@@ -502,15 +500,13 @@
 
   <main id="app">
 
-<h1 class="heading">Doraemon</h1>
-    
-    <!-- DM: Top buttons -->
+    <h1 class="heading">Doraemon</h1>
+
     <div class="grid menu-grid">
       <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-seasons')"><span class="label">Seasons</span></a>
       <a class="menu-btn" href="#" onclick="toggleDM(event, 'dm-movies')"><span class="label">Movies</span></a>
     </div>
 
-    <!-- DM: Seasons panel -->
     <div class="panel-wrap">
       <div id="dm-seasons" class="grid panel dm-panel">
         <a href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)"><span class="label">DM_S1</span></a>
@@ -531,7 +527,6 @@
         <a href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)"><span class="label">DM_S20</span></a>
       </div>
 
-      <!-- DM: Movies panel -->
       <div id="dm-movies" class="panel dm-panel">
         <div class="grid-2">
           <a href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)"><span class="label">MOVIES-1</span></a>
@@ -540,9 +535,8 @@
       </div>
     </div>
 
-<h1 class="heading section-gap">Ben 10</h1>
+    <h1 class="heading section-gap">Ben 10</h1>
 
-    <!-- B10: Top series buttons (2 rows x 2 cols) -->
     <div class="grid menu-grid">
       <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-classic')"><span class="label">Classic</span></a>
       <a class="menu-btn" href="#" onclick="toggleB10(event, 'b10-af')"><span class="label">Alien Force</span></a>
@@ -551,7 +545,6 @@
     </div>
 
     <div class="panel-wrap">
-      <!-- B10: Classic -->
       <div id="b10-classic" class="grid panel b10-panel">
         <a href="https://archive.org/details/B10_CL_S01_MAK" onclick="ripple(event)"><span class="label">CL_S1</span></a>
         <a href="https://archive.org/details/B10_CL_S02_MAK" onclick="ripple(event)"><span class="label">CL_S2</span></a>
@@ -559,21 +552,18 @@
         <a href="https://archive.org/details/B10_CL_S04_MAK" onclick="ripple(event)"><span class="label">CL_S4</span></a>
       </div>
 
-      <!-- B10: Alien Force -->
       <div id="b10-af" class="grid panel b10-panel">
         <a href="https://archive.org/details/B10_AF_S01_MAK" onclick="ripple(event)"><span class="label">AF_S1</span></a>
         <a href="https://archive.org/details/B10_AF_S02_MAK" onclick="ripple(event)"><span class="label">AF_S2</span></a>
         <a href="https://archive.org/details/B10_AF_S03_MAK" onclick="ripple(event)"><span class="label">AF_S3</span></a>
       </div>
 
-      <!-- B10: Ultimate Alien -->
       <div id="b10-ua" class="grid panel b10-panel">
         <a href="https://archive.org/details/B10_UA_S01_MAK" onclick="ripple(event)"><span class="label">UA_S1</span></a>
         <a href="https://archive.org/details/B10_UA_S02_MAK" onclick="ripple(event)"><span class="label">UA_S2</span></a>
         <a href="https://archive.org/details/B10_UA_S03_MAK" onclick="ripple(event)"><span class="label">UA_S3</span></a>
       </div>
 
-      <!-- B10: Omniverse -->
       <div id="b10-ov" class="grid panel b10-panel">
         <a href="https://archive.org/details/B10_OV_S01_MAK" onclick="ripple(event)"><span class="label">OV_S1</span></a>
         <a href="https://archive.org/details/B10_OV_S02_MAK" onclick="ripple(event)"><span class="label">OV_S2</span></a>
@@ -689,26 +679,17 @@
 
       if(open){
         panel.classList.add('open');
-
-        // reset then measure for smooth transition
         panel.style.maxHeight = '0px';
-        // force reflow
         panel.offsetHeight;
-
         const target = panel.scrollHeight;
         panel.style.maxHeight = target + 'px';
       } else {
-        // collapse smoothly from current height
         const current = panel.scrollHeight;
         panel.style.maxHeight = current + 'px';
         panel.offsetHeight;
         panel.style.maxHeight = '0px';
         panel.classList.remove('open');
       }
-    }
-
-    function closeAllPanels(selector){
-      document.querySelectorAll(selector).forEach(p => setPanelOpen(p, false));
     }
 
     function toggleGroup(e, targetId, groupSelector){
@@ -718,29 +699,29 @@
 
       const isOpen = target.classList.contains('open');
 
-      // close all in the group first
       document.querySelectorAll(groupSelector).forEach(p => setPanelOpen(p, false));
-
-      // open only if it was closed
       if(!isOpen) setPanelOpen(target, true);
 
       ripple(e);
     }
 
-    function toggleDM(e, targetId){
-      toggleGroup(e, targetId, '.dm-panel');
-    }
+    function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
+    function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
 
-    function toggleB10(e, targetId){
-      toggleGroup(e, targetId, '.b10-panel');
-    }
-
-    // keep opened panels correct on resize (prevents weird gaps)
+    // keep opened panels correct on resize
     window.addEventListener('resize', () => {
       document.querySelectorAll('.panel.open').forEach(p => {
         p.style.maxHeight = p.scrollHeight + 'px';
       });
     });
+
+    // ===== RECOMMENDED UPDATE (auto-center 3-item panels, no :has) =====
+    function applyGridFixes(){
+      document.querySelectorAll('.b10-panel.grid').forEach(g => {
+        const count = g.querySelectorAll(':scope > a').length;
+        g.classList.toggle('grid-3', count === 3);
+      });
+    }
 
     // =========================
     // CONFIG
@@ -790,7 +771,6 @@
       const target = e.currentTarget;
       if(!target) return;
 
-      // If click is triggered without coordinates, skip ripple positioning
       const rect = target.getBoundingClientRect();
       const cx = (typeof e.clientX === 'number' && e.clientX !== 0) ? e.clientX : (rect.left + rect.width / 2);
       const cy = (typeof e.clientY === 'number' && e.clientY !== 0) ? e.clientY : (rect.top + rect.height / 2);
@@ -836,9 +816,7 @@
       return clean;
     }
 
-    function nowISO(){
-      return new Date().toISOString();
-    }
+    function nowISO(){ return new Date().toISOString(); }
 
     function displayLocal(ts){
       if(!ts) return "";
@@ -861,7 +839,6 @@
       return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
     }
 
-    // Normalize seriesLabel: keep local as null (never "-")
     function normalizeSeriesLocal(x){
       const v = (x == null) ? null : String(x).trim();
       if(!v) return null;
@@ -879,7 +856,6 @@
       return store.data[profile][cartoonLabel];
     }
 
-    // Clean old local data so we don't keep duplicates from the old null vs "-" switch
     function normalizeAndDedupeStore(store){
       const profiles = ["Asim","Marwa"];
       for(const p of profiles){
@@ -891,7 +867,6 @@
             node.last.seriesLabel = normalizeSeriesLocal(node.last.seriesLabel);
           }
 
-          // normalize + dedupe by (type, seasonOrMovie, seriesLabel), keep newest ts
           const map = new Map();
           const arr = Array.isArray(node.history) ? node.history : [];
           for(const it of arr){
@@ -909,7 +884,6 @@
 
           node.history = merged;
 
-          // make sure node.last is the real latest event for that cartoon
           if(merged.length){
             const latest = merged[0];
             if(!node.last || String(latest.ts) > String(node.last.ts)){
@@ -945,8 +919,6 @@
     function formatLine(entry){
       const parts = [];
       parts.push(entry.cartoonLabel);
-
-      // Only show series if it's a real series (Ben 10). Doraemon stays clean.
       if(entry.seriesLabel) parts.push(entry.seriesLabel);
 
       if(entry.type === "season"){
@@ -962,10 +934,8 @@
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
 
-      // local seriesLabel should always be normalized
       entry.seriesLabel = normalizeSeriesLocal(entry.seriesLabel);
 
-      // Keep "global last" for the cartoon = newest ts
       if(!node.last || String(entry.ts) >= String(node.last.ts)){
         node.last = entry;
       }
@@ -979,7 +949,6 @@
       );
 
       if(idx >= 0){
-        // replace if newer
         const old = node.history[idx];
         if(!old || String(entry.ts) >= String(old.ts)){
           node.history[idx] = entry;
@@ -988,13 +957,9 @@
         node.history.unshift(entry);
       }
 
-      // keep history ordered
       node.history.sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
     }
 
-    // =========================
-    // SUPABASE HELPERS (CLOUD)
-    // =========================
     function supabaseEnabled(){
       return !!(SUPABASE_URL && SUPABASE_ANON_KEY && supabaseClient);
     }
@@ -1003,7 +968,6 @@
       const room = getRoomCode();
       if(!room) return { ok: false, skipped: true };
 
-      // IMPORTANT: cloud series_label must be NOT NULL => send "-" if no series
       const cloudSeries = (row.series_label == null || String(row.series_label).trim() === "")
         ? "-"
         : String(row.series_label);
@@ -1050,9 +1014,6 @@
       return { ok: true, rows: data || [] };
     }
 
-    // =========================
-    // APP
-    // =========================
     function initTracker(){
       const profileSeg = document.getElementById("profileSeg");
       const modeSeg = document.getElementById("modeSeg");
@@ -1082,7 +1043,6 @@
       if(!profileSeg || !modeSeg) return;
 
       let store = loadStore();
-      // write back cleaned store so duplicates are gone immediately
       saveStore(store);
 
       let activeProfile = store.activeProfile || "Asim";
@@ -1193,8 +1153,6 @@
         const cartoonLabel = cfg.label;
 
         const type = typeSelect.value;
-
-        // LOCAL: Doraemon has no series => keep null locally
         let seriesLabel = null;
 
         if(cfg.hasSeries){
@@ -1206,7 +1164,6 @@
         }
 
         const seasonOrMovie = seasonOrMovieSelect.value;
-
         return { cartoonLabel, seriesLabel, type, seasonOrMovie };
       }
 
@@ -1269,7 +1226,6 @@
         for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
-            // CLOUD "-" => LOCAL null
             seriesLabel: normalizeSeriesLocal(r.series_label),
             type: r.type,
             seasonOrMovie: r.season_or_movie,
@@ -1315,21 +1271,19 @@
 
         const entry = {
           cartoonLabel: cur.cartoonLabel,
-          seriesLabel: normalizeSeriesLocal(cur.seriesLabel), // local normalized
+          seriesLabel: normalizeSeriesLocal(cur.seriesLabel),
           type: cur.type,
           seasonOrMovie: cur.seasonOrMovie,
           num,
           ts: nowISO()
         };
 
-        // LOCAL SAVE ALWAYS
         upsertEntry(store, activeProfile, entry);
         store = normalizeAndDedupeStore(store);
         saveStore(store);
 
         saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
 
-        // CLOUD SAVE IF POSSIBLE
         const room = getRoomCode();
         if(!room || !supabaseEnabled()){
           return;
@@ -1338,7 +1292,6 @@
         const push = await sbUpsertProgress({
           profile: activeProfile,
           cartoon_label: entry.cartoonLabel,
-          // only cloud gets "-"
           series_label: entry.seriesLabel || "-",
           type: entry.type,
           season_or_movie: entry.seasonOrMovie,
@@ -1353,7 +1306,6 @@
         }
       }
 
-      // ===== INIT =====
       fillCartoonSelects();
       fillSeries();
       fillSeasonOrMovie();
@@ -1368,7 +1320,6 @@
       updateSaveHintForCartoon();
       startPolling();
 
-      // ===== EVENTS =====
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
@@ -1446,7 +1397,11 @@
       }
     }
 
-    window.addEventListener("load", initTracker);
+    window.addEventListener("load", () => {
+      initTracker();
+      applyGridFixes(); // ensure AF/UA center properly everywhere
+    });
   </script>
 </body>
 </html>
+
