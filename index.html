@@ -318,26 +318,23 @@
     }
 
     /* ===== Panels (your existing open/close logic) ===== */
-    .panel{
+  .panel{
   overflow: hidden;
-  margin: 0;
+  margin-top: 0;              /* <- no gap when closed */
   padding: 0;
   max-height: 0;
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
-  transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
-
-  display: none; /* 🔥 THIS kills the empty space */
+  transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease, margin-top 220ms ease;
+  display: block;             /* <- keep it renderable so animation works */
 }
 
-    
-   .panel.open{
-  display: block;   /* 🔥 bring it back only when open */
+.panel.open{
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
-  margin-top: 14px;
+  margin-top: 14px;           /* <- spacing only when open */
 }
 
 
