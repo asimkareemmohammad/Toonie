@@ -317,23 +317,25 @@
       .grid-2{ grid-template-columns: 1fr; }
     }
 
-    /* ===== Panels (your existing open/close logic) ===== */
-    .panel{
+   /* ===== Panels (smooth open + smooth close) ===== */
+.panel{
+  display: block;              /* keep it in the render tree so closing can animate */
   overflow: hidden;
   margin: 0;
   padding: 0;
+
   max-height: 0;
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
-  transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease;
 
-  display: none; /* 🔥 THIS kills the empty space */
+  transition:
+    max-height 420ms cubic-bezier(.2,.9,.2,1),
+    opacity 220ms ease,
+    transform 220ms ease;
 }
 
-    
-   .panel.open{
-  display: block;   /* 🔥 bring it back only when open */
+.panel.open{
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
