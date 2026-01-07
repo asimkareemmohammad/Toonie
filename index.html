@@ -318,23 +318,29 @@
     }
 
     /* ===== Panels (your existing open/close logic) ===== */
-  .panel{
+ /* ===== Panels (smooth open + smooth close) ===== */
+.panel{
+  display: block;              /* keep it in the render tree so closing can animate */
   overflow: hidden;
-  margin-top: 0;              /* <- no gap when closed */
+  margin: 0;
   padding: 0;
+
   max-height: 0;
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
-  transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease, margin-top 220ms ease;
-  display: block;             /* <- keep it renderable so animation works */
+
+  transition:
+    max-height 420ms cubic-bezier(.2,.9,.2,1),
+    opacity 220ms ease,
+    transform 220ms ease;
 }
 
 .panel.open{
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
-  margin-top: 14px;           /* <- spacing only when open */
+  margin-top: 14px;
 }
 
 
@@ -474,104 +480,103 @@
       </div>
     </header>
 
-    <!-- Doraemon -->
-    <section class="section">
+   <!-- Doraemon Section - Fixed -->
+<section class="section">
+  <div class="card">
+    <h2 class="section-title">Doraemon</h2>
+    <div class="menu-row">
+      <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-seasons')">Seasons</a>
+      <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-movies')">Movies</a>
+    </div>
 
-      
-      <div class="card">
-         <h2 class="section-title">Doraemon</h2>
-        <div class="menu-row">
-            
-
-          <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-seasons')">Seasons</a>
-          <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-movies')">Movies</a>
-        </div>
-
-<div id="dm-seasons" class="panel dm-panel"></div>
-        <div class="grid">
-            <a class="md-btn md-outlined" href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)">DM-S1</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)">DM-S2</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)">DM-S3</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S4-MAK" onclick="ripple(event)">DM-S4</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S5-MAK" onclick="ripple(event)">DM-S5</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S6-MAK2" onclick="ripple(event)">DM-S6</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S7-MAK" onclick="ripple(event)">DM-S7</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S8-MAK" onclick="ripple(event)">DM-S8</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM-S12-MAK" onclick="ripple(event)">DM-S12</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S14_MAK" onclick="ripple(event)">DM-S14</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S15_MAK" onclick="ripple(event)">DM-S15</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S16_MAK" onclick="ripple(event)">DM-S16</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S17_MAK" onclick="ripple(event)">DM-S17</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S18_MAK" onclick="ripple(event)">DM-S18</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S19_MAK" onclick="ripple(event)">DM=S19</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)">DM=S20</a>
-          </div>
-        </div>
-
-<div id="dm-movies" class="panel dm-panel"></div>
-          <div class="grid-2">
-            <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)">MOVIES-1</a>
-            <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)">MOVIES-2</a>
-          </div>
-        </div>
+    <!-- Seasons Panel -->
+    <div id="dm-seasons" class="panel dm-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)">DM-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)">DM-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM-S3-MAK" onclick="ripple(event)">DM-S3</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM-S4-MAK" onclick="ripple(event)">DM-S4</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM-S5-MAK" onclick="ripple(event)">DM-S5</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM-S6-MAK2" onclick="ripple(event)">DM-S6</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM-S7-MAK" onclick="ripple(event)">DM-S7</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM-S8-MAK" onclick="ripple(event)">DM-S8</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM-S12-MAK" onclick="ripple(event)">DM-S12</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM_S14_MAK" onclick="ripple(event)">DM-S14</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM_S15_MAK" onclick="ripple(event)">DM-S15</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM_S16_MAK" onclick="ripple(event)">DM-S16</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM_S17_MAK" onclick="ripple(event)">DM-S17</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM_S18_MAK" onclick="ripple(event)">DM-S18</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM_S19_MAK" onclick="ripple(event)">DM-S19</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/DM_S20_MAK" onclick="ripple(event)">DM-S20</a>
       </div>
-    </section>
+    </div>
 
-    <!-- Ben 10 -->
-    <section class="section">
-     
-
-      <div class="card">
-           <h2 class="section-title">Ben 10</h2>
-        <div class="menu-row">
-          <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-classic')">Classic</a>
-          <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-af')">Alien Force</a>
-          <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-ua')">Ultimate Alien</a>
-          <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-ov')">Omniverse</a>
-        </div>
-
-<div id="b10-classic" class="panel b10-panel"></div>
-          <div class="grid">
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S01-MAK_" onclick="ripple(event)">CL-S1</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S02-MAK" onclick="ripple(event)">CL-S2</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S03-MAK" onclick="ripple(event)">CL-S3</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S04-MAK" onclick="ripple(event)">CL-S4</a>
-          </div>
-        </div>
-        
-<div id="b10-af" class="panel b10-panel"></div>
-          <div class="grid">
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-AF-S01-MAK" onclick="ripple(event)">AF-S1</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-AF-S02-MAK" onclick="ripple(event)">AF-S2</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-AF-S03-MAK" onclick="ripple(event)">AF-S3</a>
-          </div>
-        </div>
-
-<div id="b10-ua" class="panel b10-panel"></div>
-          <div class="grid">
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S01-MAK" onclick="ripple(event)">UA-S1</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S02-MAK" onclick="ripple(event)">UA-S2</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S03-MAK" onclick="ripple(event)">UA-S3</a>
-          </div>
-        </div>
-
-<div id="b10-ov" class="panel b10-panel"></div>
-          <div class="grid">
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S01-MAK" onclick="ripple(event)">OV-S1</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S02-MAK" onclick="ripple(event)">OV-S2</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S03-MAK" onclick="ripple(event)">OV-S3</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S04-MAK" onclick="ripple(event)">OV-S4</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S05-MAK" onclick="ripple(event)">OV-S5</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S06-MAK" onclick="ripple(event)">OV-S6</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S07-MAK" onclick="ripple(event)">OV-S7</a>
-            <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S08-MAK" onclick="ripple(event)">OV-S8</a>
-          </div>
-        </div>
+    <!-- Movies Panel -->
+    <div id="dm-movies" class="panel dm-panel">
+      <div class="grid-2">
+        <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)">MOVIES-1</a>
+        <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)">MOVIES-2</a>
       </div>
-      
-    </section>
+    </div>
+  </div>
+</section>
 
-<!-- Ninja Hattori -->
+<!-- Ben 10 Section - Fixed -->
+<section class="section">
+  <div class="card">
+    <h2 class="section-title">Ben 10</h2>
+    <div class="menu-row">
+      <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-classic')">Classic</a>
+      <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-af')">Alien Force</a>
+      <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-ua')">Ultimate Alien</a>
+      <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-ov')">Omniverse</a>
+    </div>
+
+    <!-- Classic Panel -->
+    <div id="b10-classic" class="panel b10-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S01-MAK_" onclick="ripple(event)">CL-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S02-MAK" onclick="ripple(event)">CL-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S03-MAK" onclick="ripple(event)">CL-S3</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S04-MAK" onclick="ripple(event)">CL-S4</a>
+      </div>
+    </div>
+
+    <!-- Alien Force Panel -->
+    <div id="b10-af" class="panel b10-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-AF-S01-MAK" onclick="ripple(event)">AF-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-AF-S02-MAK" onclick="ripple(event)">AF-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-AF-S03-MAK" onclick="ripple(event)">AF-S3</a>
+      </div>
+    </div>
+
+    <!-- Ultimate Alien Panel -->
+    <div id="b10-ua" class="panel b10-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S01-MAK" onclick="ripple(event)">UA-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S02-MAK" onclick="ripple(event)">UA-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S03-MAK" onclick="ripple(event)">UA-S3</a>
+      </div>
+    </div>
+
+    <!-- Omniverse Panel -->
+    <div id="b10-ov" class="panel b10-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S01-MAK" onclick="ripple(event)">OV-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S02-MAK" onclick="ripple(event)">OV-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S03-MAK" onclick="ripple(event)">OV-S3</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S04-MAK" onclick="ripple(event)">OV-S4</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S05-MAK" onclick="ripple(event)">OV-S5</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S06-MAK" onclick="ripple(event)">OV-S6</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S07-MAK" onclick="ripple(event)">OV-S7</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S08-MAK" onclick="ripple(event)">OV-S8</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Ninja Hattori Section - Fixed -->
 <section class="section">
   <div class="card">
     <h2 class="section-title">Ninja Hattori</h2>
@@ -582,8 +587,8 @@
       <a class="md-btn md-tonal nh-tab" href="#" data-tab="movies" onclick="toggleNH(event,'nh-movies')">Movies</a>
     </div>
 
-    <!-- 1981 Seasons -->
-<div id="nh-1981" class="panel nh-panel"></div>
+    <!-- 1981 Seasons Panel -->
+    <div id="nh-1981" class="panel nh-panel">
       <div class="grid">
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S01-MAK" onclick="ripple(event)">NH-S1</a>
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S02-MAK" onclick="ripple(event)">NH-S2</a>
@@ -593,16 +598,16 @@
       </div>
     </div>
 
-    <!-- Return Seasons -->
-<div id="nh-return" class="panel nh-panel"></div>
+    <!-- Return Seasons Panel -->
+    <div id="nh-return" class="panel nh-panel">
       <div class="grid">
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-RETURN-S01-MAK" onclick="ripple(event)">NHR-S1</a>
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-RETURN-S02-MAK" onclick="ripple(event)">NHR-S2</a>
       </div>
     </div>
 
-    <!-- Movies -->
-<div id="nh-movies" class="panel nh-panel"></div>
+    <!-- Movies Panel -->
+    <div id="nh-movies" class="panel nh-panel">
       <div class="grid-2">
         <a class="md-btn md-filled" href="https://archive.org/details/NH-MOVIES-MAK" onclick="ripple(event)">MOVIES</a>
       </div>
