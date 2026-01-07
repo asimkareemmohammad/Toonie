@@ -818,39 +818,38 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const MODEL = {
-      "Doraemon": {
-        label: "DM",
-        hasSeries: false,
-        seasons: ["S1","S2","S3","S4","S5","S6","S7","S8","S12","S14","S15","S16","S17","S18","S19","S20"],
-        hasMovies: true
-      },
-      "Ben 10": {
-        label: "B10",
-        hasSeries: true,
-        series: ["Classic","Alien Force","Ultimate Alien","Omniverse"],
-        seasonsBySeries: {
-          "Classic": ["S1","S2","S3","S4"],
-          "Alien Force": ["S1","S2","S3"],
-          "Ultimate Alien": ["S1","S2","S3"],
-          "Omniverse": ["S1","S2","S3","S4","S5","S6","S7","S8"]
-        },
-        hasMovies: true
-      }
-         "Ninja Hattori": {
-  label: "NH",
-  hasSeries: true,
-
-  series: ["1981", "Return"],
-
-  seasonsBySeries: {
-    "1981": ["S1", "S2", "S3", "S4", "S5"],
-    "Return": ["S1", "S2"]
+  "Doraemon": {
+    label: "DM",
+    hasSeries: false,
+    seasons: ["S1","S2","S3","S4","S5","S6","S7","S8","S12","S14","S15","S16","S17","S18","S19","S20"],
+    hasMovies: true
   },
 
-  hasMovies: true
-}
+  "Ben 10": {
+    label: "B10",
+    hasSeries: true,
+    series: ["Classic","Alien Force","Ultimate Alien","Omniverse"],
+    seasonsBySeries: {
+      "Classic": ["S1","S2","S3","S4"],
+      "Alien Force": ["S1","S2","S3"],
+      "Ultimate Alien": ["S1","S2","S3"],
+      "Omniverse": ["S1","S2","S3","S4","S5","S6","S7","S8"]
+    },
+    hasMovies: true
+  },
 
-    };
+  "Ninja Hattori": {
+    label: "NH",
+    hasSeries: true,
+    series: ["1981", "Return"],
+    seasonsBySeries: {
+      "1981": ["S1","S2","S3","S4","S5"],
+      "Return": ["S1","S2"]
+    },
+    hasMovies: true
+  }
+};
+
 
     // =========================
     // STORAGE (ROOM + LOCAL)
