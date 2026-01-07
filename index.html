@@ -571,8 +571,49 @@
           </div>
         </div>
       </div>
+      
     </section>
 
+<!-- Ninja Hattori -->
+<section class="section">
+  <div class="card">
+    <h2 class="section-title">Ninja Hattori</h2>
+
+    <div class="menu-row">
+      <a class="md-btn md-tonal nh-tab" href="#" data-tab="1981" onclick="toggleNH(event,'nh-1981')">1981</a>
+      <a class="md-btn md-tonal nh-tab" href="#" data-tab="return" onclick="toggleNH(event,'nh-return')">Return</a>
+      <a class="md-btn md-tonal nh-tab" href="#" data-tab="movies" onclick="toggleNH(event,'nh-movies')">Movies</a>
+    </div>
+
+    <!-- 1981 Seasons -->
+    <div id="nh-1981" class="panel nh-panel" style="margin-top:12px;">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S01-MAK" onclick="ripple(event)">NH-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S02-MAK" onclick="ripple(event)">NH-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S03-MAK" onclick="ripple(event)">NH-S3</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S04-MAK" onclick="ripple(event)">NH-S4</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S05-MAK" onclick="ripple(event)">NH-S5</a>
+      </div>
+    </div>
+
+    <!-- Return Seasons -->
+    <div id="nh-return" class="panel nh-panel" style="margin-top:12px;">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-RETURN-S01-MAK" onclick="ripple(event)">NHR-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-RETURN-S02-MAK" onclick="ripple(event)">NHR-S2</a>
+      </div>
+    </div>
+
+    <!-- Movies -->
+    <div id="nh-movies" class="panel nh-panel" style="margin-top:12px;">
+      <div class="grid-2">
+        <a class="md-btn md-filled" href="https://archive.org/details/NH-MOVIES-MAK" onclick="ripple(event)">MOVIES</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+    
     <!-- Progress Tracker -->
     <section class="section">
      
@@ -703,6 +744,8 @@
 
     function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
     function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
+    function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
+
 
     // keep opened panels correct on resize
     window.addEventListener('resize', () => {
@@ -793,6 +836,20 @@
         },
         hasMovies: true
       }
+         "Ninja Hattori": {
+  label: "NH",
+  hasSeries: true,
+
+  series: ["1981", "Return"],
+
+  seasonsBySeries: {
+    "1981": ["S1", "S2", "S3", "S4", "S5"],
+    "Return": ["S1", "S2"]
+  },
+
+  hasMovies: true
+}
+
     };
 
     // =========================
@@ -1149,13 +1206,23 @@
         const type = typeSelect.value;
         let seriesLabel = null;
 
-        if(cfg.hasSeries){
-          const s = seriesSelect.value;
-          seriesLabel = (s === "Classic") ? "CL" :
-                        (s === "Alien Force") ? "AF" :
-                        (s === "Ultimate Alien") ? "UA" :
-                        (s === "Omniverse") ? "OV" : s;
-        }
+      if (cfg.hasSeries) {
+  const s = seriesSelect.value;
+
+  // Ben 10 mapping (unchanged)
+  seriesLabel = (s === "Classic") ? "CL" :
+                (s === "Alien Force") ? "AF" :
+                (s === "Ultimate Alien") ? "UA" :
+                (s === "Omniverse") ? "OV" :
+
+                // Ninja Hattori mapping (NEW)
+                (s === "1981") ? "NH" :
+                (s === "Return") ? "NHR" :
+
+                // fallback
+                s;
+}
+
 
         const seasonOrMovie = seasonOrMovieSelect.value;
         return { cartoonLabel, seriesLabel, type, seasonOrMovie };
