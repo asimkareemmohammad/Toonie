@@ -319,27 +319,22 @@
 
    /* ===== Panels (smooth open + smooth close) ===== */
 .panel{
-  display: block;              /* keep it in the render tree so closing can animate */
   overflow: hidden;
-  margin: 0;
+  margin-top: 0;              /* <- no gap when closed */
   padding: 0;
-
   max-height: 0;
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
-
-  transition:
-    max-height 420ms cubic-bezier(.2,.9,.2,1),
-    opacity 220ms ease,
-    transform 220ms ease;
+  transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease, transform 220ms ease, margin-top 220ms ease;
+  display: block;             /* <- keep it renderable so animation works */
 }
 
 .panel.open{
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
-  margin-top: 14px;
+  margin-top: 14px;           /* <- spacing only when open */
 }
 
 
@@ -492,7 +487,9 @@
           <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-movies')">Movies</a>
         </div>
 
-        <div id="dm-seasons" class="panel dm-panel" style="margin-top:12px;">
+<div id="dm-seasons" class="panel dm-panel">
+
+
           <div class="grid">
             <a class="md-btn md-outlined" href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)">DM-S1</a>
             <a class="md-btn md-outlined" href="https://archive.org/details/doraemon-s2-mak" onclick="ripple(event)">DM-S2</a>
@@ -513,8 +510,8 @@
           </div>
         </div>
 
-        <div id="dm-movies" class="panel dm-panel" style="margin-top:12px;">
-          <div class="grid-2">
+<div id="dm-movies" class="panel dm-panel"></div>
+        <div class="grid-2">
             <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)">MOVIES-1</a>
             <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_PT2_MAK" onclick="ripple(event)">MOVIES-2</a>
           </div>
@@ -535,7 +532,7 @@
           <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-ov')">Omniverse</a>
         </div>
 
-        <div id="b10-classic" class="panel b10-panel" style="margin-top:12px;">
+      <div id="b10-classic" class="panel b10-panel"></div>
           <div class="grid">
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S01-MAK_" onclick="ripple(event)">CL-S1</a>
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-CL-S02-MAK" onclick="ripple(event)">CL-S2</a>
@@ -544,7 +541,7 @@
           </div>
         </div>
         
-        <div id="b10-af" class="panel b10-panel" style="margin-top:12px;">
+      <div id="b10-af" class="panel b10-panel"></div>
           <div class="grid">
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-AF-S01-MAK" onclick="ripple(event)">AF-S1</a>
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-AF-S02-MAK" onclick="ripple(event)">AF-S2</a>
@@ -552,16 +549,16 @@
           </div>
         </div>
 
-        <div id="b10-ua" class="panel b10-panel" style="margin-top:12px;">
-          <div class="grid">
+<div id="b10-ua" class="panel b10-panel"></div>
+      <div class="grid">
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S01-MAK" onclick="ripple(event)">UA-S1</a>
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S02-MAK" onclick="ripple(event)">UA-S2</a>
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-UA-S03-MAK" onclick="ripple(event)">UA-S3</a>
           </div>
         </div>
 
-        <div id="b10-ov" class="panel b10-panel" style="margin-top:12px;">
-          <div class="grid">
+<div id="b10-ov" class="panel b10-panel"></div>
+      <div class="grid">
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S01-MAK" onclick="ripple(event)">OV-S1</a>
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S02-MAK" onclick="ripple(event)">OV-S2</a>
             <a class="md-btn md-outlined" href="https://archive.org/details/B10-OV-S03-MAK" onclick="ripple(event)">OV-S3</a>
@@ -588,8 +585,8 @@
     </div>
 
     <!-- 1981 Seasons -->
-    <div id="nh-1981" class="panel nh-panel" style="margin-top:12px;">
-      <div class="grid">
+<div id="nh-1981" class="panel nh-panel"></div>
+    <div class="grid">
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S01-MAK" onclick="ripple(event)">NH-S1</a>
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S02-MAK" onclick="ripple(event)">NH-S2</a>
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S03-MAK" onclick="ripple(event)">NH-S3</a>
@@ -599,15 +596,15 @@
     </div>
 
     <!-- Return Seasons -->
-    <div id="nh-return" class="panel nh-panel" style="margin-top:12px;">
-      <div class="grid">
+<div id="nh-return" class="panel nh-panel"></div>
+  <div class="grid">
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-RETURN-S01-MAK" onclick="ripple(event)">NHR-S1</a>
         <a class="md-btn md-outlined" href="https://archive.org/details/NH-RETURN-S02-MAK" onclick="ripple(event)">NHR-S2</a>
       </div>
     </div>
 
     <!-- Movies -->
-    <div id="nh-movies" class="panel nh-panel" style="margin-top:12px;">
+   <div id="nh-movies" class="panel nh-panel"></div>
       <div class="grid-2">
         <a class="md-btn md-filled" href="https://archive.org/details/NH-MOVIES-MAK" onclick="ripple(event)">MOVIES</a>
       </div>
