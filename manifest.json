@@ -8,13 +8,13 @@
   "theme_color": "#0f0f0f",
   "icons": [
     {
-      "src": "icons/toonie_maskable_192_clean.png",
+      "src": "icons/192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/toonie_maskable_512_clean.png",
+      "src": "icons/512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
