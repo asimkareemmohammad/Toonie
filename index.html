@@ -798,12 +798,11 @@
     function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
     function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
     function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
-    function toggleSH(e, targetId) { toggleGroup(e, targetId, ".sh-panel");
+   function toggleSH(e, targetId){
+  toggleGroup(e, targetId, ".sh-panel");
+}
 
-
-
-
-                                   function comingSoon(e, msg){
+function comingSoon(e, msg){
   if (e) e.preventDefault();
   try { if (navigator.vibrate) navigator.vibrate(18); } catch {}
 
@@ -838,6 +837,7 @@
     t.style.opacity = "0";
   }, 1800);
 }
+
 
 
 
@@ -1312,31 +1312,29 @@
         numSelect.value = "1";
       }
 
-      function currentKeyLabels(){
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        const cartoonLabel = cfg.label;
+     function currentKeyLabels(){
+  const cfg = getCartoonCfg(cartoonSelect.value);
+  const cartoonLabel = cfg.label;
 
-        const type = typeSelect.value;
-        let seriesLabel = null;
+  const type = typeSelect.value;
+  let seriesLabel = null;
 
-      if (cfg.hasSeries) {
-  const s = seriesSelect.value;
+  if (cfg.hasSeries) {
+    const s = seriesSelect.value;
 
-  // Ben 10 mapping (unchanged)
-seriesLabel = (s === "Classic") ? "CL" :
-              (s === "Alien Force") ? "AF" :
-              (s === "Ultimate Alien") ? "UA" :
-              (s === "Omniverse") ? "OV" :
+    seriesLabel = (s === "Classic") ? "CL" :
+                  (s === "Alien Force") ? "AF" :
+                  (s === "Ultimate Alien") ? "UA" :
+                  (s === "Omniverse") ? "OV" :
+                  (s === "1981") ? "NH" :
+                  (s === "Return") ? "NHR" :
+                  (s === "Special") ? "SP" :
+                  s;
+  }
 
-              // Ninja Hattori mapping (unchanged)
-              (s === "1981") ? "NH" :
-              (s === "Return") ? "NHR" :
-
-              // Shinchan mapping (NEW)
-              (s === "Special") ? "SP" :
-
-              // fallback
-              s;
+  const seasonOrMovie = seasonOrMovieSelect.value;
+  return { cartoonLabel, seriesLabel, type, seasonOrMovie };
+}
 
       
 
