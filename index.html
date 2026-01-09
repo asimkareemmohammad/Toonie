@@ -1278,16 +1278,20 @@
   if (cfg.hasSeries) {
     const s = seriesSelect.value;
 
-    seriesLabel = (s === "Classic") ? "CL" :
-                  (s === "Alien Force") ? "AF" :
-                  (s === "Ultimate Alien") ? "UA" :
-                  (s === "Omniverse") ? "OV" :
-                  (s === "1981") ? "NH" :
-                  (s === "Return") ? "NHR" :
-                  (s === "Special") ? "SP" :
-                  s;
+    seriesLabel =
+      (s === "Classic") ? "CL" :
+      (s === "Alien Force") ? "AF" :
+      (s === "Ultimate Alien") ? "UA" :
+      (s === "Omniverse") ? "OV" :
+      (s === "1981") ? "NH" :
+      (s === "Return") ? "NHR" :
+      (s === "Special") ? "SP" :
+      s;
   }
-     }
+
+  const seasonOrMovie = seasonOrMovieSelect.value;
+  return { cartoonLabel, seriesLabel, type, seasonOrMovie };
+}
 
 
 
