@@ -637,7 +637,7 @@
       <a class="md-btn md-outlined" href="https://archive.org/details/SH-S06-MAK" onclick="ripple(event)">SH-S6</a>
       <a class="md-btn md-outlined" href="https://archive.org/details/SH-S07-MAK" onclick="ripple(event)">SH-S7</a>
       <a class="md-btn md-outlined" href="https://archive.org/details/SH-S08-MAK" onclick="ripple(event)">SH-S8</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S09-MAK" onclick="ripple(event)">SH-S9</a>
+<a class="md-btn md-outlined" href="#" onclick="comingSoon(event,'SH_S9 is coming soon'); ripple(event)">SH_S9</a>
       <a class="md-btn md-outlined" href="https://archive.org/details/SH-S10-MAK" onclick="ripple(event)">SH-S10</a>
 
       <!-- no S11 (you said you don't have it) -->
@@ -646,7 +646,7 @@
       <a class="md-btn md-outlined" href="https://archive.org/details/SH-S13-MAK" onclick="ripple(event)">SH-S13</a>
       <a class="md-btn md-outlined" href="https://archive.org/details/SH-S14-MAK" onclick="ripple(event)">SH-S14</a>
       <a class="md-btn md-outlined" href="https://archive.org/details/SH-S15-MAK" onclick="ripple(event)">SH-S15</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S16-MAK" onclick="ripple(event)">SH-S16</a>
+<a class="md-btn md-outlined" href="#" onclick="comingSoon(event,'SH_S16 is coming soon'); ripple(event)">SH_S16</a>
       <a class="md-btn md-outlined" href="https://archive.org/details/SH-S17-MAK" onclick="ripple(event)">SH-S17</a>
     </div>
   </div>
@@ -799,6 +799,56 @@
     function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
     function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
     function toggleSH(e, targetId) { toggleGroup(e, targetId, ".sh-panel");
+
+
+
+
+                                    function comingSoon(e, msg){
+  if (e) e.preventDefault();
+  try { if (navigator.vibrate) navigator.vibrate(18); } catch {}
+
+  const text = msg || "Coming soon";
+
+  // Create a lightweight toast (no extra HTML needed)
+  let t = document.getElementById("toonieToast");
+  if(!t){
+    t = document.createElement("div");
+    t.id = "toonieToast";
+    t.style.position = "fixed";
+    t.style.left = "50%";
+    t.style.bottom = "18px";
+    t.style.transform = "translateX(-50%)";
+    t.style.padding = "10px 14px";
+    t.style.borderRadius = "999px";
+    t.style.background = "rgba(30,30,30,0.92)";
+    t.style.border = "1px solid rgba(255,255,255,0.14)";
+    t.style.color = "rgba(255,255,255,0.92)";
+    t.style.fontSize = "13px";
+    t.style.boxShadow = "0 10px 22px rgba(0,0,0,0.60), 0 2px 4px rgba(0,0,0,0.40)";
+    t.style.zIndex = "99999";
+    t.style.opacity = "0";
+    t.style.transition = "opacity 160ms ease, transform 160ms ease";
+    t.style.pointerEvents = "none";
+    document.body.appendChild(t);
+  }
+
+  t.textContent = text;
+
+  // reset + show
+  t.style.opacity = "0";
+  t.style.transform = "translateX(-50%) translateY(6px)";
+  requestAnimationFrame(() => {
+    t.style.opacity = "1";
+    t.style.transform = "translateX(-50%) translateY(0)";
+  });
+
+  clearTimeout(window.__toonieToastTimer);
+  window.__toonieToastTimer = setTimeout(() => {
+    t.style.opacity = "0";
+    t.style.transform = "translateX(-50%) translateY(6px)";
+  }, 1800);
+}
+
 }
 
 
@@ -1292,7 +1342,7 @@ seriesLabel = (s === "Classic") ? "CL" :
               // fallback
               s;
 
-      }
+      
 
         const seasonOrMovie = seasonOrMovieSelect.value;
         return { cartoonLabel, seriesLabel, type, seasonOrMovie };
