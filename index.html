@@ -616,54 +616,6 @@
   </div>
 </section>
 
-    <!-- Shinchan Card -->
-<section class="card">
-  <h2 class="card-title">Shinchan</h2>
-
-  <div class="tabs">
-    <button class="chip" onclick="toggleSH(event, 'sh-seasons')">Seasons</button>
-    <button class="chip" onclick="toggleSH(event, 'sh-special')">Special</button>
-    <button class="chip" onclick="toggleSH(event, 'sh-movies')">Movies</button>
-  </div>
-
-  <!-- Seasons Panel -->
-  <div id="sh-seasons" class="panel sh-panel hidden">
-    <div class="grid">
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S01-MAK" onclick="ripple(event)">SH-S1</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S02-MAK" onclick="ripple(event)">SH-S2</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S03-MAK" onclick="ripple(event)">SH-S3</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S04-MAK" onclick="ripple(event)">SH-S4</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S05-MAK" onclick="ripple(event)">SH-S5</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S06-MAK" onclick="ripple(event)">SH-S6</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S07-MAK" onclick="ripple(event)">SH-S7</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S08-MAK" onclick="ripple(event)">SH-S8</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S10-MAK" onclick="ripple(event)">SH-S10</a>
-
-      <!-- no S11 (you said you don't have it) -->
-
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S12-MAK" onclick="ripple(event)">SH-S12</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S13-MAK" onclick="ripple(event)">SH-S13</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S14-MAK" onclick="ripple(event)">SH-S14</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S15-MAK" onclick="ripple(event)">SH-S15</a>
-      <a class="md-btn md-outlined" href="https://archive.org/details/SH-S17-MAK" onclick="ripple(event)">SH-S17</a>
-    </div>
-  </div>
-
-  <!-- Special Panel -->
-  <div id="sh-special" class="panel sh-panel hidden">
-    <div class="grid">
-      <a class="md-btn md-filled" href="https://archive.org/details/SH-SP-MAK" onclick="ripple(event)">SPECIAL</a>
-    </div>
-  </div>
-
-  <!-- Movies Panel -->
-  <div id="sh-movies" class="panel sh-panel hidden">
-    <div class="grid">
-      <a class="md-btn md-filled" href="https://archive.org/details/SH-MOVIES-MAK" onclick="ripple(event)">MOVIES</a>
-    </div>
-  </div>
-</section>
-
     
     <!-- Progress Tracker -->
     <section class="section">
@@ -796,11 +748,6 @@
     function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
     function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
     function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
-   function toggleSH(e, targetId){
-  toggleGroup(e, targetId, ".sh-panel");
-}
-
-
 
 
     // keep opened panels correct on resize
@@ -903,28 +850,8 @@
       "Return": ["S1","S2"]
     },
     hasMovies: true
-  },
-
-  "Shinchan": {
-    label: "SH",
-    hasSeries: true,
-    series: ["Seasons", "Special"],
-    seasonsBySeries: {
-      "Seasons": ["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S12","S13","S14","S15","S16","S17"],
-      "Special": ["E1","E2","E3","E4","E5","E6","E7","E8","E9"]
-    },
-    comingSoonBySeries: {
-      "Seasons": ["S9","S16"]
-    },
-    hasMovies: true
   }
 };
-
-    // =========================
-    // STORAGE (ROOM + LOCAL)
-
-    // =========================
-    // STORAGE (ROOM + LOCAL)
 
 
     // =========================
@@ -1274,31 +1201,30 @@
         numSelect.value = "1";
       }
 
-     function currentKeyLabels(){
-  const cfg = getCartoonCfg(cartoonSelect.value);
-  const cartoonLabel = cfg.label;
+      function currentKeyLabels(){
+        const cfg = getCartoonCfg(cartoonSelect.value);
+        const cartoonLabel = cfg.label;
 
-  const type = typeSelect.value;
-  let seriesLabel = null;
+        const type = typeSelect.value;
+        let seriesLabel = null;
 
-  if (cfg.hasSeries) {
-    const s = seriesSelect.value;
+      if (cfg.hasSeries) {
+  const s = seriesSelect.value;
 
-    seriesLabel = (s === "Classic") ? "CL" :
-                  (s === "Alien Force") ? "AF" :
-                  (s === "Ultimate Alien") ? "UA" :
-                  (s === "Omniverse") ? "OV" :
-                  (s === "1981") ? "NH" :
-                  (s === "Return") ? "NHR" :
-                  (s === "Special") ? "SP" :
-                  s;
-  }
+  // Ben 10 mapping (unchanged)
+  seriesLabel = (s === "Classic") ? "CL" :
+                (s === "Alien Force") ? "AF" :
+                (s === "Ultimate Alien") ? "UA" :
+                (s === "Omniverse") ? "OV" :
 
-  const seasonOrMovie = seasonOrMovieSelect.value;
-  return { cartoonLabel, seriesLabel, type, seasonOrMovie };
+                // Ninja Hattori mapping (NEW)
+                (s === "1981") ? "NH" :
+                (s === "Return") ? "NHR" :
+
+                // fallback
+                s;
 }
 
-      
 
         const seasonOrMovie = seasonOrMovieSelect.value;
         return { cartoonLabel, seriesLabel, type, seasonOrMovie };
@@ -1532,7 +1458,7 @@
           }
         });
       }
-    
+    }
 
     window.addEventListener("load", () => {
       initTracker();
