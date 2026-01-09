@@ -803,13 +803,12 @@
 
 
 
-                                    function comingSoon(e, msg){
+                                   function comingSoon(e, msg){
   if (e) e.preventDefault();
   try { if (navigator.vibrate) navigator.vibrate(18); } catch {}
 
   const text = msg || "Coming soon";
 
-  // Create a lightweight toast (no extra HTML needed)
   let t = document.getElementById("toonieToast");
   if(!t){
     t = document.createElement("div");
@@ -824,7 +823,6 @@
     t.style.border = "1px solid rgba(255,255,255,0.14)";
     t.style.color = "rgba(255,255,255,0.92)";
     t.style.fontSize = "13px";
-    t.style.boxShadow = "0 10px 22px rgba(0,0,0,0.60), 0 2px 4px rgba(0,0,0,0.40)";
     t.style.zIndex = "99999";
     t.style.opacity = "0";
     t.style.transition = "opacity 160ms ease, transform 160ms ease";
@@ -833,22 +831,12 @@
   }
 
   t.textContent = text;
-
-  // reset + show
-  t.style.opacity = "0";
-  t.style.transform = "translateX(-50%) translateY(6px)";
-  requestAnimationFrame(() => {
-    t.style.opacity = "1";
-    t.style.transform = "translateX(-50%) translateY(0)";
-  });
+  t.style.opacity = "1";
 
   clearTimeout(window.__toonieToastTimer);
   window.__toonieToastTimer = setTimeout(() => {
     t.style.opacity = "0";
-    t.style.transform = "translateX(-50%) translateY(6px)";
   }, 1800);
-}
-
 }
 
 
@@ -968,6 +956,7 @@
     },
     hasMovies: true
   }
+};
 
     // =========================
     // STORAGE (ROOM + LOCAL)
