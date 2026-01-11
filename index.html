@@ -468,6 +468,33 @@
       font-size: 12px;
     }
 
+/* Title row with a right-side chip */
+.title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.last-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 6px 12px;
+  border-radius: var(--md-pill);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+
+  background: rgba(208,188,255,0.10);
+  border: 1px solid rgba(208,188,255,0.35);
+  color: var(--md-primary);
+}
+
+.last-chip:empty{
+  display:none;
+}
 
     
   </style>
@@ -491,7 +518,12 @@
    <!-- Doraemon Section - Fixed -->
 <section class="section">
   <div class="card">
-    <h2 class="section-title">Doraemon</h2>
+    
+   <div class="title-row">
+  <h2 class="section-title">Doraemon</h2>
+  <span class="last-chip" id="lastChipDM"></span>
+</div>
+
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-seasons')">Seasons</a>
       <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-movies')">Movies</a>
@@ -534,7 +566,12 @@
 <!-- Ben 10 Section - Fixed -->
 <section class="section">
   <div class="card">
-    <h2 class="section-title">Ben 10</h2>
+    
+<div class="title-row">
+  <h2 class="section-title">Ben 10</h2>
+  <span class="last-chip" id="lastChipB10"></span>
+</div>
+    
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-classic')">Classic</a>
       <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-af')">Alien Force</a>
@@ -589,7 +626,11 @@
 <!-- Ninja Hattori Section - Fixed -->
 <section class="section">
   <div class="card">
-    <h2 class="section-title">Ninja Hattori</h2>
+    
+<div class="title-row">
+  <h2 class="section-title">Ninja Hattori</h2>
+  <span class="last-chip" id="lastChipNH"></span>
+</div>
 
     <div class="menu-row">
       <a class="md-btn md-tonal nh-tab" href="#" data-tab="1981" onclick="toggleNH(event,'nh-1981')">1981</a>
@@ -629,7 +670,11 @@
 <!-- Shinchan Section - Matched to Ninja Hattori -->
 <section class="section">
   <div class="card">
-    <h2 class="section-title">Shinchan</h2>
+    
+<div class="title-row">
+  <h2 class="section-title">Shinchan</h2>
+  <span class="last-chip" id="lastChipSH"></span>
+</div>
 
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleSH(event,'sh-seasons')">Seasons</a>
@@ -1046,6 +1091,39 @@
       return parts.join(" ");
     }
 
+function chipTextFromEntry(entry){
+  if(!entry) return "";
+  // Minimal chip: "S4 EP 12" or "MOVIES M1" or "OV S4 EP 1"
+  if(entry.type === "movie"){
+    return `MOVIES M${entry.num}`;
+  }
+  const base = `${entry.seasonOrMovie} EP ${entry.num}`;
+  return entry.seriesLabel ? `${entry.seriesLabel} ${base}` : base;
+}
+
+function setChip(id, entry){
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  const txt = chipTextFromEntry(entry);
+  el.textContent = txt;
+
+  if(entry && entry.seriesLabel) el.setAttribute("data-series", entry.seriesLabel);
+  else el.removeAttribute("data-series");
+}
+
+function renderAllCartoonLastChips(){
+  const st = loadStore();
+  const p = st.activeProfile || "Asim";
+  const data = (st.data && st.data[p]) ? st.data[p] : {};
+
+  setChip("lastChipDM", (data.DM && data.DM.last) ? data.DM.last : null);
+  setChip("lastChipB10", (data.B10 && data.B10.last) ? data.B10.last : null);
+  setChip("lastChipNH", (data.NH && data.NH.last) ? data.NH.last : null);
+  setChip("lastChipSH", (data.SH && data.SH.last) ? data.SH.last : null);
+}
+
+    
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
 
@@ -1406,6 +1484,9 @@
 
         saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
 
+        renderAllCartoonLastChips();
+
+
         const room = getRoomCode();
         if(!room || !supabaseEnabled()){
           return;
@@ -1440,7 +1521,11 @@
 
       refreshRoomUI();
       updateSaveHintForCartoon();
+      renderAllCartoonLastChips();
+
       startPolling();
+      renderAllCartoonLastChips();
+
 
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
