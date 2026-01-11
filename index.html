@@ -633,7 +633,6 @@
 
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleSH(event,'sh-seasons')">Seasons</a>
-      <a class="md-btn md-tonal" href="#" onclick="toggleSH(event,'sh-special')">Special</a>
       <a class="md-btn md-tonal" href="#" onclick="toggleSH(event,'sh-movies')">Movies</a>
     </div>
 
@@ -657,13 +656,7 @@
       </div>
     </div>
 
-    <!-- Special Panel -->
-    <div id="sh-special" class="panel sh-panel">
-  <div class="grid-2">
-    <a class="md-btn md-filled" href="https://archive.org/details/SH-SP-MAK" onclick="ripple(event)">SPECIAL</a>
-  </div>
-</div>
-
+   
 
     <!-- Movies Panel -->
     <div id="sh-movies" class="panel sh-panel">
@@ -917,11 +910,10 @@
 
   "Shinchan": {
     label: "SH",
-    hasSeries: true,
-    series: ["Seasons", "Special"],
+    hasSeries: false,
+    series: ["Seasons"],
     seasonsBySeries: {
       "Seasons": ["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S12","S13","S14","S15","S16","S17"],
-      "Special": ["E1","E2","E3","E4","E5","E6","E7","E8","E9"]
     },
     hasMovies: true
   }
@@ -1293,7 +1285,6 @@
       (s === "Omniverse") ? "OV" :
       (s === "1981") ? "NH" :
       (s === "Return") ? "NHR" :
-      (s === "Special") ? "SP" :
       s;
   }
 
