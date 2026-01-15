@@ -328,20 +328,20 @@
     /* ===== Panels (your existing open/close logic) ===== */
  /* ===== Panels (smooth open + smooth close) ===== */
 .panel{
-  display: block;              /* keep it in the render tree so closing can animate */
   overflow: hidden;
-  margin: 0;
-  padding: 0;
-
   max-height: 0;
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
 
+  /* performance helpers */
+  will-change: max-height, opacity, transform;
+  contain: layout paint;
+
   transition:
-    max-height 420ms cubic-bezier(.2,.9,.2,1),
-    opacity 220ms ease,
-    transform 220ms ease;
+    max-height 320ms cubic-bezier(.2,.9,.2,1),
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .panel.open{
@@ -350,6 +350,7 @@
   pointer-events: auto;
   margin-top: 14px;
 }
+
 
 
     /* ===== Progress tracker (Material-ish form styling) ===== */
@@ -495,7 +496,7 @@
 
   background: rgba(208,188,255,0.10);
   border: 1px solid rgba(208,188,255,0.35);
-color: var(--md-primary);}
+color: var(--md-primary);
 }
 
 .last-chip:empty{
@@ -817,23 +818,30 @@ color: var(--md-primary);}
 
   <script>
     /* ===== Smooth panel animation (same logic) ===== */
-    function setPanelOpen(panel, open){
-      if(!panel) return;
+   function setPanelOpen(panel, open){
+  if(!panel) return;
 
-      if(open){
-        panel.classList.add('open');
-        panel.style.maxHeight = '0px';
-        panel.offsetHeight;
-        const target = panel.scrollHeight;
-        panel.style.maxHeight = target + 'px';
-      } else {
-        const current = panel.scrollHeight;
-        panel.style.maxHeight = current + 'px';
-        panel.offsetHeight;
-        panel.style.maxHeight = '0px';
-        panel.classList.remove('open');
-      }
-    }
+  if(open){
+    panel.classList.add('open');
+
+    // start from 0
+    panel.style.maxHeight = '0px';
+
+    requestAnimationFrame(() => {
+      const target = panel.scrollHeight;
+      panel.style.maxHeight = target + 'px';
+    });
+  } else {
+    const current = panel.scrollHeight;
+    panel.style.maxHeight = current + 'px';
+
+    requestAnimationFrame(() => {
+      panel.style.maxHeight = '0px';
+      panel.classList.remove('open');
+    });
+  }
+}
+
 
     function toggleGroup(e, targetId, groupSelector){
       e.preventDefault();
