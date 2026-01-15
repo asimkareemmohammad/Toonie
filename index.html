@@ -325,31 +325,34 @@
       .grid-2{ grid-template-columns: 1fr; }
     }
 
-    /* ===== Panels (smooth open + smooth close) ===== */
-.panel{
-  display: block;              /* keep it in the render tree so closing can animate */
-  overflow: hidden;
+  /* ===== Smooth Panel Animation (Grid-based) ===== */
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
   margin: 0;
   padding: 0;
-
-  max-height: 0;
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
-
-  transition:
-    max-height 420ms cubic-bezier(.2,.9,.2,1),
+  transition: 
+    grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1),
     opacity 220ms ease,
     transform 220ms ease;
+  overflow: hidden;
 }
 
-.panel.open{
+.panel > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel.open {
+  grid-template-rows: 1fr;
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
   margin-top: 14px;
 }
-
 
     /* ===== Progress tracker (Material-ish form styling) ===== */
     .form-row{
@@ -815,36 +818,33 @@ color: var(--md-primary);
   </main>
 
   <script>
-    /* ===== Smooth panel animation (same logic) ===== */
-    function setPanelOpen(panel, open){
-      if(!panel) return;
+    /* ===== Smooth panel animation (grid-based) ===== */
+function setPanelOpen(panel, open){
+  if(!panel) return;
+  
+  if(open){
+    panel.classList.add('open');
+  } else {
+    panel.classList.remove('open');
+  }
+}
 
-      if(open){
-        panel.classList.add('open');
-        panel.style.maxHeight = '0px';
-        panel.offsetHeight;
-        const target = panel.scrollHeight;
-        panel.style.maxHeight = target + 'px';
-      } else {
-        const current = panel.scrollHeight;
-        panel.style.maxHeight = current + 'px';
-        panel.offsetHeight;
-        panel.style.maxHeight = '0px';
-        panel.classList.remove('open');
-      }
-    }
+function toggleGroup(e, targetId, groupSelector){
+  e.preventDefault();
+  const target = document.getElementById(targetId);
+  if(!target) return;
 
-    function toggleGroup(e, targetId, groupSelector){
-      e.preventDefault();
-      const target = document.getElementById(targetId);
-      if(!target) return;
+  const isOpen = target.classList.contains('open');
+  document.querySelectorAll(groupSelector).forEach(p => {
+    p.classList.remove('open');
+  });
+  
+  if(!isOpen){
+    target.classList.add('open');
+  }
 
-      const isOpen = target.classList.contains('open');
-      document.querySelectorAll(groupSelector).forEach(p => setPanelOpen(p, false));
-      if(!isOpen) setPanelOpen(target, true);
-
-      ripple(e);
-    }
+  ripple(e);
+}
 
     function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
     function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
