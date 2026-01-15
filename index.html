@@ -304,7 +304,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 2px;
+      margin-top: 12px;
     }
 
     /* Make grid items stretch nicely */
@@ -328,20 +328,20 @@
     /* ===== Panels (your existing open/close logic) ===== */
  /* ===== Panels (smooth open + smooth close) ===== */
 .panel{
+  display: block;              /* keep it in the render tree so closing can animate */
   overflow: hidden;
+  margin: 0;
+  padding: 0;
+
   max-height: 0;
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
 
-  /* performance helpers */
-  will-change: max-height, opacity, transform;
-  contain: layout paint;
-
   transition:
-    max-height 320ms cubic-bezier(.2,.9,.2,1),
-    opacity 160ms ease,
-    transform 160ms ease;
+    max-height 420ms cubic-bezier(.2,.9,.2,1),
+    opacity 220ms ease,
+    transform 220ms ease;
 }
 
 .panel.open{
@@ -350,7 +350,6 @@
   pointer-events: auto;
   margin-top: 14px;
 }
-
 
 
     /* ===== Progress tracker (Material-ish form styling) ===== */
@@ -469,39 +468,6 @@
       font-size: 12px;
     }
 
-.title-row{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.section-title{
-  line-height: 1.1;
-}
-
-
-.last-chip{
-  
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-   transform: translateY(-6px);
-  padding: 4px 10px;
-  border-radius: var(--md-pill);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1px;
-  white-space: nowrap;
-
-  background: rgba(208,188,255,0.10);
-  border: 1px solid rgba(208,188,255,0.35);
-color: var(--md-primary);
-}
-
-.last-chip:empty{
-  display:none;
-}
 
     
   </style>
@@ -525,12 +491,7 @@ color: var(--md-primary);
    <!-- Doraemon Section - Fixed -->
 <section class="section">
   <div class="card">
-    
-   <div class="title-row">
-  <h2 class="section-title">Doraemon</h2>
-  <span class="last-chip" id="lastChipDM"></span>
-</div>
-
+    <h2 class="section-title">Doraemon</h2>
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-seasons')">Seasons</a>
       <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-movies')">Movies</a>
@@ -573,12 +534,7 @@ color: var(--md-primary);
 <!-- Ben 10 Section - Fixed -->
 <section class="section">
   <div class="card">
-    
-<div class="title-row">
-  <h2 class="section-title">Ben 10</h2>
-  <span class="last-chip" id="lastChipB10"></span>
-</div>
-    
+    <h2 class="section-title">Ben 10</h2>
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-classic')">Classic</a>
       <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-af')">Alien Force</a>
@@ -633,11 +589,7 @@ color: var(--md-primary);
 <!-- Ninja Hattori Section - Fixed -->
 <section class="section">
   <div class="card">
-    
-<div class="title-row">
-  <h2 class="section-title">Ninja Hattori</h2>
-  <span class="last-chip" id="lastChipNH"></span>
-</div>
+    <h2 class="section-title">Ninja Hattori</h2>
 
     <div class="menu-row">
       <a class="md-btn md-tonal nh-tab" href="#" data-tab="1981" onclick="toggleNH(event,'nh-1981')">1981</a>
@@ -648,19 +600,19 @@ color: var(--md-primary);
     <!-- 1981 Seasons Panel -->
     <div id="nh-1981" class="panel nh-panel">
       <div class="grid">
-        <a class="md-btn md-outlined" href="https://archive.org/details/NH-S01-MAK" onclick="ripple(event)">NH-S1</a>
-        <a class="md-btn md-outlined" href="https://archive.org/details/NH-S02-MAK" onclick="ripple(event)">NH-S2</a>
-        <a class="md-btn md-outlined" href="https://archive.org/details/NH-S03-MAK" onclick="ripple(event)">NH-S3</a>
-        <a class="md-btn md-outlined" href="https://archive.org/details/NH-S04-MAK" onclick="ripple(event)">NH-S4</a>
-        <a class="md-btn md-outlined" href="https://archive.org/details/NH-S05-MAK" onclick="ripple(event)">NH-S5</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S01-MAK" onclick="ripple(event)">NH-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S02-MAK" onclick="ripple(event)">NH-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S03-MAK" onclick="ripple(event)">NH-S3</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S04-MAK" onclick="ripple(event)">NH-S4</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-1981-S05-MAK" onclick="ripple(event)">NH-S5</a>
       </div>
     </div>
 
     <!-- Return Seasons Panel -->
     <div id="nh-return" class="panel nh-panel">
       <div class="grid">
-        <a class="md-btn md-outlined" href="https://archive.org/details/NHR-S01-MAK" onclick="ripple(event)">NHR-S1</a>
-        <a class="md-btn md-outlined" href="https://archive.org/details/NHR-S02-MAK" onclick="ripple(event)">NHR-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-RETURN-S01-MAK" onclick="ripple(event)">NHR-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/NH-RETURN-S02-MAK" onclick="ripple(event)">NHR-S2</a>
       </div>
     </div>
 
@@ -677,11 +629,7 @@ color: var(--md-primary);
 <!-- Shinchan Section - Matched to Ninja Hattori -->
 <section class="section">
   <div class="card">
-    
-<div class="title-row">
-  <h2 class="section-title">Shinchan</h2>
-  <span class="last-chip" id="lastChipSH"></span>
-</div>
+    <h2 class="section-title">Shinchan</h2>
 
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleSH(event,'sh-seasons')">Seasons</a>
@@ -713,7 +661,7 @@ color: var(--md-primary);
     <!-- Movies Panel -->
     <div id="sh-movies" class="panel sh-panel">
       <div class="grid-2">
-        <a class="md-btn md-filled" href="https://archive.org/details/SH-MOVIES-MAK_" onclick="ripple(event)">MOVIES</a>
+        <a class="md-btn md-filled" href="https://archive.org/details/SH-MOVIES-MAK" onclick="ripple(event)">MOVIES</a>
       </div>
     </div>
 
@@ -818,30 +766,23 @@ color: var(--md-primary);
 
   <script>
     /* ===== Smooth panel animation (same logic) ===== */
-   function setPanelOpen(panel, open){
-  if(!panel) return;
+    function setPanelOpen(panel, open){
+      if(!panel) return;
 
-  if(open){
-    panel.classList.add('open');
-
-    // start from 0
-    panel.style.maxHeight = '0px';
-
-    requestAnimationFrame(() => {
-      const target = panel.scrollHeight;
-      panel.style.maxHeight = target + 'px';
-    });
-  } else {
-    const current = panel.scrollHeight;
-    panel.style.maxHeight = current + 'px';
-
-    requestAnimationFrame(() => {
-      panel.style.maxHeight = '0px';
-      panel.classList.remove('open');
-    });
-  }
-}
-
+      if(open){
+        panel.classList.add('open');
+        panel.style.maxHeight = '0px';
+        panel.offsetHeight;
+        const target = panel.scrollHeight;
+        panel.style.maxHeight = target + 'px';
+      } else {
+        const current = panel.scrollHeight;
+        panel.style.maxHeight = current + 'px';
+        panel.offsetHeight;
+        panel.style.maxHeight = '0px';
+        panel.classList.remove('open');
+      }
+    }
 
     function toggleGroup(e, targetId, groupSelector){
       e.preventDefault();
@@ -1105,39 +1046,6 @@ color: var(--md-primary);
       return parts.join(" ");
     }
 
-function chipTextFromEntry(entry){
-  if(!entry) return "";
-  // Minimal chip: "S4 EP 12" or "MOVIES M1" or "OV S4 EP 1"
-  if(entry.type === "movie"){
-    return `MOVIES M${entry.num}`;
-  }
-  const base = `${entry.seasonOrMovie} EP ${entry.num}`;
-  return entry.seriesLabel ? `${entry.seriesLabel} ${base}` : base;
-}
-
-function setChip(id, entry){
-  const el = document.getElementById(id);
-  if(!el) return;
-
-  const txt = chipTextFromEntry(entry);
-  el.textContent = txt;
-
-  if(entry && entry.seriesLabel) el.setAttribute("data-series", entry.seriesLabel);
-  else el.removeAttribute("data-series");
-}
-
-function renderAllCartoonLastChips(){
-  const st = loadStore();
-  const p = st.activeProfile || "Asim";
-  const data = (st.data && st.data[p]) ? st.data[p] : {};
-
-  setChip("lastChipDM", (data.DM && data.DM.last) ? data.DM.last : null);
-  setChip("lastChipB10", (data.B10 && data.B10.last) ? data.B10.last : null);
-  setChip("lastChipNH", (data.NH && data.NH.last) ? data.NH.last : null);
-  setChip("lastChipSH", (data.SH && data.SH.last) ? data.SH.last : null);
-}
-
-    
     function upsertEntry(store, profile, entry){
       const node = ensurePath(store, profile, entry.cartoonLabel);
 
@@ -1498,9 +1406,6 @@ function renderAllCartoonLastChips(){
 
         saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
 
-        renderAllCartoonLastChips();
-
-
         const room = getRoomCode();
         if(!room || !supabaseEnabled()){
           return;
@@ -1535,11 +1440,7 @@ function renderAllCartoonLastChips(){
 
       refreshRoomUI();
       updateSaveHintForCartoon();
-      renderAllCartoonLastChips();
-
       startPolling();
-      renderAllCartoonLastChips();
-
 
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
