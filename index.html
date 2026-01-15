@@ -325,34 +325,46 @@
       .grid-2{ grid-template-columns: 1fr; }
     }
 
-  /* ===== Smooth Panel Animation (Grid-based) ===== */
+
+
+    
+/* ===== Panels (optimized smooth animation) ===== */
 .panel {
   display: grid;
   grid-template-rows: 0fr;
   margin: 0;
   padding: 0;
   opacity: 0;
-  transform: translateY(-6px);
+  visibility: hidden;
   pointer-events: none;
   transition: 
-    grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 220ms ease,
-    transform 220ms ease;
+    grid-template-rows 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 180ms ease,
+    margin-top 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
 }
 
 .panel > * {
   min-height: 0;
   overflow: hidden;
+  transition: transform 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateY(-8px);
 }
 
 .panel.open {
   grid-template-rows: 1fr;
   opacity: 1;
-  transform: translateY(0);
+  visibility: visible;
   pointer-events: auto;
   margin-top: 14px;
 }
+
+.panel.open > * {
+  transform: translateY(0);
+}
+
+
+    
 
     /* ===== Progress tracker (Material-ish form styling) ===== */
     .form-row{
