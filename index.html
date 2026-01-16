@@ -328,36 +328,30 @@
 
 
     
-/* ===== Panels (optimized smooth opening AND closing) ===== */
+/* ===== Panels (scaleY transform - super smooth) ===== */
 .panel {
-  display: grid;
-  grid-template-rows: 0fr;
+  display: block;
   margin: 0;
   padding: 0;
+  max-height: 0;
   opacity: 0;
-  visibility: hidden;
+  transform: scaleY(0);
+  transform-origin: top;
+  overflow: hidden;
   pointer-events: none;
-  overflow: hidden;
   transition: 
-    grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 300ms cubic-bezier(0.4, 0, 0.2, 1),
-    margin-top 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.panel > * {
-  min-height: 0;
-  overflow: hidden;
+    max-height 350ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 250ms cubic-bezier(0.4, 0, 0.2, 1) 50ms,
+    transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .panel.open {
-  grid-template-rows: 1fr;
+  max-height: 1200px; /* Set high enough for your content */
   opacity: 1;
-  visibility: visible;
+  transform: scaleY(1);
   pointer-events: auto;
   margin-top: 14px;
 }
-
 
     
 
