@@ -490,54 +490,6 @@ color: var(--md-primary);
   display:none;
 }
 
-
-/* Add these styles to your existing CSS */
-
-/* Animated panels for mode switching */
-.mode-panel {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: 
-    opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
-  height: 0;
-  overflow: hidden;
-}
-
-.mode-panel.active {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-  height: auto;
-  overflow: visible;
-}
-
-/* For save panel specific layout */
-#savePanel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#savePanel.active {
-  grid-template-rows: 1fr;
-  margin-top: 12px;
-}
-
-#savePanel > * {
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* For recent panel */
-#recentPanel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-    
     
   </style>
 </head>
@@ -786,7 +738,7 @@ color: var(--md-primary);
           <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
         </div>
 
-<div id="savePanel" class="mode-panel active" style="margin-top:12px;">
+        <div id="savePanel" style="margin-top:12px;">
           <div class="form-row">
             <div class="field">
               <div class="label">Cartoon</div>
@@ -829,7 +781,7 @@ color: var(--md-primary);
           <div class="mini" id="saveHint"></div>
         </div>
 
-<div id="recentPanel" class="mode-panel" style="margin-top:12px;">
+        <div id="recentPanel" class="hidden" style="margin-top:12px;">
           <div class="form-row">
             <div class="field">
               <div class="label">Cartoon</div>
@@ -1299,60 +1251,21 @@ function renderAllCartoonLastChips(){
         });
       }
 
-
-      
       function setModeUI(){
-  // Update button states
-  [...modeSeg.querySelectorAll("button")].forEach(b => {
-    b.classList.toggle("active", b.dataset.mode === activeMode);
-  });
+        [...modeSeg.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("active", b.dataset.mode === activeMode);
+        });
 
-  // Get panel elements
-  const savePanel = document.getElementById("savePanel");
-  const recentPanel = document.getElementById("recentPanel");
-  
-  // Remove transition temporarily for initial setup
-  savePanel.style.transition = 'none';
-  recentPanel.style.transition = 'none';
-  
-  if(activeMode === "save"){
-    // Switch to save mode
-    recentPanel.classList.remove("active");
-    
-    // Small delay to ensure recent panel hides first
-    setTimeout(() => {
-      savePanel.classList.add("active");
-      
-      // Restore transitions
-      savePanel.style.transition = '';
-      recentPanel.style.transition = '';
-      
-      // Trigger reflow for animation
-      savePanel.offsetHeight;
-    }, 10);
-  } else {
-    // Switch to recent mode
-    savePanel.classList.remove("active");
-    
-    // Small delay to ensure save panel hides first
-    setTimeout(() => {
-      recentPanel.classList.add("active");
-      
-      // Restore transitions
-      savePanel.style.transition = '';
-      recentPanel.style.transition = '';
-      
-      // Trigger reflow for animation
-      recentPanel.offsetHeight;
-      
-      // Render recent content after panel is visible
-      setTimeout(() => renderRecent(), 50);
-    }, 10);
-  }
-}
+        if(activeMode === "save"){
+          savePanel.classList.remove("hidden");
+          recentPanel.classList.add("hidden");
+        } else {
+          savePanel.classList.add("hidden");
+          recentPanel.classList.remove("hidden");
+          renderRecent();
+        }
+      }
 
-
-      
       function cartoonsList(){ return Object.keys(MODEL); }
       function getCartoonCfg(name){ return MODEL[name]; }
 
