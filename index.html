@@ -26,13 +26,11 @@
   <style>
   
     :root{
-      /* Boot */
       --boot-min-show: 900ms;
       --boot-fade: 350ms;
       --app-fade: 250ms;
       --app-fade-delay: 80ms;
 
-      /* ===== Material 3 dark-ish token set (hand-tuned) ===== */
       --md-bg: #121212;
       --md-surface: #1E1E1E;
       --md-surface-2: #232323;
@@ -45,7 +43,6 @@
       --md-text-soft: rgba(255,255,255,0.70);
       --md-text-faint: rgba(255,255,255,0.54);
 
-      /* Material 3-ish purple in dark theme */
       --md-primary: #D0BCFF;
       --md-on-primary: #2B1B5A;
 
@@ -58,24 +55,20 @@
       --md-error: #F2B8B5;
       --md-on-error: #601410;
 
-      /* Shape */
       --md-radius-xs: 10px;
       --md-radius-sm: 12px;
       --md-radius-md: 16px;
       --md-radius-lg: 20px;
       --md-pill: 999px;
 
-      /* Elevation */
       --e1: 0 1px 2px rgba(0,0,0,0.55), 0 1px 1px rgba(0,0,0,0.35);
       --e2: 0 4px 10px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.35);
       --e3: 0 10px 22px rgba(0,0,0,0.60), 0 2px 4px rgba(0,0,0,0.40);
 
-      /* Motion */
       --t-fast: 140ms;
       --t-med: 200ms;
       --t-slow: 320ms;
 
-      /* Layout */
       --max: 920px;
     }
 
@@ -91,7 +84,6 @@
       overflow-y: auto;
     }
 
-    /* Boot */
     #boot {
       position: fixed;
       inset: 0;
@@ -102,7 +94,6 @@
     }
     #boot.hide { opacity: 0; pointer-events: none; }
 
-    /* App fade-in */
     #app {
       opacity: 0;
       transform: translateY(4px);
@@ -113,7 +104,6 @@
     }
     .boot-done #app { opacity: 1; transform: translateY(0); }
 
-    /* ===== Top App Bar (Material-ish) ===== */
     .appbar{
       position: sticky;
       top: 0;
@@ -159,7 +149,6 @@
       max-width: 70vw;
     }
 
-    /* ===== Section titles ===== */
     .section{
       max-width: var(--max);
       margin: 0 auto;
@@ -174,7 +163,6 @@
     }
 
     
-/* spacing for section titles inside cards (Sync / Profile / Progress Tracker) */
 .card .section-title{
   margin-bottom: 14px;
 }
@@ -187,7 +175,6 @@
       line-height: 1.45;
     }
 
-    /* ===== Cards ===== */
     .card{
       background: var(--md-surface);
       border: 1px solid var(--md-outline);
@@ -206,7 +193,6 @@
       color: var(--md-text);
     }
 
-    /* ===== Buttons (Material-ish) ===== */
     .md-btn{
       -webkit-tap-highlight-color: transparent;
       user-select: none;
@@ -271,7 +257,6 @@
       color: var(--md-error);
     }
 
-    /* Ripple */
     .md-btn .ripple{
       position: absolute;
       border-radius: 50%;
@@ -285,7 +270,6 @@
       to { transform: scale(3.8); opacity: 0; }
     }
 
-    /* ===== Grid for season buttons ===== */
     .grid{
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -299,7 +283,6 @@
       .grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
 
-    /* Menu row */
     .menu-row{
       display: flex;
       flex-wrap: wrap;
@@ -307,7 +290,6 @@
       margin-top: 2px;
     }
 
-    /* Make grid items stretch nicely */
     .grid .md-btn{
       width: 100%;
       height: 44px;
@@ -315,7 +297,6 @@
       justify-content: center;
     }
 
-    /* Movies grid */
     .grid-2{
       display:grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -328,34 +309,39 @@
 
 
     
-/* ===== Panels (scaleY transform - super smooth) ===== */
+
 .panel {
-  display: block;
+  display: grid;
+  grid-template-rows: 0fr;
   margin: 0;
   padding: 0;
-  max-height: 0;
   opacity: 0;
-  transform: scaleY(0);
-  transform-origin: top;
-  overflow: hidden;
+  visibility: hidden;
   pointer-events: none;
+  overflow: hidden;
   transition: 
-    max-height 350ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 250ms cubic-bezier(0.4, 0, 0.2, 1) 50ms,
-    transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    margin-top 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panel > * {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .panel.open {
-  max-height: 1200px; /* Set high enough for your content */
+  grid-template-rows: 1fr;
   opacity: 1;
-  transform: scaleY(1);
+  visibility: visible;
   pointer-events: auto;
   margin-top: 14px;
 }
 
     
 
-    /* ===== Progress tracker (Material-ish form styling) ===== */
+  
     .form-row{
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -458,7 +444,6 @@
 
     .hidden{ display:none !important; }
 
-    /* Sync status pill */
     .status-pill{
       display:inline-flex;
       align-items:center;
@@ -513,7 +498,7 @@ color: var(--md-primary);
   <div id="boot"></div>
 
   <main id="app">
-    <!-- App Bar -->
+
     <header class="appbar">
       <div class="appbar-inner">
         <div class="brand">
@@ -524,7 +509,6 @@ color: var(--md-primary);
       </div>
     </header>
 
-   <!-- Doraemon Section - Fixed -->
 <section class="section">
   <div class="card">
     
@@ -539,7 +523,6 @@ color: var(--md-primary);
     </div>
 
 
-    <!-- Seasons Panel -->
     <div id="dm-seasons" class="panel dm-panel">
       <div class="grid">
         <a class="md-btn md-outlined" href="https://archive.org/details/dm-s1-mak" onclick="ripple(event)">DM-S1</a>
@@ -562,7 +545,6 @@ color: var(--md-primary);
       </div>
     </div>
 
-    <!-- Movies Panel -->
     <div id="dm-movies" class="panel dm-panel">
       <div class="grid-2">
         <a class="md-btn md-filled" href="https://archive.org/details/DM_MOVIES_MAK" onclick="ripple(event)">MOVIES-1</a>
@@ -572,7 +554,6 @@ color: var(--md-primary);
   </div>
 </section>
 
-<!-- Ben 10 Section - Fixed -->
 <section class="section">
   <div class="card">
     
@@ -817,9 +798,8 @@ color: var(--md-primary);
       </div>
     </section>
   </main>
-
   <script>
-    /* ===== Smooth panel animation (grid-based) ===== */
+    
 function setPanelOpen(panel, open){
   if(!panel) return;
   
@@ -857,27 +837,23 @@ function toggleGroup(e, targetId, groupSelector){
 
 
 
-    // keep opened panels correct on resize
     window.addEventListener('resize', () => {
       document.querySelectorAll('.panel.open').forEach(p => {
         p.style.maxHeight = p.scrollHeight + 'px';
       });
     });
 
-    // UI
     function setSyncStatus(text) {
       const el = document.getElementById("syncStatus");
       if (el) el.textContent = text;
     }
 
-    /* Material-ish ripple */
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(18);
 
       const target = e.currentTarget;
       if(!target) return;
 
-      // only ripple Material buttons/links
       if(!target.classList || !target.classList.contains('md-btn')) return;
 
       const rect = target.getBoundingClientRect();
@@ -895,7 +871,6 @@ function toggleGroup(e, targetId, groupSelector){
       setTimeout(() => rp.remove(), 600);
     }
 
-    // Boot overlay fade
     const bootStart = performance.now();
     window.addEventListener('load', () => {
       const MIN_SHOW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--boot-min-show')) || 900;
@@ -913,9 +888,7 @@ function toggleGroup(e, targetId, groupSelector){
       }, wait);
     });
 
-    // =========================
-    // CONFIG
-    // =========================
+
     const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
     const TABLE_NAME = "toonie_progress";
@@ -968,9 +941,7 @@ function toggleGroup(e, targetId, groupSelector){
    }
 
 
-    // =========================
-    // STORAGE (ROOM + LOCAL)
-    // =========================
+
     function getRoomCode() {
       return (localStorage.getItem(ROOM_KEY) || "").trim();
     }
@@ -1099,7 +1070,6 @@ function toggleGroup(e, targetId, groupSelector){
 
 function chipTextFromEntry(entry){
   if(!entry) return "";
-  // Minimal chip: "S4 EP 12" or "MOVIES M1" or "OV S4 EP 1"
   if(entry.type === "movie"){
     return `MOVIES M${entry.num}`;
   }
