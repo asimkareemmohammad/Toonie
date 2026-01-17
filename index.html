@@ -1199,7 +1199,7 @@ function setChip(id, entry){
  // Make only the trailing number roll
 const m = String(txt).match(/^(.*\s)(\d+)$/);
 if(m){
-  el.innerHTML = `${m[1]}<span class="chip-num">${m[2]}</span>`;
+el.innerHTML = `${prefix}&nbsp;<span class="chip-num">${num}</span>`;
 } else {
   el.textContent = txt;
 }
