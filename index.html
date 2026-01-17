@@ -535,6 +535,32 @@
   filter: brightness(1.12);
 }
 
+/* Slot-roll animation for the middle text */
+.last-chip{
+  position: relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  will-change: transform, opacity;
+}
+
+.last-chip.roll-up{
+  animation: rollUp 180ms ease-out;
+}
+
+.last-chip.roll-down{
+  animation: rollDown 180ms ease-out;
+}
+
+@keyframes rollUp{
+  from { transform: translateY(6px); opacity: 0.55; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+@keyframes rollDown{
+  from { transform: translateY(-6px); opacity: 0.55; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
 
 
     
@@ -1169,6 +1195,20 @@ function setChip(id, entry){
   else el.removeAttribute("data-series");
 }
 
+const pendingChipAnim = {}; // e.g. { DM: +1, B10: -1 }
+
+function animateChip(id, delta){
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  el.classList.remove("roll-up", "roll-down");
+  void el.offsetWidth; // restart animation
+
+  if(delta > 0) el.classList.add("roll-up");
+  else if(delta < 0) el.classList.add("roll-down");
+}
+
+    
 const STEPPER_MAP = {
   DM: { minus: "dmMinus", plus: "dmPlus" },
   B10: { minus: "b10Minus", plus: "b10Plus" },
@@ -1214,6 +1254,13 @@ function renderAllCartoonLastChips(){
   setStepperState("B10", b10);
   setStepperState("NH", nh);
   setStepperState("SH", sh);
+
+    // play pending roll animations (set by +/-)
+  if(pendingChipAnim.DM){ animateChip("lastChipDM", pendingChipAnim.DM); delete pendingChipAnim.DM; }
+  if(pendingChipAnim.B10){ animateChip("lastChipB10", pendingChipAnim.B10); delete pendingChipAnim.B10; }
+  if(pendingChipAnim.NH){ animateChip("lastChipNH", pendingChipAnim.NH); delete pendingChipAnim.NH; }
+  if(pendingChipAnim.SH){ animateChip("lastChipSH", pendingChipAnim.SH); delete pendingChipAnim.SH; }
+
 }
 
 
@@ -1590,11 +1637,13 @@ if (cfg.hasSeries && type !== "movie") {
 
         upsertEntry(store, activeProfile, entry);
         store = normalizeAndDedupeStore(store);
-        saveStore(store);
+          saveStore(store);
 
-        saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
+  pendingChipAnim[cartoonLabel] = delta;
 
-        renderAllCartoonLastChips();
+  saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
+  renderAllCartoonLastChips();
+
 
 
         const room = getRoomCode();
