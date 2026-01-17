@@ -468,27 +468,62 @@
 }
 
 
-.last-chip{
-  
+/* Stepper pill wrapper (this is the new "pill") */
+.last-stepper{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-   transform: translateY(-6px);
-  padding: 4px 10px;
+  transform: translateY(-6px);
   border-radius: var(--md-pill);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1px;
   white-space: nowrap;
+  overflow: hidden;
 
   background: rgba(208,188,255,0.10);
   border: 1px solid rgba(208,188,255,0.35);
-color: var(--md-primary);
+  color: var(--md-primary);
 }
 
-.last-chip:empty{
+/* Hide the whole pill when there is no "last watched" yet */
+.last-stepper:has(.last-chip:empty){
   display:none;
 }
+
+/* Middle label text only (no background/border now) */
+.last-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+
+/* Internal divider line: the "|" feel */
+.stepper-div{
+  width: 1px;
+  height: 18px;
+  background: rgba(208,188,255,0.35);
+}
+
+/* + / - buttons inside the pill */
+.stepper-btn{
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--md-primary);
+  font-weight: 800;
+  font-size: 14px;
+  width: 32px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.stepper-btn:disabled{
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 
     
   </style>
@@ -512,16 +547,17 @@ color: var(--md-primary);
 <section class="section">
   <div class="card">
     
-   <div class="title-row">
+  <div class="title-row">
   <h2 class="section-title">Doraemon</h2>
-  <span class="last-chip" id="lastChipDM"></span>
+
+  <span class="last-stepper" id="stepperDM">
+    <button class="stepper-btn" type="button" id="dmMinus" aria-label="Doraemon minus" disabled>−</button>
+    <span class="stepper-div"></span>
+    <span class="last-chip" id="lastChipDM"></span>
+    <span class="stepper-div"></span>
+    <button class="stepper-btn" type="button" id="dmPlus" aria-label="Doraemon plus" disabled>+</button>
+  </span>
 </div>
-
-    <div class="menu-row">
-      <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-seasons')">Seasons</a>
-      <a class="md-btn md-tonal" href="#" onclick="toggleDM(event,'dm-movies')">Movies</a>
-    </div>
-
 
     <div id="dm-seasons" class="panel dm-panel">
       <div class="grid">
@@ -559,8 +595,16 @@ color: var(--md-primary);
     
 <div class="title-row">
   <h2 class="section-title">Ben 10</h2>
-  <span class="last-chip" id="lastChipB10"></span>
+
+  <span class="last-stepper" id="stepperB10">
+    <button class="stepper-btn" type="button" id="b10Minus" aria-label="Ben 10 minus" disabled>−</button>
+    <span class="stepper-div"></span>
+    <span class="last-chip" id="lastChipB10"></span>
+    <span class="stepper-div"></span>
+    <button class="stepper-btn" type="button" id="b10Plus" aria-label="Ben 10 plus" disabled>+</button>
+  </span>
 </div>
+
     
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleB10(event,'b10-classic')">Classic</a>
@@ -619,8 +663,16 @@ color: var(--md-primary);
     
 <div class="title-row">
   <h2 class="section-title">Ninja Hattori</h2>
-  <span class="last-chip" id="lastChipNH"></span>
+
+  <span class="last-stepper" id="stepperNH">
+    <button class="stepper-btn" type="button" id="nhMinus" aria-label="Ninja Hattori minus" disabled>−</button>
+    <span class="stepper-div"></span>
+    <span class="last-chip" id="lastChipNH"></span>
+    <span class="stepper-div"></span>
+    <button class="stepper-btn" type="button" id="nhPlus" aria-label="Ninja Hattori plus" disabled>+</button>
+  </span>
 </div>
+
 
     <div class="menu-row">
       <a class="md-btn md-tonal nh-tab" href="#" data-tab="1981" onclick="toggleNH(event,'nh-1981')">1981</a>
@@ -663,8 +715,16 @@ color: var(--md-primary);
     
 <div class="title-row">
   <h2 class="section-title">Shinchan</h2>
-  <span class="last-chip" id="lastChipSH"></span>
+
+  <span class="last-stepper" id="stepperSH">
+    <button class="stepper-btn" type="button" id="shMinus" aria-label="Shinchan minus" disabled>−</button>
+    <span class="stepper-div"></span>
+    <span class="last-chip" id="lastChipSH"></span>
+    <span class="stepper-div"></span>
+    <button class="stepper-btn" type="button" id="shPlus" aria-label="Shinchan plus" disabled>+</button>
+  </span>
 </div>
+
 
     <div class="menu-row">
       <a class="md-btn md-tonal" href="#" onclick="toggleSH(event,'sh-seasons')">Seasons</a>
