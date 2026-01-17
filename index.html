@@ -1157,16 +1157,53 @@ function setChip(id, entry){
   else el.removeAttribute("data-series");
 }
 
+const STEPPER_MAP = {
+  DM: { minus: "dmMinus", plus: "dmPlus" },
+  B10: { minus: "b10Minus", plus: "b10Plus" },
+  NH: { minus: "nhMinus", plus: "nhPlus" },
+  SH: { minus: "shMinus", plus: "shPlus" }
+};
+
+function setStepperState(cartoonLabel, entry){
+  const m = STEPPER_MAP[cartoonLabel];
+  if(!m) return;
+
+  const minusBtn = document.getElementById(m.minus);
+  const plusBtn  = document.getElementById(m.plus);
+  if(!minusBtn || !plusBtn) return;
+
+  if(!entry){
+    minusBtn.disabled = true;
+    plusBtn.disabled = true;
+    return;
+  }
+
+  const n = Number(entry.num) || 1;
+  minusBtn.disabled = n <= 1;
+  plusBtn.disabled  = n >= 100;
+}
+
 function renderAllCartoonLastChips(){
   const st = loadStore();
   const p = st.activeProfile || "Asim";
   const data = (st.data && st.data[p]) ? st.data[p] : {};
 
-  setChip("lastChipDM", (data.DM && data.DM.last) ? data.DM.last : null);
-  setChip("lastChipB10", (data.B10 && data.B10.last) ? data.B10.last : null);
-  setChip("lastChipNH", (data.NH && data.NH.last) ? data.NH.last : null);
-  setChip("lastChipSH", (data.SH && data.SH.last) ? data.SH.last : null);
+  const dm  = data.DM?.last || null;
+  const b10 = data.B10?.last || null;
+  const nh  = data.NH?.last || null;
+  const sh  = data.SH?.last || null;
+
+  setChip("lastChipDM", dm);
+  setChip("lastChipB10", b10);
+  setChip("lastChipNH", nh);
+  setChip("lastChipSH", sh);
+
+  setStepperState("DM", dm);
+  setStepperState("B10", b10);
+  setStepperState("NH", nh);
+  setStepperState("SH", sh);
 }
+
 
     
     function upsertEntry(store, profile, entry){
@@ -1569,6 +1606,68 @@ if (cfg.hasSeries && type !== "movie") {
         }
       }
 
+async function stepFromLast(cartoonLabel, delta){
+  vib();
+  store = loadStore();
+
+  const node = ensurePath(store, activeProfile, cartoonLabel);
+  const last = node.last;
+
+  if(!last){
+    renderAllCartoonLastChips();
+    return;
+  }
+
+  const curNum = Math.max(1, Math.min(100, Number(last.num) || 1));
+  const nextNum = Math.max(1, Math.min(100, curNum + delta));
+  if(nextNum === curNum){
+    renderAllCartoonLastChips();
+    return;
+  }
+
+  const entry = {
+    cartoonLabel: last.cartoonLabel,
+    seriesLabel: normalizeSeriesLocal(last.seriesLabel),
+    type: last.type,
+    seasonOrMovie: last.seasonOrMovie,
+    num: nextNum,
+    ts: nowISO()
+  };
+
+  upsertEntry(store, activeProfile, entry);
+  store = normalizeAndDedupeStore(store);
+  saveStore(store);
+
+  // Keep UI consistent
+  saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
+  renderAllCartoonLastChips();
+  updateSaveHintForCartoon();
+  if(activeMode === "recent") renderRecent();
+  refreshRoomUI();
+
+  // Cloud sync (same rules as doSave)
+  const room = getRoomCode();
+  if(!room || !supabaseEnabled()) return;
+
+  const push = await sbUpsertProgress({
+    profile: activeProfile,
+    cartoon_label: entry.cartoonLabel,
+    series_label: entry.seriesLabel || "-",
+    type: entry.type,
+    season_or_movie: entry.seasonOrMovie,
+    num: entry.num,
+    ts: entry.ts
+  });
+
+  if(push.ok){
+    pollFromCloud().catch(() => {});
+  } else {
+    saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
+  }
+}
+
+
+      
       fillCartoonSelects();
       fillSeries();
       fillSeasonOrMovie();
@@ -1664,6 +1763,19 @@ if (cfg.hasSeries && type !== "movie") {
           }
         });
       }
+
+      document.getElementById("dmMinus")?.addEventListener("click", () => stepFromLast("DM", -1))
+      document.getElementById("dmPlus")?.addEventListener("click", () => stepFromLast("DM", +1));
+
+
+      document.getElementById("b10Minus")?.addEventListener("click", () => stepFromLast("B10", -1));
+      document.getElementById("b10Plus")?.addEventListener("click", () => stepFromLast("B10", +1));
+
+      document.getElementById("nhMinus")?.addEventListener("click", () => stepFromLast("NH", -1));
+      document.getElementById("nhPlus")?.addEventListener("click", () => stepFromLast("NH", +1));
+
+      document.getElementById("shMinus")?.addEventListener("click", () => stepFromLast("SH", -1));
+      document.getElementById("shPlus")?.addEventListener("click", () => stepFromLast("SH", +1));   
     }
 
     window.addEventListener("load", () => {
