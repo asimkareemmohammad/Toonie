@@ -523,6 +523,17 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+/* Match md-btn press feedback for +/- buttons (no color change) */
+.stepper-btn{
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.stepper-btn:active:not(:disabled){
+  transform: translateY(1px);
+  filter: brightness(1.02);
+}
 
 
     
