@@ -807,32 +807,33 @@
         </div>
 
         <div id="savePanel" style="margin-top:12px;">
-          <div class="form-row">
-            <div class="field">
-              <div class="label">Cartoon</div>
-              <select id="cartoonSelect" class="select"></select>
-            </div>
+         <div class="form-row">
+  <div class="field">
+    <div class="label">Cartoon</div>
+    <select id="cartoonSelect" class="select"></select>
+  </div>
 
-            <div class="field" id="seriesField">
-              <div class="label">Series</div>
-              <select id="seriesSelect" class="select"></select>
-            </div>
-          </div>
+  <div class="field">
+    <div class="label">Type</div>
+    <select id="typeSelect" class="select">
+      <option value="season">Season</option>
+      <option value="movie">Movies</option>
+    </select>
+  </div>
+</div>
 
-          <div class="form-row" style="margin-top:12px;">
-            <div class="field">
-              <div class="label">Type</div>
-              <select id="typeSelect" class="select">
-                <option value="season">Season</option>
-                <option value="movie">Movies</option>
-              </select>
-            </div>
+<div class="form-row" style="margin-top:12px;">
+  <div class="field" id="seriesField">
+    <div class="label">Series</div>
+    <select id="seriesSelect" class="select"></select>
+  </div>
 
-           <div class="field" id="seasonOrMovieField">
-             <div class="label" id="seasonLabel">Season</div>
-              <select id="seasonOrMovieSelect" class="select"></select>
-            </div>
-          </div>
+  <div class="field" id="seasonOrMovieField">
+    <div class="label" id="seasonLabel">Season</div>
+    <select id="seasonOrMovieSelect" class="select"></select>
+  </div>
+</div>
+
 
           <div class="form-row" style="margin-top:12px;">
             <div class="field">
@@ -1343,23 +1344,28 @@ function renderAllCartoonLastChips(){
         recentCartoonSelect.innerHTML = opts;
       }
 
-      function fillSeries(){
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        if(!cfg || !cfg.hasSeries){
-          seriesField.classList.add("hidden");
-          seriesSelect.innerHTML = "";
-          return;
-        }
-        seriesField.classList.remove("hidden");
-        seriesSelect.innerHTML = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
-      }
+     function fillSeries(){
+  const cfg = getCartoonCfg(cartoonSelect.value);
 
-     function fillSeasonOrMovie(){
+  // If movies mode, series should not exist visually
+  if(typeSelect.value === "movie" || !cfg || !cfg.hasSeries){
+    seriesField.classList.add("hidden");
+    seriesSelect.innerHTML = "";
+    return;
+  }
+
+  seriesField.classList.remove("hidden");
+  seriesSelect.innerHTML = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
+}
+
+
+function fillSeasonOrMovie(){
   const cfg = getCartoonCfg(cartoonSelect.value);
   const type = typeSelect.value;
 
+  const field = document.getElementById("seasonOrMovieField");
+
   if(type === "movie"){
-    const field = document.getElementById("seasonOrMovieField");
     if(field) field.classList.add("hidden");
 
     seasonLabel.textContent = "Movies";
@@ -1368,20 +1374,21 @@ function renderAllCartoonLastChips(){
     return;
   }
 
+  // Season mode: ensure field is back
+  if(field) field.classList.remove("hidden");
 
+  seasonLabel.textContent = "Season";
 
-        seasonLabel.textContent = "Season";
+  let seasons = [];
+  if(cfg.hasSeries){
+    const s = seriesSelect.value;
+    seasons = (cfg.seasonsBySeries && cfg.seasonsBySeries[s]) ? cfg.seasonsBySeries[s] : [];
+  } else {
+    seasons = cfg.seasons || [];
+  }
 
-        let seasons = [];
-        if(cfg.hasSeries){
-          const s = seriesSelect.value;
-          seasons = (cfg.seasonsBySeries && cfg.seasonsBySeries[s]) ? cfg.seasonsBySeries[s] : [];
-        } else {
-          seasons = cfg.seasons || [];
-        }
-
-        seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
-      }
+  seasonOrMovieSelect.innerHTML = seasons.map(x => `<option value="${x}">${x}</option>`).join("");
+}
 
       function fillEpisodeDropdown(max = 100){
         let html = "";
@@ -1622,12 +1629,14 @@ if (cfg.hasSeries && type !== "movie") {
         updateSaveHintForCartoon();
       });
 
-      typeSelect.addEventListener("change", () => {
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        if(typeSelect.value === "movie" && !cfg.hasMovies) typeSelect.value = "season";
-        fillSeasonOrMovie();
-        updateSaveHintForCartoon();
-      });
+    typeSelect.addEventListener("change", () => {
+  const cfg = getCartoonCfg(cartoonSelect.value);
+  if(typeSelect.value === "movie" && !cfg.hasMovies) typeSelect.value = "season";
+
+  fillSeries();          // <-- important
+  fillSeasonOrMovie();
+  updateSaveHintForCartoon();
+});
 
       seasonOrMovieSelect.addEventListener("change", () => {
         updateSaveHintForCartoon();
