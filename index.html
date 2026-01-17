@@ -1702,7 +1702,8 @@ async function stepFromLast(cartoonLabel, delta){
   upsertEntry(store, activeProfile, entry);
   store = normalizeAndDedupeStore(store);
   saveStore(store);
-
+// 🔥 THIS is what was missing
+pendingChipAnim[cartoonLabel] = delta;
   // Keep UI consistent
   saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
   renderAllCartoonLastChips();
