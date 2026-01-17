@@ -777,6 +777,7 @@
 
       <div class="card">
 <h2 class="section-title">Sync</h2>
+        
         <div class="form-row">
           <div class="field">
             <input id="roomInput" class="input" type="text" placeholder="Example: Asim123">
@@ -827,8 +828,8 @@
               </select>
             </div>
 
-            <div class="field">
-              <div class="label" id="seasonLabel">Season</div>
+           <div class="field" id="seasonOrMovieField">
+             <div class="label" id="seasonLabel">Season</div>
               <select id="seasonOrMovieSelect" class="select"></select>
             </div>
           </div>
@@ -1353,15 +1354,21 @@ function renderAllCartoonLastChips(){
         seriesSelect.innerHTML = cfg.series.map(s => `<option value="${s}">${s}</option>`).join("");
       }
 
-      function fillSeasonOrMovie(){
-        const cfg = getCartoonCfg(cartoonSelect.value);
-        const type = typeSelect.value;
+     function fillSeasonOrMovie(){
+  const cfg = getCartoonCfg(cartoonSelect.value);
+  const type = typeSelect.value;
 
-        if(type === "movie"){
-          seasonLabel.textContent = "Movies";
-          seasonOrMovieSelect.innerHTML = `<option value="Movies">Movies</option>`;
-          return;
-        }
+  if(type === "movie"){
+    const field = document.getElementById("seasonOrMovieField");
+    if(field) field.classList.add("hidden");
+
+    seasonLabel.textContent = "Movies";
+    seasonOrMovieSelect.innerHTML = `<option value="Movies">Movies</option>`;
+    seasonOrMovieSelect.value = "Movies";
+    return;
+  }
+
+
 
         seasonLabel.textContent = "Season";
 
