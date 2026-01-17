@@ -551,13 +551,6 @@
 .last-chip.roll-down{
   animation: rollDown 180ms ease-out;
 }
-    
-.chip-num{
-  display: inline-block;
-  min-width: 2ch;      /* keeps alignment nice */
-  text-align: right;
-  will-change: transform, filter;
-}
 
 @keyframes rollUp{
   from { transform: translateY(6px); opacity: 0.55; }
@@ -568,8 +561,6 @@
   from { transform: translateY(-6px); opacity: 0.55; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-
-
     
   </style>
 </head>
@@ -1196,14 +1187,7 @@ function setChip(id, entry){
   if(!el) return;
 
   const txt = chipTextFromEntry(entry);
- // Make only the trailing number roll
-const m = String(txt).match(/^(.*\s)(\d+)$/);
-if(m){
-el.innerHTML = `${prefix}&nbsp;<span class="chip-num">${num}</span>`;
-} else {
   el.textContent = txt;
-}
-
 
   if(entry && entry.seriesLabel) el.setAttribute("data-series", entry.seriesLabel);
   else el.removeAttribute("data-series");
@@ -1212,18 +1196,14 @@ el.innerHTML = `${prefix}&nbsp;<span class="chip-num">${num}</span>`;
 const pendingChipAnim = {}; // e.g. { DM: +1, B10: -1 }
 
 function animateChip(id, delta){
- const el = document.getElementById(id);
-if(!el) return;
+  const el = document.getElementById(id);
+  if(!el) return;
 
-const num = el.querySelector(".chip-num");
-if(!num) return;
+  el.classList.remove("roll-up", "roll-down");
+  void el.offsetWidth; // restart animation
 
-num.classList.remove("roll-up", "roll-down");
-void num.offsetWidth;
-
-if(delta > 0) num.classList.add("roll-up");
-else if(delta < 0) num.classList.add("roll-down");
-
+  if(delta > 0) el.classList.add("roll-up");
+  else if(delta < 0) el.classList.add("roll-down");
 }
 
     
@@ -1717,8 +1697,7 @@ async function stepFromLast(cartoonLabel, delta){
   upsertEntry(store, activeProfile, entry);
   store = normalizeAndDedupeStore(store);
   saveStore(store);
-// 🔥 THIS is what was missing
-pendingChipAnim[cartoonLabel] = delta;
+
   // Keep UI consistent
   saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
   renderAllCartoonLastChips();
