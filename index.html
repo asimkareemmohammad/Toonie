@@ -1697,6 +1697,7 @@ async function stepFromLast(cartoonLabel, delta){
   upsertEntry(store, activeProfile, entry);
   store = normalizeAndDedupeStore(store);
   saveStore(store);
+pendingChipAnim[cartoonLabel] = delta;
 
   // Keep UI consistent
   saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
