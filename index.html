@@ -1746,6 +1746,9 @@ updateSaveHintForCartoon();
 if(activeMode === "recent") renderRecent();
 refreshRoomUI();
 
+  await new Promise(requestAnimationFrame);
+
+  
   // Cloud sync (same rules as doSave)
   const room = getRoomCode();
   if(!room || !supabaseEnabled()) return;
