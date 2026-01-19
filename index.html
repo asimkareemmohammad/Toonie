@@ -965,9 +965,9 @@ function toggleGroup(e, targetId, groupSelector){
     function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
     function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
     function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
-    
-    function toggleSH(e, targetId){
-  toggleGroup(e, targetId, ".sh-panel");
+    function toggleSH(e, targetId){toggleGroup(e, targetId, ".sh-panel");
+    function toggleSM(e, targetId){ toggleGroup(e, targetId, ".sm-panel"); }
+
 }
 
 
@@ -1073,7 +1073,12 @@ function toggleGroup(e, targetId, groupSelector){
   seasons: ["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S12","S13","S14","S15","S16","S17"],
   hasMovies: true
 },
-   }
+     "Spiderman": {
+  label: "SM",
+  hasSeries: false,
+  seasons: ["S1","S2","S3","S4"],
+  hasMovies: false
+}, }
 
 
 
@@ -1241,7 +1246,9 @@ const STEPPER_MAP = {
   DM: { minus: "dmMinus", plus: "dmPlus" },
   B10: { minus: "b10Minus", plus: "b10Plus" },
   NH: { minus: "nhMinus", plus: "nhPlus" },
-  SH: { minus: "shMinus", plus: "shPlus" }
+  SH: { minus: "shMinus", plus: "shPlus" },
+  SM: { minus: "smMinus", plus: "smPlus" },
+
 };
 
 function setStepperState(cartoonLabel, entry){
@@ -1272,23 +1279,29 @@ function renderAllCartoonLastChips(){
   const b10 = data.B10?.last || null;
   const nh  = data.NH?.last || null;
   const sh  = data.SH?.last || null;
+  const sm = data.SM?.last || null;
+
 
   setChip("lastChipDM", dm);
   setChip("lastChipB10", b10);
   setChip("lastChipNH", nh);
   setChip("lastChipSH", sh);
+  setChip("lastChipSM", sm);
+
 
   setStepperState("DM", dm);
   setStepperState("B10", b10);
   setStepperState("NH", nh);
   setStepperState("SH", sh);
+  setStepperState("SM", sm);
+
 
     // play pending roll animations (set by +/-)
   if(pendingChipAnim.DM){ animateChip("lastChipDM", pendingChipAnim.DM); delete pendingChipAnim.DM; }
   if(pendingChipAnim.B10){ animateChip("lastChipB10", pendingChipAnim.B10); delete pendingChipAnim.B10; }
   if(pendingChipAnim.NH){ animateChip("lastChipNH", pendingChipAnim.NH); delete pendingChipAnim.NH; }
   if(pendingChipAnim.SH){ animateChip("lastChipSH", pendingChipAnim.SH); delete pendingChipAnim.SH; }
-
+  if(pendingChipAnim.SM){ animateChip("lastChipSM", pendingChipAnim.SM); delete pendingChipAnim.SM; }
 }
 
 
