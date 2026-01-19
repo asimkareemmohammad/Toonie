@@ -836,6 +836,44 @@
 
   </div>
 </section>
+
+
+
+<!-- TMNT Section -->
+<section class="section">
+  <div class="card">
+
+    <div class="title-row">
+      <h2 class="section-title">TMNT</h2>
+
+      <span class="last-stepper" id="stepperTM">
+        <button class="stepper-btn" type="button" id="tmMinus" aria-label="TMNT minus" disabled>−</button>
+        <span class="stepper-div"></span>
+        <span class="last-chip" id="lastChipTM"></span>
+        <span class="stepper-div"></span>
+        <button class="stepper-btn" type="button" id="tmPlus" aria-label="TMNT plus" disabled>+</button>
+      </span>
+    </div>
+
+    <div class="menu-row">
+      <a class="md-btn md-tonal tm-tab" href="#"
+         onclick="toggleTM(event,'tm-seasons')">Seasons</a>
+    </div>
+
+    <!-- Seasons Panel -->
+    <div id="tm-seasons" class="panel tm-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/TM-S01-MAK" onclick="ripple(event)">TM-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/TM-S02-MAK" onclick="ripple(event)">TM-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/TM-S03-MAK" onclick="ripple(event)">TM-S3</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/TM-S04-MAK" onclick="ripple(event)">TM-S4</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+    
     
     <!-- Progress Tracker -->
     <section class="section">
@@ -967,6 +1005,8 @@ function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
 function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
 function toggleSH(e, targetId){ toggleGroup(e, targetId, '.sh-panel'); }
 function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
+function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
+
 
 
 
@@ -1076,7 +1116,13 @@ function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
   hasSeries: false,
   seasons: ["S1","S2","S3","S4"],
   hasMovies: false
-}, }
+}, 
+   "TMNT": {
+  label: "TM",
+  hasSeries: false,
+  seasons: ["S1","S2","S3","S4"],
+  hasMovies: false
+},}
 
 
 
@@ -1241,12 +1287,14 @@ function animateChip(id, delta){
 
     
 const STEPPER_MAP = {
-  DM:  { minus: "dmMinus",  plus: "dmPlus"  },
-  B10: { minus: "b10Minus", plus: "b10Plus" },
-  NH:  { minus: "nhMinus",  plus: "nhPlus"  },
-  SH:  { minus: "shMinus",  plus: "shPlus"  },
-  SM:  { minus: "smMinus",  plus: "smPlus"  }
+  DM: { minus:"dmMinus", plus:"dmPlus" },
+  B10:{ minus:"b10Minus", plus:"b10Plus" },
+  NH: { minus:"nhMinus", plus:"nhPlus" },
+  SH: { minus:"shMinus", plus:"shPlus" },
+  SM: { minus:"smMinus", plus:"smPlus" },
+  TM: { minus:"tmMinus", plus:"tmPlus" }
 };
+
 
 
 function setStepperState(cartoonLabel, entry){
@@ -1278,6 +1326,8 @@ function renderAllCartoonLastChips(){
   const nh  = data.NH?.last || null;
   const sh  = data.SH?.last || null;
   const sm = data.SM?.last || null;
+  const tm = data.TM?.last || null;
+
 
 
   setChip("lastChipDM", dm);
@@ -1285,6 +1335,8 @@ function renderAllCartoonLastChips(){
   setChip("lastChipNH", nh);
   setChip("lastChipSH", sh);
   setChip("lastChipSM", sm);
+  setChip("lastChipTM", tm);
+
 
 
   setStepperState("DM", dm);
@@ -1292,6 +1344,8 @@ function renderAllCartoonLastChips(){
   setStepperState("NH", nh);
   setStepperState("SH", sh);
   setStepperState("SM", sm);
+  setStepperState("TM", tm);
+
 
 
     // play pending roll animations (set by +/-)
@@ -1300,6 +1354,8 @@ function renderAllCartoonLastChips(){
   if(pendingChipAnim.NH){ animateChip("lastChipNH", pendingChipAnim.NH); delete pendingChipAnim.NH; }
   if(pendingChipAnim.SH){ animateChip("lastChipSH", pendingChipAnim.SH); delete pendingChipAnim.SH; }
   if(pendingChipAnim.SM){ animateChip("lastChipSM", pendingChipAnim.SM); delete pendingChipAnim.SM; }
+  if(pendingChipAnim.TM){ animateChip("lastChipTM", pendingChipAnim.TM); delete pendingChipAnim.TM; }
+
 }
 
 
@@ -1883,6 +1939,9 @@ refreshRoomUI();
 
       document.getElementById("smMinus")?.addEventListener("click", () => stepFromLast("SM", -1));
       document.getElementById("smPlus")?.addEventListener("click", () => stepFromLast("SM", +1));
+
+      document.getElementById("tmMinus")?.addEventListener("click", () => stepFromLast("TM", -1));
+      document.getElementById("tmPlus")?.addEventListener("click", () => stepFromLast("TM", +1));
 
     }
 
