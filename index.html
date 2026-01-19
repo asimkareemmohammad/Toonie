@@ -1735,17 +1735,17 @@ async function stepFromLast(cartoonLabel, delta){
     ts: nowISO()
   };
 
-  upsertEntry(store, activeProfile, entry);
-  store = normalizeAndDedupeStore(store);
-  saveStore(store);
-pendingChipAnim[cartoonLabel] = delta;
+ upsertEntry(store, activeProfile, entry);
+store = normalizeAndDedupeStore(store);
+saveStore(store);
 
-  // Keep UI consistent
-  saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
-  renderAllCartoonLastChips();
-  updateSaveHintForCartoon();
-  if(activeMode === "recent") renderRecent();
-  refreshRoomUI();
+// UI consistent (INSTANT feedback)
+saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
+renderAllCartoonLastChips();
+updateSaveHintForCartoon(); 
+
+if(activeMode === "recent") renderRecent();
+refreshRoomUI();
 
   // Cloud sync (same rules as doSave)
   const room = getRoomCode();
