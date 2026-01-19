@@ -1243,13 +1243,13 @@ function animateChip(id, delta){
 
     
 const STEPPER_MAP = {
-  DM: { minus: "dmMinus", plus: "dmPlus" },
+  DM:  { minus: "dmMinus",  plus: "dmPlus"  },
   B10: { minus: "b10Minus", plus: "b10Plus" },
-  NH: { minus: "nhMinus", plus: "nhPlus" },
-  SH: { minus: "shMinus", plus: "shPlus" },
-  SM: { minus: "smMinus", plus: "smPlus" },
-
+  NH:  { minus: "nhMinus",  plus: "nhPlus"  },
+  SH:  { minus: "shMinus",  plus: "shPlus"  },
+  SM:  { minus: "smMinus",  plus: "smPlus"  }
 };
+
 
 function setStepperState(cartoonLabel, entry){
   const m = STEPPER_MAP[cartoonLabel];
@@ -1880,6 +1880,10 @@ pendingChipAnim[cartoonLabel] = delta;
 
       document.getElementById("shMinus")?.addEventListener("click", () => stepFromLast("SH", -1));
       document.getElementById("shPlus")?.addEventListener("click", () => stepFromLast("SH", +1));   
+
+      document.getElementById("smMinus")?.addEventListener("click", () => stepFromLast("SM", -1));
+      document.getElementById("smPlus")?.addEventListener("click", () => stepFromLast("SM", +1));
+
     }
 
     window.addEventListener("load", () => {
