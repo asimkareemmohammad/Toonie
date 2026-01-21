@@ -1276,28 +1276,29 @@ window.addEventListener("scroll", () => {
       if (el) el.textContent = text;
     }
 
-    function ripple(e) {
-      if (navigator.vibrate) navigator.vibrate(18);
+    function ripple(e, el){
+  if (navigator.vibrate) navigator.vibrate(18);
 
-      const target = e.currentTarget;
-      if(!target) return;
+  // Prefer explicit element (el). Fallback to event.currentTarget.
+  const target = el || e?.currentTarget;
+  if(!target) return;
 
-      if(!target.classList || !target.classList.contains('md-btn')) return;
+  if(!target.classList || !target.classList.contains('md-btn')) return;
 
-      const rect = target.getBoundingClientRect();
-      const cx = (typeof e.clientX === 'number' && e.clientX !== 0) ? e.clientX : (rect.left + rect.width / 2);
-      const cy = (typeof e.clientY === 'number' && e.clientY !== 0) ? e.clientY : (rect.top + rect.height / 2);
+  const rect = target.getBoundingClientRect();
+  const cx = (typeof e?.clientX === 'number' && e.clientX !== 0) ? e.clientX : (rect.left + rect.width / 2);
+  const cy = (typeof e?.clientY === 'number' && e.clientY !== 0) ? e.clientY : (rect.top + rect.height / 2);
 
-      const rp = document.createElement('span');
-      rp.classList.add('ripple');
-      const size = Math.max(target.offsetWidth, target.offsetHeight);
-      rp.style.width = rp.style.height = (size * 1.2) + 'px';
-      rp.style.left = (cx - rect.left - (size*1.2)/2) + 'px';
-      rp.style.top = (cy - rect.top - (size*1.2)/2) + 'px';
+  const rp = document.createElement('span');
+  rp.classList.add('ripple');
+  const size = Math.max(target.offsetWidth, target.offsetHeight);
+  rp.style.width = rp.style.height = (size * 1.2) + 'px';
+  rp.style.left = (cx - rect.left - (size*1.2)/2) + 'px';
+  rp.style.top  = (cy - rect.top  - (size*1.2)/2) + 'px';
 
-      target.appendChild(rp);
-      setTimeout(() => rp.remove(), 600);
-    }
+  target.appendChild(rp);
+  setTimeout(() => rp.remove(), 600);
+}
 
     const bootStart = performance.now();
     window.addEventListener('load', () => {
