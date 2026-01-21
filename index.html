@@ -5,7 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toonie</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+// Tracker Drawer: button-only open/close (no swipe drag to avoid "stuck" states)
+function initTrackerDrawer(){
+  const openBtn = document.getElementById("openTrackerBtn");
+  const closeBtn = document.getElementById("closeTrackerBtn");
+  const drawer = document.getElementById("trackerDrawer");
+  const backdrop = document.getElementById("trackerBackdrop");
+
+  if(!openBtn || !closeBtn || !drawer || !backdrop) return;
+
+  function openDrawer(){
+    drawer.classList.add("open");
+    backdrop.classList.add("show");
+    drawer.setAttribute("aria-hidden","false");
+    backdrop.setAttribute("aria-hidden","false");
+    document.body.classList.add("drawer-open");
+  }
+
+  function closeDrawer(){
+    drawer.classList.remove("open");
+    backdrop.classList.remove("show");
+    drawer.setAttribute("aria-hidden","true");
+    backdrop.setAttribute("aria-hidden","true");
+    document.body.classList.remove("drawer-open");
+  }
+
+  openBtn.addEventListener("click", () => { if(navigator.vibrate) navigator.vibrate(16); openDrawer(); });
+  closeBtn.addEventListener("click", () => { if(navigator.vibrate) navigator.vibrate(10); closeDrawer(); });
+  backdrop.addEventListener("click", closeDrawer);
+
+  // Escape key (desktop)
+  window.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && drawer.classList.contains("open")) closeDrawer();
+  });
+}
+
+  </script>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="icon" href="favicon.ico">
@@ -562,134 +598,89 @@
   to   { transform: translateY(0);    opacity: 1; }
 }
     
+  
+/* Tracker launcher */
+.tracker-launch-card .title-row{
+  align-items: center;
+}
+.tracker-open-btn{
+  height: 40px;
+  padding: 0 16px;
+}
+@media (max-width: 420px){
+  .tracker-open-btn{ width: 100%; justify-content: center; }
+  .tracker-launch-card .title-row{ flex-direction: column; align-items: stretch; }
+}
 
-    /* ===== IG-style Tracker Sheet ===== */
-    .sheet-launcher{
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 10px;
-      z-index: 60;
-      display: flex;
-      justify-content: center;
-      pointer-events: none; /* only inner should capture */
-    }
+/* Drawer (no-drag, no-stuck) */
+.drawer-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  z-index: 250;
+}
+.drawer-backdrop.show{
+  opacity: 1;
+  pointer-events: auto;
+}
+.drawer{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 92vh;
+  background: rgba(18,18,18,0.98);
+  border-top: 1px solid var(--md-outline);
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+  transform: translateY(100%);
+  transition: transform 260ms cubic-bezier(0.2,0,0,1);
+  z-index: 260;
+  overflow: hidden;
+  box-shadow: var(--e3);
+}
+.drawer.open{
+  transform: translateY(0);
+}
+.drawer-header{
+  padding: 10px 14px 0;
+}
+.drawer-grabber{
+  width: 44px;
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.18);
+  margin: 0 auto 10px;
+}
+.drawer-topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px 10px;
+  border-bottom: 1px solid var(--md-outline);
+}
+.drawer-title{
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+.drawer-body{
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(92vh - 64px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
 
-    .ig-launch-inner{
-      pointer-events: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: var(--md-pill);
-      background: rgba(30,30,30,0.78);
-      border: 1px solid rgba(255,255,255,0.14);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: var(--e2);
-      user-select: none;
-      cursor: grab;
-    }
-    .ig-launch-inner:active{ cursor: grabbing; }
+/* When drawer is open, prevent background scroll */
+body.drawer-open{
+  overflow: hidden;
+}
 
-    .ig-ring{
-      width: 28px;
-      height: 28px;
-      display: grid;
-      place-items: center;
-    }
-    .ring-svg{ width: 28px; height: 28px; }
-    .ring-bg{
-      fill: none;
-      stroke: rgba(255,255,255,0.18);
-      stroke-width: 4;
-    }
-    .ring-fg{
-      fill: none;
-      stroke: var(--md-primary);
-      stroke-width: 4;
-      stroke-linecap: round;
-      transform: rotate(-90deg);
-      transform-origin: 50% 50%;
-      stroke-dasharray: 113.097; /* 2πr where r=18 */
-      stroke-dashoffset: 113.097;
-      transition: stroke-dashoffset 80ms linear;
-    }
-
-    .ig-hint-text{
-      font-size: 12px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.82);
-      letter-spacing: 0.15px;
-      white-space: nowrap;
-      transition: opacity 120ms ease, transform 120ms ease;
-    }
-
-    .sheet-overlay{
-      position: fixed;
-      inset: 0;
-      z-index: 70;
-      pointer-events: none;
-    }
-    .sheet-overlay.open{ pointer-events: auto; }
-
-    .sheet-backdrop{
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
-      opacity: 0;
-      transition: opacity 160ms ease;
-    }
-    .sheet-overlay.open .sheet-backdrop{ opacity: 1; }
-
-    .sheet{
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 92vh;
-      max-height: 92vh;
-      background: rgba(18,18,18,0.96);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-top-left-radius: 26px;
-      border-top-right-radius: 26px;
-      border-top: 1px solid rgba(255,255,255,0.12);
-      box-shadow: var(--e3);
-      transform: translateY(100%);
-      transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
-      display:flex;
-      flex-direction: column;
-      overflow: hidden;
-      touch-action: none; /* we manage drag */
-    }
-    .sheet-overlay.open .sheet{ transform: translateY(0); }
-
-    .sheet-handle-area{
-      padding: 10px 16px 6px;
-      display:flex;
-      justify-content: center;
-      align-items:center;
-      touch-action: none;
-    }
-    .sheet-handle-pill{
-      width: 48px;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.20);
-    }
-    .sheet-content{
-      flex: 1;
-      overflow: auto;
-      padding-bottom: 90px;
-    }
-
-    body.sheet-open{
-      overflow: hidden;
-      touch-action: none;
-    }
-
-  </style>
+</style>
 </head>
 
 <body>
@@ -1093,37 +1084,39 @@
 </section>
     
     
-    <!-- Tracker Launcher (Swipe up like IG) -->
-    <div class="sheet-launcher" id="sheetLauncher" aria-label="Open tracker">
-      <div class="ig-launch-inner" id="igLaunchHandle">
-        <div class="ig-ring" aria-hidden="true">
-          <svg viewBox="0 0 44 44" class="ring-svg">
-            <circle class="ring-bg" cx="22" cy="22" r="18"></circle>
-            <circle class="ring-fg" id="ringFgLaunch" cx="22" cy="22" r="18"></circle>
-          </svg>
-        </div>
-        <div class="ig-hint-text" id="igHintTextLaunch">Swipe up for Tracker</div>
+<!-- Tracker Launcher -->
+<section class="section">
+  <div class="card tracker-launch-card">
+    <div class="title-row">
+      <h2 class="section-title">Tracker</h2>
+      <button class="md-btn md-filled tracker-open-btn" id="openTrackerBtn" type="button" aria-label="Open tracker">
+        ▲ Open Tracker
+      </button>
+    </div>
+    <p class="section-hint" style="margin-top:10px;">Open Sync, Profile, and Progress Tracker.</p>
+  </div>
+</section>
+
+
+  <!-- Tracker Drawer (overlay) -->
+  <div id="trackerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
+  <aside id="trackerDrawer" class="drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-grabber" aria-hidden="true"></div>
+      <div class="drawer-topbar">
+        <div class="drawer-title">Tracker</div>
+        <button class="md-btn md-outlined" id="closeTrackerBtn" type="button">Close</button>
       </div>
     </div>
 
-  </main>
-
-  <!-- Tracker Sheet -->
-  <div id="trackerOverlay" class="sheet-overlay" aria-hidden="true">
-    <div class="sheet-backdrop" id="sheetBackdrop"></div>
-
-    <div class="sheet" id="trackerSheet" role="dialog" aria-label="Tracker">
-      <div class="sheet-handle-area" id="sheetHandleArea">
-        <div class="sheet-handle-pill"></div>
-      </div>
-
-      <div class="sheet-content">
+    <div class="drawer-body">
 <section class="section">
-     
+
 
       <div class="card">
 <h2 class="section-title">Sync</h2>
-        
+
         <div class="form-row">
           <div class="field">
             <input id="roomInput" class="input" type="text" placeholder="Example: Asim123">
@@ -1132,7 +1125,7 @@
             <button class="md-btn md-filled" id="roomSaveBtn" type="button">Save Room Code</button>
           </div>
         </div>
-       
+
       </div>
 
       <div class="card">
@@ -1212,11 +1205,10 @@
         </div>
       </div>
     </section>
-
-      </div>
     </div>
-  </div>
+  </aside>
 
+</main>
   <script>
     
 function setPanelOpen(panel, open){
@@ -1254,232 +1246,6 @@ function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
 function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
 function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
 
-
-/* ===== IG-style swipe-up tracker sheet ===== */
-(function(){
-  const overlay = () => document.getElementById("trackerOverlay");
-  const sheet = () => document.getElementById("trackerSheet");
-  const backdrop = () => document.getElementById("sheetBackdrop");
-  const launcher = () => document.getElementById("sheetLauncher");
-  const handle = () => document.getElementById("igLaunchHandle");
-  const handleArea = () => document.getElementById("sheetHandleArea");
-  const ringFg = () => document.getElementById("ringFgLaunch");
-  const hintText = () => document.getElementById("igHintTextLaunch");
-
-  let isOpen = false;
-  let dragging = false;
-  let startY = 0;
-  let lastY = 0;
-  let progress = 0; // 0 closed, 1 open
-
-  const RING_CIRC = 113.097; // matches CSS dasharray
-
-  function setRing(p){
-    const el = ringFg();
-    if(!el) return;
-    const clamped = Math.max(0, Math.min(1, p));
-    el.style.strokeDashoffset = String(RING_CIRC * (1 - clamped));
-  }
-
-  function setHint(p){
-    const h = hintText();
-    if(!h) return;
-    const clamped = Math.max(0, Math.min(1, p));
-    const fade = 1 - Math.min(1, clamped * 1.6);
-    h.style.opacity = String(fade);
-    h.style.transform = `translateY(${(1 - fade) * 6}px)`;
-  }
-
-  function setSheetTranslatePx(px){
-    const sh = sheet();
-    const ov = overlay();
-    if(!sh || !ov) return;
-
-    sh.style.transition = "none";
-    sh.style.transform = `translateY(${Math.max(0, px)}px)`;
-
-    // backdrop
-    const bd = backdrop();
-    if(bd){
-      bd.style.transition = "none";
-      const openAmt = 1 - Math.min(1, px / sh.offsetHeight);
-      bd.style.opacity = String(openAmt);
-    }
-  }
-
-  function clearInlineTransitions(){
-    const sh = sheet();
-    const bd = backdrop();
-    if(sh) sh.style.transition = "";
-    if(bd) bd.style.transition = "";
-  }
-
-  function openSheet(){
-    const ov = overlay();
-    if(!ov) return;
-    isOpen = true;
-    ov.classList.add("open");
-    ov.setAttribute("aria-hidden","false");
-    document.body.classList.add("sheet-open");
-    if(launcher()) launcher().style.display = "none";
-    progress = 1;
-    setRing(1);
-    setHint(1);
-    clearInlineTransitions();
-  }
-
-  function closeSheet(){
-    const ov = overlay();
-    if(!ov) return;
-    isOpen = false;
-    ov.classList.remove("open");
-    ov.setAttribute("aria-hidden","true");
-    document.body.classList.remove("sheet-open");
-    if(launcher()) launcher().style.display = "";
-    progress = 0;
-    setRing(0);
-    setHint(0);
-    clearInlineTransitions();
-  }
-
-  function beginDrag(clientY){
-    if(!sheet() || !overlay()) return;
-    dragging = true;
-    startY = clientY;
-    lastY = clientY;
-
-    // ensure overlay is interactive during drag
-    overlay().classList.add("open");
-    overlay().setAttribute("aria-hidden","false");
-    document.body.classList.add("sheet-open");
-
-    // starting position depends on open state
-    const sh = sheet();
-    const startPx = isOpen ? 0 : sh.offsetHeight;
-    setSheetTranslatePx(startPx);
-  }
-
-  function moveDrag(clientY){
-    if(!dragging || !sheet()) return;
-    lastY = clientY;
-
-    const sh = sheet();
-    const dy = clientY - startY; // + down, - up
-    const base = isOpen ? 0 : sh.offsetHeight;
-    let px = base + dy;
-
-    // clamp within [0, height]
-    px = Math.max(0, Math.min(sh.offsetHeight, px));
-    setSheetTranslatePx(px);
-
-    const p = 1 - (px / sh.offsetHeight);
-    progress = p;
-    setRing(p);
-    setHint(p);
-
-    // show launcher while dragging from closed
-    if(!isOpen && launcher()) launcher().style.display = "";
-    if(isOpen && launcher()) launcher().style.display = "none";
-  }
-
-  function endDrag(){
-    if(!dragging || !sheet()) return;
-    dragging = false;
-
-    const sh = sheet();
-    const pxNow = Math.max(0, Math.min(sh.offsetHeight, (isOpen ? 0 : sh.offsetHeight) + (lastY - startY)));
-    const p = 1 - (pxNow / sh.offsetHeight);
-
-    clearInlineTransitions();
-
-    if(p > 0.35){
-      // snap open
-      openSheet();
-    } else {
-      // snap closed
-      // restore transform so transition runs
-      if(overlay()) overlay().classList.remove("open");
-      // let CSS animate from current inline transform to closed
-      sh.style.transition = "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)";
-      sh.style.transform = "translateY(100%)";
-      const bd = backdrop();
-      if(bd){
-        bd.style.transition = "opacity 160ms ease";
-        bd.style.opacity = "0";
-      }
-      setTimeout(() => closeSheet(), 230);
-    }
-  }
-
-  function attachDrag(el, fromOpenHandle){
-    if(!el) return;
-
-    const onDown = (e) => {
-      // left click / touch only
-      if(e.type === "mousedown" && e.button !== 0) return;
-
-      const y = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-      if(typeof y !== "number") return;
-
-      // If launcher: only start if user drags upward or just clicks (we'll allow click open)
-      beginDrag(y);
-
-      // prevent selecting text
-      e.preventDefault();
-    };
-
-    const onMove = (e) => {
-      if(!dragging) return;
-      const y = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-      if(typeof y !== "number") return;
-      moveDrag(y);
-      e.preventDefault();
-    };
-
-    const onUp = (e) => {
-      if(!dragging) return;
-      endDrag();
-      e.preventDefault();
-    };
-
-    el.addEventListener("touchstart", onDown, { passive: false });
-    el.addEventListener("touchmove", onMove, { passive: false });
-    el.addEventListener("touchend", onUp, { passive: false });
-
-    el.addEventListener("mousedown", onDown);
-    window.addEventListener("mousemove", onMove, { passive: false });
-    window.addEventListener("mouseup", onUp, { passive: false });
-
-    // click to open/close for desktop convenience
-    if(!fromOpenHandle){
-      el.addEventListener("click", (e) => {
-        if(dragging) return;
-        openSheet();
-        e.preventDefault();
-      });
-    }
-  }
-
-  window.addEventListener("load", () => {
-    setRing(0);
-    setHint(0);
-
-    attachDrag(handle(), false);
-    attachDrag(handleArea(), true);
-
-    if(backdrop()){
-      backdrop().addEventListener("click", () => closeSheet());
-    }
-
-    // ESC closes
-    window.addEventListener("keydown", (e) => {
-      if(e.key === "Escape" && isOpen) closeSheet();
-    });
-  });
-
-  // expose for optional use
-  window.ToonieTrackerSheet = { open: openSheet, close: closeSheet };
-})();
 
 
 
@@ -1584,7 +1350,7 @@ function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
   seasons: ["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S12","S13","S14","S15","S16","S17"],
   hasMovies: true
 },
-     "Spider-Man": {
+     "Spiderman": {
   label: "SM",
   hasSeries: false,
   seasons: ["S1","S2","S3","S4"],
@@ -1614,28 +1380,6 @@ function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
    }
 
 
-
-const SERIES_CODE = {
-  "Ben 10": {
-    "Classic": "CL",
-    "Alien Force": "AF",
-    "Ultimate Alien": "UA",
-    "Omniverse": "OV"
-  },
-  "Ninja Hattori": {
-    "1981": "NH",
-    "Return": "NHR"
-  },
-  "Tom and Jerry": {
-    "Classic": "CL",
-    "Tales": "TL",
-    "Kids": "KD",
-    "Comedy": "CS",
-    "Show": "SH",
-    "New": "NS",
-    "NYC": "NYC"
-  }
-};
 
     function getRoomCode() {
       return (localStorage.getItem(ROOM_KEY) || "").trim();
@@ -2109,25 +1853,38 @@ function fillSeasonOrMovie(){
         numSelect.value = "1";
       }
 
-     
-      function currentKeyLabels(){
-        const cartoonName = cartoonSelect.value;
-        const cfg = getCartoonCfg(cartoonName);
-        const cartoonLabel = cfg.label;
+     function currentKeyLabels(){
+  const cfg = getCartoonCfg(cartoonSelect.value);
+  const cartoonLabel = cfg.label;
 
-        const type = typeSelect.value;
+ const type = typeSelect.value;
+let seriesLabel = null;
 
-        // Only apply series for SEASONS. Movies are a single tracker per cartoon.
-        let seriesLabel = null;
-        if(cfg.hasSeries && type !== "movie"){
-          const s = seriesSelect.value;
-          seriesLabel = (SERIES_CODE[cartoonName] && SERIES_CODE[cartoonName][s]) ? SERIES_CODE[cartoonName][s] : s;
-        }
+// Only apply series for SEASONS. Movies are a single tracker per cartoon.
+if (cfg.hasSeries && type !== "movie") {
+  const s = seriesSelect.value;
 
-        const seasonOrMovie = seasonOrMovieSelect.value;
-        return { cartoonLabel, seriesLabel, type, seasonOrMovie };
-      }
+  seriesLabel =
+    (s === "Classic") ? "CL" :
+    (s === "Alien Force") ? "AF" :
+    (s === "Ultimate Alien") ? "UA" :
+    (s === "Omniverse") ? "OV" :
+    (s === "1981") ? "NH" :
+    (s === "Return") ? "NHR" :
+    (s === "Classic") ? "CL" :
+    (s === "Tales") ? "TL" :
+    (s === "Kids") ? "KD" :
+    (s === "Comedy") ? "CS" :
+    (s === "Show") ? "SH" :
+    (s === "New") ? "NS" :
+    (s === "NYC") ? "NYC" :
+     s;
+}
 
+
+  const seasonOrMovie = seasonOrMovieSelect.value;
+  return { cartoonLabel, seriesLabel, type, seasonOrMovie };
+}
 
 
 
@@ -2462,8 +2219,9 @@ refreshRoomUI();
     }
 
     window.addEventListener("load", () => {
+      initTrackerDrawer();
       initTracker();
     });
-  </script>
+</script>
 </body>
 </html>
