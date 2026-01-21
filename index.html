@@ -873,7 +873,96 @@
   </div>
 </section>
 
+    <!-- Tom and Jerry Section -->
+<section class="section">
+  <div class="card">
     
+    <div class="title-row">
+      <h2 class="section-title">Tom and Jerry</h2>
+
+      <span class="last-stepper" id="stepperTJ">
+        <button class="stepper-btn" type="button" id="tjMinus" aria-label="Tom and Jerry minus" disabled>−</button>
+        <span class="stepper-div"></span>
+        <span class="last-chip" id="lastChipTJ"></span>
+        <span class="stepper-div"></span>
+        <button class="stepper-btn" type="button" id="tjPlus" aria-label="Tom and Jerry plus" disabled>+</button>
+      </span>
+    </div>
+
+    <div class="menu-row">
+      <a class="md-btn md-tonal tj-tab" href="#" data-tab="classic" onclick="toggleTJ(event,'tj-classic')">Classic</a>
+      <a class="md-btn md-tonal tj-tab" href="#" data-tab="tales" onclick="toggleTJ(event,'tj-tales')">Tales</a>
+      <a class="md-btn md-tonal tj-tab" href="#" data-tab="kids" onclick="toggleTJ(event,'tj-kids')">Kids</a>
+      <a class="md-btn md-tonal tj-tab" href="#" data-tab="comedy" onclick="toggleTJ(event,'tj-comedy')">Comedy Show</a>
+      <a class="md-btn md-tonal tj-tab" href="#" data-tab="show" onclick="toggleTJ(event,'tj-show')">Show</a>
+      <a class="md-btn md-tonal tj-tab" href="#" data-tab="newshow" onclick="toggleTJ(event,'tj-newshow')">New Show</a>
+      <a class="md-btn md-tonal tj-tab" href="#" data-tab="nyc" onclick="toggleTJ(event,'tj-nyc')">NYC</a>
+    </div>
+
+    <!-- Classic Panel -->
+    <div id="tj-classic" class="panel tj-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CL-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CL-S2</a>
+      </div>
+    </div>
+
+    <!-- Tales Panel -->
+    <div id="tj-tales" class="panel tj-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">TL-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">TL-S2</a>
+      </div>
+    </div>
+
+    <!-- Kids Panel -->
+    <div id="tj-kids" class="panel tj-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">KD-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">KD-S2</a>
+      </div>
+    </div>
+
+    <!-- Comedy Show Panel -->
+    <div id="tj-comedy" class="panel tj-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CS-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CS-S2</a>
+      </div>
+    </div>
+
+    <!-- Show Panel -->
+    <div id="tj-show" class="panel tj-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">SH-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">SH-S2</a>
+      </div>
+    </div>
+
+    <!-- New Show Panel -->
+    <div id="tj-newshow" class="panel tj-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">NS-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">NS-S2</a>
+      </div>
+    </div>
+
+    <!-- NYC Panel -->
+    <div id="tj-nyc" class="panel tj-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">NYC-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">NYC-S2</a>
+      </div>
+    </div>
+
+    <!-- Movies Panel -->
+    <div id="tj-movies" class="panel tj-panel">
+      <div class="grid-2">
+        <a class="md-btn md-filled" href="" onclick="ripple(event)">MOVIES</a>
+      </div>
+    </div>
+  </div>
+</section>
     
     <!-- Progress Tracker -->
     <section class="section">
@@ -1006,6 +1095,7 @@ function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
 function toggleSH(e, targetId){ toggleGroup(e, targetId, '.sh-panel'); }
 function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
 function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
+function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
 
 
 
@@ -1122,7 +1212,23 @@ function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
   hasSeries: false,
   seasons: ["S1","S2","S3","S4"],
   hasMovies: false
-},}
+},
+ "Tom and Jerry": {
+  label: "TJ",
+  hasSeries: true,
+  series: ["Classic", "Tales", "Kids", "Comedy Show", "Show", "New Show", "NYC"],
+  seasonsBySeries: {
+    "Classic": ["S1", "S2"],
+    "Tales": ["S1", "S2"],
+    "Kids": ["S1", "S2"],
+    "Comedy Show": ["S1", "S2"],
+    "Show": ["S1", "S2"],
+    "New Show": ["S1", "S2"],
+    "NYC": ["S1", "S2"]
+  },
+  hasMovies: true
+}  
+   }
 
 
 
@@ -1292,7 +1398,8 @@ const STEPPER_MAP = {
   NH: { minus:"nhMinus", plus:"nhPlus" },
   SH: { minus:"shMinus", plus:"shPlus" },
   SM: { minus:"smMinus", plus:"smPlus" },
-  TM: { minus:"tmMinus", plus:"tmPlus" }
+  TM: { minus:"tmMinus", plus:"tmPlus" },
+  TJ: { minus:"tjMinus", plus:"tjPlus" }
 };
 
 
@@ -1327,6 +1434,7 @@ function renderAllCartoonLastChips(){
   const sh  = data.SH?.last || null;
   const sm = data.SM?.last || null;
   const tm = data.TM?.last || null;
+  const tj  = data.TJ?.last || null;
 
 
 
@@ -1336,6 +1444,8 @@ function renderAllCartoonLastChips(){
   setChip("lastChipSH", sh);
   setChip("lastChipSM", sm);
   setChip("lastChipTM", tm);
+  setChip("lastChipTJ", tj);
+
 
 
 
@@ -1345,6 +1455,8 @@ function renderAllCartoonLastChips(){
   setStepperState("SH", sh);
   setStepperState("SM", sm);
   setStepperState("TM", tm);
+  setStepperState("TJ", tj);
+
 
 
 
@@ -1355,6 +1467,8 @@ function renderAllCartoonLastChips(){
   if(pendingChipAnim.SH){ animateChip("lastChipSH", pendingChipAnim.SH); delete pendingChipAnim.SH; }
   if(pendingChipAnim.SM){ animateChip("lastChipSM", pendingChipAnim.SM); delete pendingChipAnim.SM; }
   if(pendingChipAnim.TM){ animateChip("lastChipTM", pendingChipAnim.TM); delete pendingChipAnim.TM; }
+  if(pendingChipAnim.TJ){ animateChip("lastChipTJ", pendingChipAnim.TJ); delete pendingChipAnim.TJ; }
+
 
 }
 
@@ -1608,7 +1722,14 @@ if (cfg.hasSeries && type !== "movie") {
     (s === "Omniverse") ? "OV" :
     (s === "1981") ? "NH" :
     (s === "Return") ? "NHR" :
-    s;
+    (s === "Classic") ? "CL" :
+    (s === "Tales") ? "TL" :
+    (s === "Kids") ? "KD" :
+    (s === "Comedy Show") ? "CS" :
+    (s === "Show") ? "SH" :
+    (s === "New Show") ? "NS" :
+    (s === "NYC") ? "NYC" :
+     s;
 }
 
 
@@ -1942,6 +2063,9 @@ refreshRoomUI();
 
       document.getElementById("tmMinus")?.addEventListener("click", () => stepFromLast("TM", -1));
       document.getElementById("tmPlus")?.addEventListener("click", () => stepFromLast("TM", +1));
+
+      document.getElementById("tjMinus")?.addEventListener("click", () => stepFromLast("TJ", -1));
+      document.getElementById("tjPlus")?.addEventListener("click", () => stepFromLast("TJ", +1));
 
     }
 
