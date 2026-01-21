@@ -1157,7 +1157,7 @@ function closeTrackerSection(){
   if(!wrap) return;
 
   wrap.classList.add("hidden");
-  if(btn) btn.textContent = "TRACKER";
+  if(btn) btn.textContent = "TOOLS";
 }
 
 function toggleTrackerSection(e){
@@ -1171,7 +1171,7 @@ function toggleTrackerSection(e){
 
   if(isHidden){
     wrap.classList.remove("hidden");
-    if(btn) btn.textContent = "CLOSE TRACKER";
+    if(btn) btn.textContent = "TOOLS";
 
     // Optional: bring it into view when opening
     setTimeout(() => {
