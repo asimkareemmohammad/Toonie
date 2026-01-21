@@ -23,6 +23,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+
+  
   <style>
   
     :root{
@@ -651,7 +656,12 @@
   opacity: 1;
 }
 
-    
+    #appTitle{
+  font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
     
   </style>
 </head>
@@ -664,7 +674,7 @@
     <header class="appbar">
       <div class="appbar-inner">
         <div class="brand">
-          <p class="brand-title">Toonie</p>
+<p class="brand-title" id="appTitle">Toonie</p>
         </div>
 
         <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
