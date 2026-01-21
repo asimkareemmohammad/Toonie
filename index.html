@@ -1117,6 +1117,12 @@
   </main>
   <script>
     
+    function haptic(ms = 12){
+  try{
+    if (navigator.vibrate) navigator.vibrate(ms);
+  } catch(e){}
+}
+
 function setPanelOpen(panel, open){
   if(!panel) return;
   
@@ -1162,7 +1168,7 @@ function closeToolsSection(){
 
 function toggletoolsSection(e){
   if(e) e.preventDefault();
-
+  haptic(); 
   const wrap = document.getElementById("toolsSection");
   const btn = document.getElementById("toolsToggleBtn");
   if(!wrap) return;
