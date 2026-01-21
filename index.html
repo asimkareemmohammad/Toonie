@@ -979,11 +979,14 @@
 <!-- Tracker Toggle Button (ALWAYS visible) -->
 <section class="section">
   <div class="card">
-    <a id="trackerToggleBtn" class="md-btn md-filled tracker-toggle" href="#" onclick="toggleTrackerSection(event)">
-      TRACKER
-    </a>
+    <div class="grid-2">
+      <a id="trackerToggleBtn" class="md-btn md-filled tracker-toggle" href="#" onclick="toggleTrackerSection(event)">
+        TRACKER
+      </a>
+    </div>
   </div>
 </section>
+
 
 <!-- Tracker Content (HIDDEN by default) -->
 <div id="trackerSection" class="hidden">
@@ -1116,6 +1119,15 @@ function toggleSH(e, targetId){ toggleGroup(e, targetId, '.sh-panel'); }
 function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
 function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
 function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
+function closeTrackerSection(){
+  const wrap = document.getElementById("trackerSection");
+  const btn = document.getElementById("trackerToggleBtn");
+  if(!wrap) return;
+
+  wrap.classList.add("hidden");
+  if(btn) btn.textContent = "TRACKER";
+}
+
 function toggleTrackerSection(e){
   if(e) e.preventDefault();
 
@@ -1129,15 +1141,39 @@ function toggleTrackerSection(e){
     wrap.classList.remove("hidden");
     if(btn) btn.textContent = "CLOSE TRACKER";
 
-    // scroll to the top of the tracker content (not the button)
+    // Optional: bring it into view when opening
     setTimeout(() => {
       wrap.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   } else {
-    wrap.classList.add("hidden");
-    if(btn) btn.textContent = "TRACKER";
+    closeTrackerSection();
   }
 }
+
+    
+let __lastScrollY = window.scrollY;
+
+window.addEventListener("scroll", () => {
+  const wrap = document.getElementById("trackerSection");
+  const btn  = document.getElementById("trackerToggleBtn");
+  if(!wrap || !btn) return;
+
+  const isOpen = !wrap.classList.contains("hidden");
+  if(!isOpen){
+    __lastScrollY = window.scrollY;
+    return;
+  }
+
+  const y = window.scrollY;
+  const goingUp = y < __lastScrollY;
+  __lastScrollY = y;
+
+  // If user scrolls UP and the tracker button is now BELOW the viewport,
+  // it means we're above the button area again -> auto close.
+  if(goingUp && btn.getBoundingClientRect().top > window.innerHeight + 20){
+    closeTrackerSection();
+  }
+}, { passive: true });
 
 
 
