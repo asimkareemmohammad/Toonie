@@ -561,119 +561,6 @@
   from { transform: translateY(-6px); opacity: 0.55; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-
-/* ===== Bottom Drawer (Tracker) ===== */
-.appbar-actions{
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.tracker-fab{
-  appearance: none;
-  border: 1px solid var(--md-outline);
-  background: var(--md-surface-2);
-  color: var(--md-text);
-  width: 40px;
-  height: 40px;
-  border-radius: var(--md-pill);
-  cursor: pointer;
-  box-shadow: none;
-  transition: transform var(--t-fast) ease, filter var(--t-fast) ease, border-color var(--t-fast) ease;
-}
-.tracker-fab:hover{ filter: brightness(1.06); }
-.tracker-fab:active{ transform: translateY(1px); filter: brightness(1.02); }
-
-.drawer-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--t-slow) ease;
-  z-index: 80;
-}
-
-.drawer{
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 92vh;
-  background: rgba(30,30,30,0.98);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-top: 1px solid var(--md-outline);
-  border-top-left-radius: var(--md-radius-lg);
-  border-top-right-radius: var(--md-radius-lg);
-  box-shadow: var(--e3);
-  transform: translateY(100%);
-  transition: transform var(--t-slow) cubic-bezier(0.2, 0.9, 0.2, 1);
-  z-index: 90;
-  display: flex;
-  flex-direction: column;
-}
-
-.drawer.open{
-  transform: translateY(0);
-}
-
-.drawer-overlay.open{
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.drawer-handle-area{
-  padding: 10px 0 6px;
-  display: flex;
-  justify-content: center;
-}
-.drawer-handle{
-  width: 46px;
-  height: 5px;
-  border-radius: var(--md-pill);
-  background: rgba(255,255,255,0.18);
-}
-
-.drawer-header{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px 12px;
-  border-bottom: 1px solid var(--md-outline);
-}
-
-.drawer-title{
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  color: var(--md-text);
-}
-
-.drawer-close{
-  appearance: none;
-  border: 1px solid var(--md-outline);
-  background: var(--md-surface-2);
-  color: var(--md-text);
-  width: 40px;
-  height: 40px;
-  border-radius: var(--md-pill);
-  cursor: pointer;
-  transition: transform var(--t-fast) ease, filter var(--t-fast) ease;
-}
-.drawer-close:hover{ filter: brightness(1.06); }
-.drawer-close:active{ transform: translateY(1px); filter: brightness(1.02); }
-
-.drawer-body{
-  overflow: auto;
-  padding: 14px 16px 18px;
-}
-
-/* keep it feeling full + not cramped on short screens */
-@media (max-height: 740px){
-  .drawer{ height: 94vh; }
-}
-
     
   </style>
 </head>
@@ -689,11 +576,7 @@
           <p class="brand-title">Toonie</p>
         </div>
 
-       <div class="appbar-actions">
-  <button id="openTrackerBtn" class="tracker-fab" type="button" aria-label="Open tracker">▲</button>
-  <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
-</div>
-
+        <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
       </div>
     </header>
 
@@ -1082,114 +965,101 @@
   </div>
 </section>
     
-    <!-- Progress Tracker Drawer -->
-<div id="trackerOverlay" class="drawer-overlay" aria-hidden="true"></div>
-
-<section id="trackerDrawer" class="drawer" aria-hidden="true">
-  <div class="drawer-handle-area">
-    <div class="drawer-handle"></div>
-  </div>
-
-  <div class="drawer-header">
-    <div class="drawer-title">Tracker</div>
-    <button id="closeTrackerBtn" class="drawer-close" type="button" aria-label="Close tracker">✕</button>
-  </div>
-
-  <div class="drawer-body">
-    <!-- Sync -->
-    <div class="card">
-      <h2 class="section-title">Sync</h2>
-
-      <div class="form-row">
-        <div class="field">
-          <input id="roomInput" class="input" type="text" placeholder="Example: Asim123">
-        </div>
-        <div class="field">
-          <button class="md-btn md-filled" id="roomSaveBtn" type="button">Save Room Code</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Profile -->
-    <div class="card">
-      <h2 class="section-title">Profile</h2>
-      <div class="seg" id="profileSeg">
-        <button class="md-btn md-outlined" type="button" data-profile="Asim">Asim</button>
-        <button class="md-btn md-outlined" type="button" data-profile="Marwa">Marwa</button>
-      </div>
-    </div>
-
     <!-- Progress Tracker -->
-    <div class="card">
-      <h2 class="section-title">Progress Tracker</h2>
-      <div class="label" style="margin-top:2px; margin-bottom:6px;">Mode</div>
+    <section class="section">
+     
 
-      <div class="seg" id="modeSeg">
-        <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
-        <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
-      </div>
-
-      <div id="savePanel" style="margin-top:12px;">
+      <div class="card">
+<h2 class="section-title">Sync</h2>
+        
         <div class="form-row">
           <div class="field">
-            <div class="label">Cartoon</div>
-            <select id="cartoonSelect" class="select"></select>
+            <input id="roomInput" class="input" type="text" placeholder="Example: Asim123">
           </div>
-
           <div class="field">
-            <div class="label">Type</div>
-            <select id="typeSelect" class="select">
-              <option value="season">Season</option>
-              <option value="movie">Movies</option>
-            </select>
+            <button class="md-btn md-filled" id="roomSaveBtn" type="button">Save Room Code</button>
           </div>
         </div>
-
-        <div class="form-row" style="margin-top:12px;">
-          <div class="field" id="seriesField">
-            <div class="label">Series</div>
-            <select id="seriesSelect" class="select"></select>
-          </div>
-
-          <div class="field" id="seasonOrMovieField">
-            <div class="label" id="seasonLabel">Season</div>
-            <select id="seasonOrMovieSelect" class="select"></select>
-          </div>
-        </div>
-
-        <div class="form-row" style="margin-top:12px;">
-          <div class="field">
-            <div class="label">Episode / Movie Number</div>
-            <select id="numSelect" class="select"></select>
-          </div>
-
-          <div class="field">
-            <div class="label">Action</div>
-            <button class="md-btn md-filled" id="saveBtn" type="button">Save</button>
-          </div>
-        </div>
-
-        <div class="mini" id="saveHint"></div>
+       
       </div>
 
-      <div id="recentPanel" class="hidden" style="margin-top:12px;">
-        <div class="form-row">
-          <div class="field">
-            <div class="label">Cartoon</div>
-            <select id="recentCartoonSelect" class="select"></select>
-          </div>
-          <div class="field">
-            <div class="label">Info</div>
-            <div class="mini" id="recentInfo">Select a cartoon to view full activity.</div>
-          </div>
+      <div class="card">
+<h2 class="section-title">Profile</h2>
+        <div class="seg" id="profileSeg">
+          <button class="md-btn md-outlined" type="button" data-profile="Asim">Asim</button>
+          <button class="md-btn md-outlined" type="button" data-profile="Marwa">Marwa</button>
+        </div>
+      </div>
+
+      <div class="card">
+         <h2 class="section-title">Progress Tracker</h2>
+<div class="label" style="margin-top:2px;
+  margin-bottom:6px;">Mode</div>
+        <div class="seg" id="modeSeg">
+          <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
+          <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
         </div>
 
-        <div class="activity-list" id="activityList"></div>
-      </div>
-    </div>
+        <div id="savePanel" style="margin-top:12px;">
+         <div class="form-row">
+  <div class="field">
+    <div class="label">Cartoon</div>
+    <select id="cartoonSelect" class="select"></select>
   </div>
-</section>
 
+  <div class="field">
+    <div class="label">Type</div>
+    <select id="typeSelect" class="select">
+      <option value="season">Season</option>
+      <option value="movie">Movies</option>
+    </select>
+  </div>
+</div>
+
+<div class="form-row" style="margin-top:12px;">
+  <div class="field" id="seriesField">
+    <div class="label">Series</div>
+    <select id="seriesSelect" class="select"></select>
+  </div>
+
+  <div class="field" id="seasonOrMovieField">
+    <div class="label" id="seasonLabel">Season</div>
+    <select id="seasonOrMovieSelect" class="select"></select>
+  </div>
+</div>
+
+
+          <div class="form-row" style="margin-top:12px;">
+            <div class="field">
+              <div class="label">Episode / Movie Number</div>
+              <select id="numSelect" class="select"></select>
+            </div>
+
+            <div class="field">
+              <div class="label">Action</div>
+              <button class="md-btn md-filled" id="saveBtn" type="button">Save</button>
+            </div>
+          </div>
+
+          <div class="mini" id="saveHint"></div>
+        </div>
+
+        <div id="recentPanel" class="hidden" style="margin-top:12px;">
+          <div class="form-row">
+            <div class="field">
+              <div class="label">Cartoon</div>
+              <select id="recentCartoonSelect" class="select"></select>
+            </div>
+            <div class="field">
+              <div class="label">Info</div>
+              <div class="mini" id="recentInfo">Select a cartoon to view full activity.</div>
+            </div>
+          </div>
+
+          <div class="activity-list" id="activityList"></div>
+        </div>
+      </div>
+    </section>
   </main>
   <script>
     
@@ -2200,56 +2070,9 @@ refreshRoomUI();
 
     }
 
-function initTrackerDrawer(){
-  const drawer = document.getElementById("trackerDrawer");
-  const overlay = document.getElementById("trackerOverlay");
-  const openBtn = document.getElementById("openTrackerBtn");
-  const closeBtn = document.getElementById("closeTrackerBtn");
-
-  if(!drawer || !overlay || !openBtn || !closeBtn) return;
-
-  function openDrawer(){
-    overlay.classList.add("open");
-    drawer.classList.add("open");
-    overlay.setAttribute("aria-hidden", "false");
-    drawer.setAttribute("aria-hidden", "false");
-
-    // open at top (your preference)
-    const body = drawer.querySelector(".drawer-body");
-    if(body) body.scrollTop = 0;
-
-    // prevent background scrolling while open
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeDrawer(){
-    overlay.classList.remove("open");
-    drawer.classList.remove("open");
-    overlay.setAttribute("aria-hidden", "true");
-    drawer.setAttribute("aria-hidden", "true");
-
-    document.body.style.overflow = "";
-  }
-
-  openBtn.addEventListener("click", () => openDrawer());
-  closeBtn.addEventListener("click", () => closeDrawer());
-  overlay.addEventListener("click", () => closeDrawer());
-
-  document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape" && drawer.classList.contains("open")){
-      closeDrawer();
-    }
-  });
-}
-
-
-
-    
-   window.addEventListener("load", () => {
-  initTracker();
-  initTrackerDrawer();
-});
-
+    window.addEventListener("load", () => {
+      initTracker();
+    });
   </script>
 </body>
 </html>
