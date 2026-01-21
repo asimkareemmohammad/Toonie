@@ -23,11 +23,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
-
-  
   <style>
   
     :root{
@@ -610,6 +605,7 @@
 }
 
 
+
     /* TOOLS button – glow/press effect like series chips */
 .tracker-btn{
   position: relative;
@@ -656,20 +652,7 @@
   opacity: 1;
 }
 
-    #appTitle{
-  font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-
-/* Doraemon title – test brand font */
-.doraemon-title{
-  font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.25px;
-}
-
-
+    
     
   </style>
 </head>
@@ -682,7 +665,7 @@
     <header class="appbar">
       <div class="appbar-inner">
         <div class="brand">
-<p class="brand-title" id="appTitle">Toonie</p>
+          <p class="brand-title">Toonie</p>
         </div>
 
         <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
@@ -693,7 +676,7 @@
   <div class="card">
     
   <div class="title-row">
-<h2 class="section-title doraemon-title">Doraemon</h2>
+  <h2 class="section-title">Doraemon</h2>
 
   <span class="last-stepper" id="stepperDM">
     <button class="stepper-btn" type="button" id="dmMinus" aria-label="Doraemon minus" disabled>−</button>
@@ -1078,9 +1061,9 @@
 <section class="section">
   <div class="card">
     <div class="tools-grid">
-    <a id="toolsToggleBtn" class="md-btn tools-btn" href="#" onclick="toggletoolsSection(event)">
-  TOOLS
-</a>
+      <a id="toolsToggleBtn" class="md-btn tools-btn" href="#" onclick="toggletoolsSection(event)">
+        TOOLS
+      </a>
     </div>
   </div>
 </section>
@@ -1199,38 +1182,6 @@ function setPanelOpen(panel, open){
   }
 }
 
-function toggleGroup(e, targetId, groupSelector){
-  e.preventDefault();
-  const target = document.getElementById(targetId);
-  if(!target) return;
-
-  const isOpen = target.classList.contains('open');
-  document.querySelectorAll(groupSelector).forEach(p => {
-    p.classList.remove('open');
-  });
-  
-  if(!isOpen){
-    target.classList.add('open');
-  }
-
-  ripple(e);
-}
-
-function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
-function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
-function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
-function toggleSH(e, targetId){ toggleGroup(e, targetId, '.sh-panel'); }
-function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
-function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
-function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
-function closeToolsSection(){
-  const wrap = document.getElementById("toolsSection");
-  const btn = document.getElementById("toolsToggleBtn");
-  if(!wrap) return;
-
-  wrap.classList.add("hidden");
-  if(btn) btn.textContent = "TOOLS";
-}
 
 function toggletoolsSection(e){
   e.preventDefault();
@@ -1256,6 +1207,46 @@ function toggletoolsSection(e){
   // ADD THIS LINE - Same as other buttons!
   ripple(e);
 }
+
+function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
+function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
+function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
+function toggleSH(e, targetId){ toggleGroup(e, targetId, '.sh-panel'); }
+function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
+function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
+function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
+function closeToolsSection(){
+  const wrap = document.getElementById("toolsSection");
+  const btn = document.getElementById("toolsToggleBtn");
+  if(!wrap) return;
+
+  wrap.classList.add("hidden");
+  if(btn) btn.textContent = "TOOLS";
+}
+
+function toggletoolsSection(e){
+  if(e) e.preventDefault();
+  haptic(); 
+ripple(e, document.getElementById("toolsToggleBtn"));
+  const wrap = document.getElementById("toolsSection");
+  const btn = document.getElementById("toolsToggleBtn");
+  if(!wrap) return;
+
+  const isHidden = wrap.classList.contains("hidden");
+
+  if(isHidden){
+    wrap.classList.remove("hidden");
+    if(btn) btn.textContent = "CLOSE TOOLS";
+
+    // Optional: bring it into view when opening
+    setTimeout(() => {
+      wrap.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  } else {
+    closeToolsSection();
+  }
+}
+
     
 let __lastScrollY = window.scrollY;
 
