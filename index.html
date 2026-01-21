@@ -1747,15 +1747,16 @@ function renderAllCartoonLastChips(){
       }
 
       function setProfileUI(){
-        [...profileSeg.querySelectorAll("button")].forEach(b => {
-          b.classList.toggle("active", b.dataset.profile === activeProfile);
-        });
-      }
+       [...profileSeg.querySelectorAll("button")].forEach(b => {
+  b.classList.toggle("active", b.dataset.profile === activeProfile);
+});
+
 
       function setModeUI(){
-        [...modeSeg.querySelectorAll("button")].forEach(b => {
-          b.classList.toggle("active", b.dataset.mode === activeMode);
-        });
+       [...modeSeg.querySelectorAll("button")].forEach(b => {
+  b.classList.toggle("active", b.dataset.mode === activeMode);
+});
+
 
         if(activeMode === "save"){
           savePanel.classList.remove("hidden");
