@@ -1652,8 +1652,8 @@ function renderAllCartoonLastChips(){
           return;
         }
 
-        setSyncStatus(`Sync: ON (Room: ${room})`);
-        updateRoomStatus(`Room: ${room} → Sync ON`);
+        setSyncStatus(`Sync: ON (${room})`);
+        updateRoomStatus(`${room} → Sync ON`);
       }
 
     function setProfileUI(){
@@ -1825,7 +1825,7 @@ if (cfg.hasSeries && type !== "movie") {
         const res = await sbFetchProgress(room, activeProfile, 250);
         if(!res.ok){
           if(lastCloudOk){
-            updateRoomStatus(`Room: ${room} → Sync ON, but fetch failed. (Will keep trying)`);
+            updateRoomStatus(`${room} → Sync ON, but fetch failed. (Will keep trying)`);
           }
           lastCloudOk = false;
           return;
