@@ -563,7 +563,7 @@
 }
 
 /* Tracker Toggle Button (MOVIES style) */
-.tracker-toggle{
+.tools-toggle{
   width: 100%;
   height: 54px;
   border-radius: var(--md-radius-md);
@@ -571,15 +571,15 @@
   letter-spacing: 0.6px;
 }
 
-/* Tracker button wrapper: always 1 column (fixes desktop half-width issue) */
-.tracker-grid{
+/* tools button wrapper: always 1 column (fixes desktop half-width issue) */
+.tools-grid{
   display: grid;
   grid-template-columns: 1fr;
   width: 100%;
 }
 
-/* New tracker button style (different from MOVIES) */
-.tracker-btn{
+/* New tools button style (different from MOVIES) */
+.tools-btn{
   width: 100%;
   height: 54px;
   border-radius: var(--md-radius-md);
@@ -593,11 +593,11 @@
   box-shadow: none;
 }
 
-.tracker-btn:hover{
+.tools-btn:hover{
   filter: brightness(1.06);
 }
 
-.tracker-btn:active{
+.tools-btn:active{
   transform: translateY(1px);
   filter: brightness(1.02);
 }
@@ -1008,11 +1008,11 @@
   </div>
 </section>
 
-<!-- Tracker Toggle Button (ALWAYS visible) -->
+<!-- tools Toggle Button (ALWAYS visible) -->
 <section class="section">
   <div class="card">
-    <div class="tracker-grid">
-      <a id="trackerToggleBtn" class="md-btn tracker-btn" href="#" onclick="toggleTrackerSection(event)">
+    <div class="tools-grid">
+      <a id="toolsToggleBtn" class="md-btn tools-btn" href="#" onclick="toggletoolsSection(event)">
         TOOLS
       </a>
     </div>
@@ -1020,8 +1020,8 @@
 </section>
 
 
-<!-- Tracker Content (HIDDEN by default) -->
-<div id="trackerSection" class="hidden">
+<!-- tools Content (HIDDEN by default) -->
+<div id="toolsSection" class="hidden">
   <section class="section">
     <div class="card">
       <h2 class="section-title">Sync</h2>
@@ -1151,20 +1151,20 @@ function toggleSH(e, targetId){ toggleGroup(e, targetId, '.sh-panel'); }
 function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
 function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
 function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
-function closeTrackerSection(){
-  const wrap = document.getElementById("trackerSection");
-  const btn = document.getElementById("trackerToggleBtn");
+function closeToolsSection(){
+  const wrap = document.getElementById("toolsSection");
+  const btn = document.getElementById("toolsToggleBtn");
   if(!wrap) return;
 
   wrap.classList.add("hidden");
   if(btn) btn.textContent = "TOOLS";
 }
 
-function toggleTrackerSection(e){
+function toggletoolsSection(e){
   if(e) e.preventDefault();
 
-  const wrap = document.getElementById("trackerSection");
-  const btn = document.getElementById("trackerToggleBtn");
+  const wrap = document.getElementById("toolsSection");
+  const btn = document.getElementById("toolsToggleBtn");
   if(!wrap) return;
 
   const isHidden = wrap.classList.contains("hidden");
@@ -1178,7 +1178,7 @@ function toggleTrackerSection(e){
       wrap.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   } else {
-    closeTrackerSection();
+    closeToolsSection();
   }
 }
 
@@ -1186,8 +1186,8 @@ function toggleTrackerSection(e){
 let __lastScrollY = window.scrollY;
 
 window.addEventListener("scroll", () => {
-  const wrap = document.getElementById("trackerSection");
-  const btn  = document.getElementById("trackerToggleBtn");
+  const wrap = document.getElementById("toolsSection");
+  const btn  = document.getElementById("toolsToggleBtn");
   if(!wrap || !btn) return;
 
   const isOpen = !wrap.classList.contains("hidden");
@@ -1200,10 +1200,10 @@ window.addEventListener("scroll", () => {
   const goingUp = y < __lastScrollY;
   __lastScrollY = y;
 
-  // If user scrolls UP and the tracker button is now BELOW the viewport,
+  // If user scrolls UP and the tools button is now BELOW the viewport,
   // it means we're above the button area again -> auto close.
   if(goingUp && btn.getBoundingClientRect().top > window.innerHeight + 20){
-    closeTrackerSection();
+    closeToolsSection();
   }
 }, { passive: true });
 
