@@ -83,29 +83,7 @@
       overflow-x: hidden;
       overflow-y: auto;
     }
-.appbar-inner{
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Keep this */
-  gap: 12px;
-}
 
-/* Add this new rule for the brand to be centered */
-.brand {
-  flex: 1;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-}
-
-/* Ensure status pills have proper width */
-.status-pill {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
     #boot {
       position: fixed;
       inset: 0;
@@ -583,169 +561,6 @@
   from { transform: translateY(-6px); opacity: 0.55; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-
-
-/* ===== SWIPE OVERLAY SYSTEM ===== */
-/* (Add this at the end of your existing CSS) */
-
-/* Tracker Overlay (Page 2) */
-#trackerOverlay {
-  position: fixed;
-  top: 100%; /* Start below screen */
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--md-bg);
-  z-index: 9998;
-  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
-  padding-bottom: 36px;
-}
-
-#trackerOverlay.open {
-  transform: translateY(-100%);
-}
-
-/* Overlay Content Container */
-.tracker-content {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 18px 16px 8px;
-}
-
-/* Circular Progress Indicator (Instagram-style) */
-.swipe-progress {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 200ms ease;
-}
-
-.swipe-progress.visible {
-  opacity: 1;
-}
-
-/* Progress Circle */
-.progress-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: transparent;
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  position: relative;
-}
-
-.progress-fill {
-  position: absolute;
-  top: -3px;
-  left: -3px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: var(--md-primary);
-  transform: rotate(-90deg);
-  transition: stroke-dashoffset 0.1s linear;
-}
-
-/* Hide the SVG path fill */
-.progress-fill::after {
-  content: '';
-  position: absolute;
-  top: -3px;
-  left: -3px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: var(--md-primary);
-}
-
-/* Progress Text */
-.progress-text {
-  font-size: 12px;
-  color: var(--md-text-soft);
-  background: rgba(18, 18, 18, 0.85);
-  padding: 6px 12px;
-  border-radius: var(--md-pill);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--md-outline);
-  white-space: nowrap;
-}
-
-/* Overlay Header (for Tracker Page) */
-.overlay-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(18, 18, 18, 0.94);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--md-outline);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.overlay-header .brand {
-  flex: 1;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-}
-
-.overlay-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.15px;
-  line-height: 1.2;
-  margin: 0;
-}
-
-/* Swipe Hint for Main Page */
-.swipe-hint {
-  position: fixed;
-  bottom: 100px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  z-index: 9997;
-  pointer-events: none;
-}
-
-.swipe-hint-text {
-  display: inline-block;
-  font-size: 13px;
-  color: var(--md-text-soft);
-  background: rgba(18, 18, 18, 0.85);
-  padding: 8px 16px;
-  border-radius: var(--md-pill);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--md-outline);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-/* Prevent body scroll when overlay is open */
-body.overlay-open {
-  overflow: hidden;
-}
-
     
   </style>
 </head>
@@ -756,19 +571,14 @@ body.overlay-open {
   <main id="app">
 
     <header class="appbar">
-  <div class="appbar-inner">
-    <!-- Left: Profile Status Pill -->
-    <div id="profileStatus" class="status-pill">Profile: Asim</div>
-    
-    <!-- Center: Brand (Toonie) -->
-    <div class="brand">
-      <p class="brand-title">Toonie</p>
-    </div>
+      <div class="appbar-inner">
+        <div class="brand">
+          <p class="brand-title">Toonie</p>
+        </div>
 
-    <!-- Right: Sync Status Pill -->
-    <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
-  </div>
-</header>
+        <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
+      </div>
+    </header>
 
 <section class="section">
   <div class="card">
@@ -1297,16 +1107,10 @@ function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
       });
     });
 
-   function setSyncStatus(text) {
-  const el = document.getElementById("syncStatus");
-  if (el) el.textContent = text;
-}
-
-// ADD THIS NEW FUNCTION
-function setProfileStatus(text) {
-  const el = document.getElementById("profileStatus");
-  if (el) el.textContent = text;
-}
+    function setSyncStatus(text) {
+      const el = document.getElementById("syncStatus");
+      if (el) el.textContent = text;
+    }
 
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(18);
@@ -1799,10 +1603,7 @@ function renderAllCartoonLastChips(){
       function refreshRoomUI(){
         const room = getRoomCode();
         if(roomInput) roomInput.value = room;
-        
-// ADD THIS LINE to update profile pill initially
-  setProfileStatus(`Profile: ${activeProfile}`);
-        
+
         if(!room){
           setSyncStatus("Sync: OFF (local only)");
           updateRoomStatus("Sync is OFF (no room code). Local save only.");
@@ -1815,18 +1616,15 @@ function renderAllCartoonLastChips(){
           return;
         }
 
-        setSyncStatus(`Sync: ON (${room})`);
-        updateRoomStatus(`${room} → Sync ON`);
+        setSyncStatus(`Sync: ON (Room: ${room})`);
+        updateRoomStatus(`Room: ${room} → Sync ON`);
       }
 
-    function setProfileUI(){
-  [...profileSeg.querySelectorAll("button")].forEach(b => {
-    b.classList.toggle("active", b.dataset.profile === activeProfile);
-  });
-  
-  // ADD THIS LINE to update the profile pill
-  setProfileStatus(`Profile: ${activeProfile}`);
-}
+      function setProfileUI(){
+        [...profileSeg.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("active", b.dataset.profile === activeProfile);
+        });
+      }
 
       function setModeUI(){
         [...modeSeg.querySelectorAll("button")].forEach(b => {
@@ -1988,7 +1786,7 @@ if (cfg.hasSeries && type !== "movie") {
         const res = await sbFetchProgress(room, activeProfile, 250);
         if(!res.ok){
           if(lastCloudOk){
-            updateRoomStatus(`${room} → Sync ON, but fetch failed. (Will keep trying)`);
+            updateRoomStatus(`Room: ${room} → Sync ON, but fetch failed. (Will keep trying)`);
           }
           lastCloudOk = false;
           return;
