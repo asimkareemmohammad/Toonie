@@ -83,7 +83,29 @@
       overflow-x: hidden;
       overflow-y: auto;
     }
+.appbar-inner{
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Keep this */
+  gap: 12px;
+}
 
+/* Add this new rule for the brand to be centered */
+.brand {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+/* Ensure status pills have proper width */
+.status-pill {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
     #boot {
       position: fixed;
       inset: 0;
@@ -571,14 +593,19 @@
   <main id="app">
 
     <header class="appbar">
-      <div class="appbar-inner">
-        <div class="brand">
-          <p class="brand-title">Toonie</p>
-        </div>
+  <div class="appbar-inner">
+    <!-- Left: Profile Status Pill -->
+    <div id="profileStatus" class="status-pill">Profile: Asim</div>
+    
+    <!-- Center: Brand (Toonie) -->
+    <div class="brand">
+      <p class="brand-title">Toonie</p>
+    </div>
 
-        <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
-      </div>
-    </header>
+    <!-- Right: Sync Status Pill -->
+    <div id="syncStatus" class="status-pill">Sync: OFF (local only)</div>
+  </div>
+</header>
 
 <section class="section">
   <div class="card">
@@ -1107,10 +1134,16 @@ function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
       });
     });
 
-    function setSyncStatus(text) {
-      const el = document.getElementById("syncStatus");
-      if (el) el.textContent = text;
-    }
+   function setSyncStatus(text) {
+  const el = document.getElementById("syncStatus");
+  if (el) el.textContent = text;
+}
+
+// ADD THIS NEW FUNCTION
+function setProfileStatus(text) {
+  const el = document.getElementById("profileStatus");
+  if (el) el.textContent = text;
+}
 
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(18);
@@ -1603,7 +1636,10 @@ function renderAllCartoonLastChips(){
       function refreshRoomUI(){
         const room = getRoomCode();
         if(roomInput) roomInput.value = room;
-
+        
+// ADD THIS LINE to update profile pill initially
+  setProfileStatus(`Profile: ${activeProfile}`);
+        
         if(!room){
           setSyncStatus("Sync: OFF (local only)");
           updateRoomStatus("Sync is OFF (no room code). Local save only.");
@@ -1620,11 +1656,14 @@ function renderAllCartoonLastChips(){
         updateRoomStatus(`Room: ${room} → Sync ON`);
       }
 
-      function setProfileUI(){
-        [...profileSeg.querySelectorAll("button")].forEach(b => {
-          b.classList.toggle("active", b.dataset.profile === activeProfile);
-        });
-      }
+    function setProfileUI(){
+  [...profileSeg.querySelectorAll("button")].forEach(b => {
+    b.classList.toggle("active", b.dataset.profile === activeProfile);
+  });
+  
+  // ADD THIS LINE to update the profile pill
+  setProfileStatus(`Profile: ${activeProfile}`);
+}
 
       function setModeUI(){
         [...modeSeg.querySelectorAll("button")].forEach(b => {
