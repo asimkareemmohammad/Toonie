@@ -976,8 +976,7 @@
   </div>
 </section>
 
-    <!-- Tracker Toggle Button -->
-    <div id="trackerSection" class="hidden">
+<!-- Tracker Toggle Button (ALWAYS visible) -->
 <section class="section">
   <div class="card">
     <a id="trackerToggleBtn" class="md-btn md-filled tracker-toggle" href="#" onclick="toggleTrackerSection(event)">
@@ -986,39 +985,38 @@
   </div>
 </section>
 
-    
-    <!-- Progress Tracker -->
-    <section class="section">
-      <div class="card">
-<h2 class="section-title">Sync</h2>
-        
-        <div class="form-row">
-          <div class="field">
-            <input id="roomInput" class="input" type="text" placeholder="Example: Asim123">
-          </div>
-          <div class="field">
-            <button class="md-btn md-filled" id="roomSaveBtn" type="button">Save Room Code</button>
-          </div>
-        </div>
-       
-      </div>
+<!-- Tracker Content (HIDDEN by default) -->
+<div id="trackerSection" class="hidden">
+  <section class="section">
+    <div class="card">
+      <h2 class="section-title">Sync</h2>
 
-      <div class="card">
-<h2 class="section-title">Profile</h2>
-        <div class="seg" id="profileSeg">
-          <button class="md-btn md-outlined" type="button" data-profile="Asim">Asim</button>
-          <button class="md-btn md-outlined" type="button" data-profile="Marwa">Marwa</button>
+      <div class="form-row">
+        <div class="field">
+          <input id="roomInput" class="input" type="text" placeholder="Example: Asim123">
+        </div>
+        <div class="field">
+          <button class="md-btn md-filled" id="roomSaveBtn" type="button">Save Room Code</button>
         </div>
       </div>
+    </div>
 
-      <div class="card">
-         <h2 class="section-title">Progress Tracker</h2>
-<div class="label" style="margin-top:2px;
-  margin-bottom:6px;">Mode</div>
-        <div class="seg" id="modeSeg">
-          <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
-          <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
-        </div>
+    <div class="card">
+      <h2 class="section-title">Profile</h2>
+      <div class="seg" id="profileSeg">
+        <button class="md-btn md-outlined" type="button" data-profile="Asim">Asim</button>
+        <button class="md-btn md-outlined" type="button" data-profile="Marwa">Marwa</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Progress Tracker</h2>
+      <div class="label" style="margin-top:2px; margin-bottom:6px;">Mode</div>
+
+      <div class="seg" id="modeSeg">
+        <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
+        <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
+      </div>
 
         <div id="savePanel" style="margin-top:12px;">
          <div class="form-row">
@@ -1131,7 +1129,7 @@ function toggleTrackerSection(e){
     wrap.classList.remove("hidden");
     if(btn) btn.textContent = "CLOSE TRACKER";
 
-    // Smooth scroll into view so user sees it immediately
+    // scroll to the top of the tracker content (not the button)
     setTimeout(() => {
       wrap.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
