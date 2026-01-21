@@ -1217,7 +1217,7 @@ function closeToolsSection(){
 function toggletoolsSection(e){
   if(e) e.preventDefault();
   haptic(); 
-    ripple(e);
+ripple(e, document.getElementById("toolsToggleBtn"));
   const wrap = document.getElementById("toolsSection");
   const btn = document.getElementById("toolsToggleBtn");
   if(!wrap) return;
