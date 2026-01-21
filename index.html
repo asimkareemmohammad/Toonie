@@ -1060,7 +1060,7 @@
 <section class="section">
   <div class="card">
     <div class="tools-grid">
-      <a id="toolsToggleBtn" class="md-btn tools-btn tracker-btn" href="#" onclick="toggletoolsSection(event)">
+     <a id="toolsToggleBtn" class="md-btn md-tonal" href="#" onclick="toggletoolsSection(event)">
   TOOLS
 </a>
     </div>
@@ -1215,11 +1215,8 @@ function closeToolsSection(){
 }
 
 function toggletoolsSection(e){
-  if(e) e.preventDefault();
-  haptic(); 
-  
-  // ADD THIS LINE to trigger the ripple effect:
-  ripple(e, document.getElementById("toolsToggleBtn"));
+  e.preventDefault();
+  haptic();
   
   const wrap = document.getElementById("toolsSection");
   const btn = document.getElementById("toolsToggleBtn");
@@ -1237,6 +1234,9 @@ function toggletoolsSection(e){
   } else {
     closeToolsSection();
   }
+  
+  // ADD THIS LINE - Same as other buttons!
+  ripple(e);
 }
     
 let __lastScrollY = window.scrollY;
