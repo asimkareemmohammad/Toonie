@@ -1060,9 +1060,9 @@
 <section class="section">
   <div class="card">
     <div class="tools-grid">
-      <a id="toolsToggleBtn" class="md-btn tools-btn" href="#" onclick="toggletoolsSection(event)">
-        TOOLS
-      </a>
+      <a id="toolsToggleBtn" class="md-btn tools-btn tracker-btn" href="#" onclick="toggletoolsSection(event)">
+  TOOLS
+</a>
     </div>
   </div>
 </section>
@@ -1217,7 +1217,10 @@ function closeToolsSection(){
 function toggletoolsSection(e){
   if(e) e.preventDefault();
   haptic(); 
-ripple(e, document.getElementById("toolsToggleBtn"));
+  
+  // ADD THIS LINE to trigger the ripple effect:
+  ripple(e, document.getElementById("toolsToggleBtn"));
+  
   const wrap = document.getElementById("toolsSection");
   const btn = document.getElementById("toolsToggleBtn");
   if(!wrap) return;
@@ -1228,7 +1231,6 @@ ripple(e, document.getElementById("toolsToggleBtn"));
     wrap.classList.remove("hidden");
     if(btn) btn.textContent = "CLOSE TOOLS";
 
-    // Optional: bring it into view when opening
     setTimeout(() => {
       wrap.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
@@ -1236,7 +1238,6 @@ ripple(e, document.getElementById("toolsToggleBtn"));
     closeToolsSection();
   }
 }
-
     
 let __lastScrollY = window.scrollY;
 
