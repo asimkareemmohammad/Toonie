@@ -1099,6 +1099,156 @@
   </div>
 </section>
 
+<!-- Scooby-Doo Section -->
+<section class="section">
+  <div class="card">
+
+    <div class="title-row">
+      <h2 class="section-title">Scooby-Doo</h2>
+
+      <span class="last-stepper" id="stepperSD">
+        <button class="stepper-btn" type="button" id="sdMinus" aria-label="Scooby-Doo minus" disabled>−</button>
+        <span class="stepper-div"></span>
+        <span class="last-chip" id="lastChipSD"></span>
+        <span class="stepper-div"></span>
+        <button class="stepper-btn" type="button" id="sdPlus" aria-label="Scooby-Doo plus" disabled>+</button>
+      </span>
+    </div>
+
+    <div class="menu-row">
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-wru')">WRU</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-newmov')">New Mov</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-scrappy')">Scrappy</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-becool')">Be Cool</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-gsswho')">Gss Who</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-pup')">Pup</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-whtsnew')">Whts New</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-newmyst')">New Myst</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-mystinc')">Myst Inc</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-13ghsts')">13 Ghsts</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-show')">Show</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-nscrappy')">N Scrappy</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-getclue')">Get Clue</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-movies')">Movies</a>
+    </div>
+
+    <!-- WRU -->
+    <div id="sd-wru" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">WRU-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">WRU-S2</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">WRU-S3</a>
+      </div>
+    </div>
+
+    <!-- New Movies -->
+    <div id="sd-newmov" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">MOV-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">MOV-S2</a>
+      </div>
+    </div>
+
+    <!-- Scrappy -->
+    <div id="sd-scrappy" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">SCR-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">SCR-S2</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">SCR-S3</a>
+      </div>
+    </div>
+
+    <!-- Be Cool -->
+    <div id="sd-becool" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CL-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CL-S2</a>
+      </div>
+    </div>
+
+    <!-- Guess Who -->
+    <div id="sd-gsswho" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">GSW-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">GSW-S2</a>
+      </div>
+    </div>
+
+    <!-- Pup -->
+    <div id="sd-pup" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">PUP-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">PUP-S2</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">PUP-S3</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">PUP-S4</a>
+      </div>
+    </div>
+
+    <!-- What's New -->
+    <div id="sd-whtsnew" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">WSN-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">WSN-S2</a>
+      </div>
+    </div>
+
+    <!-- New Mysteries -->
+    <div id="sd-newmyst" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">NM-S1</a>
+      </div>
+    </div>
+
+    <!-- Mystery Inc -->
+    <div id="sd-mystinc" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">MI-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">MI-S2</a>
+      </div>
+    </div>
+
+    <!-- 13 Ghosts -->
+    <div id="sd-13ghsts" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">13G-S1</a>
+      </div>
+    </div>
+
+    <!-- Show -->
+    <div id="sd-show" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">SH-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">SH-S2</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">SH-S3</a>
+      </div>
+    </div>
+
+    <!-- New Scooby & Scrappy -->
+    <div id="sd-nscrappy" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">NSR-S1</a>
+      </div>
+    </div>
+
+    <!-- Get a Clue -->
+    <div id="sd-getclue" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">GAC-S1</a>
+      </div>
+    </div>
+
+    <!-- Movies -->
+    <div id="sd-movies" class="panel sd-panel">
+      <div class="grid-2">
+        <a class="md-btn md-filled" href="" onclick="ripple(event)">MOVIES</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+    
 <!-- tools Toggle Button (ALWAYS visible) -->
 <section class="section">
   <div class="card">
@@ -1248,6 +1398,9 @@ function toggleSH(e, targetId){ toggleGroup(e, targetId, '.sh-panel'); }
 function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
 function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
 function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
+function toggleSD(e, targetId){ toggleGroup(e, targetId, '.sd-panel'); }
+
+    
 function closeToolsSection(){
   const wrap = document.getElementById("toolsSection");
   const btn = document.getElementById("toolsToggleBtn");
@@ -1504,8 +1657,29 @@ window.addEventListener("resize", () => {
     "NYC": ["S1", "S2"]
   },
   hasMovies: true
-}  
-   }
+ }, 
+  "Scooby-Doo": {
+    label: "SD",
+    hasSeries: true,
+    series: ["WRU","New Mov","Scrappy","Be Cool","Gss Who","Pup","Whts New","New Myst","Myst Inc","13 Ghsts","Show","N Scrappy","Get Clue"],
+    seasonsBySeries: {
+      "WRU": ["S1","S2","S3"],
+      "New Mov": ["S1","S2"],
+      "Scrappy": ["S1","S2","S3"],
+      "Be Cool": ["S1","S2"],
+      "Gss Who": ["S1","S2"],
+      "Pup": ["S1","S2","S3","S4"],
+      "Whts New": ["S1","S2"],
+      "New Myst": ["S1"],
+      "Myst Inc": ["S1","S2"],
+      "13 Ghsts": ["S1"],
+      "Show": ["S1","S2","S3"],
+      "N Scrappy": ["S1"],
+      "Get Clue": ["S1"]
+    },
+    hasMovies: true
+  }
+
 
 
 
@@ -1676,7 +1850,8 @@ const STEPPER_MAP = {
   SH: { minus:"shMinus", plus:"shPlus" },
   SM: { minus:"smMinus", plus:"smPlus" },
   TM: { minus:"tmMinus", plus:"tmPlus" },
-  TJ: { minus:"tjMinus", plus:"tjPlus" }
+  TJ: { minus:"tjMinus", plus:"tjPlus" },
+  SD: { minus:"sdMinus", plus:"sdPlus" }
 };
 
 
@@ -1712,6 +1887,8 @@ function renderAllCartoonLastChips(){
   const sm = data.SM?.last || null;
   const tm = data.TM?.last || null;
   const tj  = data.TJ?.last || null;
+  const sd  = data.SD?.last || null;
+
 
 
 
@@ -1722,6 +1899,8 @@ function renderAllCartoonLastChips(){
   setChip("lastChipSM", sm);
   setChip("lastChipTM", tm);
   setChip("lastChipTJ", tj);
+  setChip("lastChipSD", sd);
+
 
 
 
@@ -1733,6 +1912,8 @@ function renderAllCartoonLastChips(){
   setStepperState("SM", sm);
   setStepperState("TM", tm);
   setStepperState("TJ", tj);
+  setStepperState("SD", sd);
+
 
 
 
@@ -1745,8 +1926,7 @@ function renderAllCartoonLastChips(){
   if(pendingChipAnim.SM){ animateChip("lastChipSM", pendingChipAnim.SM); delete pendingChipAnim.SM; }
   if(pendingChipAnim.TM){ animateChip("lastChipTM", pendingChipAnim.TM); delete pendingChipAnim.TM; }
   if(pendingChipAnim.TJ){ animateChip("lastChipTJ", pendingChipAnim.TJ); delete pendingChipAnim.TJ; }
-
-
+  if(pendingChipAnim.SD){ animateChip("lastChipSD", pendingChipAnim.SD); delete pendingChipAnim.SD; }
 }
 
 
@@ -2344,6 +2524,10 @@ refreshRoomUI();
 
       document.getElementById("tjMinus")?.addEventListener("click", () => stepFromLast("TJ", -1));
       document.getElementById("tjPlus")?.addEventListener("click", () => stepFromLast("TJ", +1));
+
+      document.getElementById("sdMinus")?.addEventListener("click", () => stepFromLast("SD", -1));
+      document.getElementById("sdPlus")?.addEventListener("click", () => stepFromLast("SD", +1));
+
 
     }
 
