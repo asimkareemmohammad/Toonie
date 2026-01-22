@@ -476,7 +476,7 @@
 .status-pill .mq-track{
   display: inline-flex;
   align-items: center;
-  gap: var(--mq-gap, 0px);
+  gap: var(--mq-gap, 4px);
   width: max-content;
   will-change: transform;
 }
@@ -1332,7 +1332,7 @@ function setSyncStatus(text){
 
   __syncRendered = __syncText;
 
-  const gapPx = 0;
+  const gapPx = 4;
   el.style.setProperty("--mq-gap", gapPx + "px");
 
   // Build marquee: 2 copies = perfect seamless loop
