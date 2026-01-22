@@ -1119,12 +1119,12 @@
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-wru')">WRU</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-newmov')">New Mov</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-scrappy')">Scrappy</a>
-            <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-pup')">Pup</a>
-      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-becool')">Be Cool</a>
-      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-gsswho')">Gss Who</a>
-    <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-nscrappy')">N Scrappy</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-pup')">Pup</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-nscrappy')">N Scrappy</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-whtsnew')">Whts New</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-newmyst')">New Myst</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-becool')">Be Cool</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-gsswho')">Gss Who</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-mystinc')">Myst Inc</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-13ghsts')">13 Ghsts</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-show')">Show</a>
@@ -1167,22 +1167,6 @@
         <a class="md-btn md-outlined" href="" onclick="ripple(event)">PUP-S4</a>
       </div>
     </div>
-    
-    <!-- Be Cool -->
-    <div id="sd-becool" class="panel sd-panel">
-      <div class="grid">
-        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CL-S1</a>
-        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CL-S2</a>
-      </div>
-    </div>
-
-    <!-- Guess Who -->
-    <div id="sd-gsswho" class="panel sd-panel">
-      <div class="grid">
-        <a class="md-btn md-outlined" href="" onclick="ripple(event)">GSW-S1</a>
-        <a class="md-btn md-outlined" href="" onclick="ripple(event)">GSW-S2</a>
-      </div>
-    </div>
 
    <!-- New Scooby & Scrappy -->
     <div id="sd-nscrappy" class="panel sd-panel">
@@ -1206,7 +1190,23 @@
         <a class="md-btn md-outlined" href="" onclick="ripple(event)">NM-S1</a>
       </div>
     </div>
+    
+ <!-- Be Cool -->
+    <div id="sd-becool" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CL-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">CL-S2</a>
+      </div>
+    </div>
 
+    <!-- Guess Who -->
+    <div id="sd-gsswho" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">GSW-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">GSW-S2</a>
+      </div>
+    </div>
+    
     <!-- Mystery Inc -->
     <div id="sd-mystinc" class="panel sd-panel">
       <div class="grid">
@@ -1663,17 +1663,17 @@ window.addEventListener("resize", () => {
   "Scooby-Doo": {
     label: "SD",
     hasSeries: true,
-    series: ["WRU","New Mov","Scrappy","Pup","Be Cool","Gss Who","N Scrappy","Whts New","New Myst","Myst Inc","13 Ghsts","Show","Get Clue"],
+    series: ["WRU","New Mov","Scrappy","Pup","N Scrappy","Whts New","New Myst","Be Cool","Gss Who","Myst Inc","13 Ghsts","Show","Get Clue"],
     seasonsBySeries: {
       "WRU": ["S1","S2","S3"],
       "New Mov": ["S1","S2"],
       "Scrappy": ["S1","S2","S3"],
       "Pup": ["S1","S2","S3","S4"],
-      "Be Cool": ["S1","S2"],
-      "Gss Who": ["S1","S2"],
-        "N Scrappy": ["S1"],
+      "N Scrappy": ["S1"],
       "Whts New": ["S1","S2"],
       "New Myst": ["S1"],
+      "Be Cool": ["S1","S2"],
+      "Gss Who": ["S1","S2"],
       "Myst Inc": ["S1","S2"],
       "13 Ghsts": ["S1"],
       "Show": ["S1","S2","S3"],
