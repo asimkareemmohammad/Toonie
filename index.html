@@ -444,18 +444,28 @@
 
     .hidden{ display:none !important; }
 
-    .status-pill{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: var(--md-pill);
-      background: var(--md-surface-2);
-      border: 1px solid var(--md-outline);
-      color: var(--md-text-soft);
-      font-size: 12px;
-        max-width: min(42vw, 420px); /* ✅ add here */
-    }
+   .status-pill{
+  /* existing styles stay */
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--md-pill);
+  background: var(--md-surface-2);
+  border: 1px solid var(--md-outline);
+  color: var(--md-text-soft);
+  font-size: 12px;
+
+  /* width control */
+  max-width: 320px;   /* desktop */
+}
+
+@media (max-width: 600px){
+  .status-pill{
+    max-width: 70vw;  /* mobile */
+  }
+}
+
 
 
     /* --- marquee behavior (addon, not replacement) --- */
