@@ -444,10 +444,13 @@
 
     .hidden{ display:none !important; }
 
-   .status-pill{
-  /* existing styles stay */
-  display:inline-flex;
-  align-items:center;
+  /* =========================
+   Status pill (compact LED ticker)
+   ========================= */
+
+.status-pill{
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
   padding: 6px 10px;
   border-radius: var(--md-pill);
@@ -456,33 +459,26 @@
   color: var(--md-text-soft);
   font-size: 12px;
 
-  /* width control */
-  max-width: 320px;   /* desktop */
-}
+  /* 🔑 FIXED COMPACT SIZE (about "Profile: Asim") */
+  width: 16ch;
+  flex: 0 0 16ch;
 
-@media (max-width: 600px){
-  .status-pill{
-    max-width: 70vw;  /* mobile */
-  }
-}
-
-
-
-    /* --- marquee behavior (addon, not replacement) --- */
-.status-pill{
   overflow: hidden;
   white-space: nowrap;
 }
 
+/* Marquee internals */
 .status-pill .mq-clip{
-  overflow: hidden;
+  display: block;
   width: 100%;
+  overflow: hidden;
 }
 
 .status-pill .mq-track{
   display: inline-flex;
   align-items: center;
   gap: var(--mq-gap, 28px);
+  width: max-content;
   will-change: transform;
 }
 
@@ -496,8 +492,11 @@
   to   { transform: translateX(calc(-1 * var(--mq-distance, 200px))); }
 }
 
+/* Accessibility */
 @media (prefers-reduced-motion: reduce){
-  .status-pill.mq-on .mq-track{ animation: none; }
+  .status-pill.mq-on .mq-track{
+    animation: none;
+  }
 }
 
 
