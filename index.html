@@ -1122,12 +1122,12 @@
             <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-pup')">Pup</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-becool')">Be Cool</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-gsswho')">Gss Who</a>
+    <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-nscrappy')">N Scrappy</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-whtsnew')">Whts New</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-newmyst')">New Myst</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-mystinc')">Myst Inc</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-13ghsts')">13 Ghsts</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-show')">Show</a>
-      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-nscrappy')">N Scrappy</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-getclue')">Get Clue</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-movies')">Movies</a>
     </div>
@@ -1184,7 +1184,13 @@
       </div>
     </div>
 
-  
+   <!-- New Scooby & Scrappy -->
+    <div id="sd-nscrappy" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">NSR-S1</a>
+      </div>
+    </div>
+
 
     <!-- What's New -->
     <div id="sd-whtsnew" class="panel sd-panel">
@@ -1225,13 +1231,7 @@
       </div>
     </div>
 
-    <!-- New Scooby & Scrappy -->
-    <div id="sd-nscrappy" class="panel sd-panel">
-      <div class="grid">
-        <a class="md-btn md-outlined" href="" onclick="ripple(event)">NSR-S1</a>
-      </div>
-    </div>
-
+   
     <!-- Get a Clue -->
     <div id="sd-getclue" class="panel sd-panel">
       <div class="grid">
@@ -1663,7 +1663,7 @@ window.addEventListener("resize", () => {
   "Scooby-Doo": {
     label: "SD",
     hasSeries: true,
-    series: ["WRU","New Mov","Scrappy","Pup","Be Cool","Gss Who","Whts New","New Myst","Myst Inc","13 Ghsts","Show","N Scrappy","Get Clue"],
+    series: ["WRU","New Mov","Scrappy","Pup","Be Cool","Gss Who","N Scrappy","Whts New","New Myst","Myst Inc","13 Ghsts","Show","Get Clue"],
     seasonsBySeries: {
       "WRU": ["S1","S2","S3"],
       "New Mov": ["S1","S2"],
@@ -1671,12 +1671,12 @@ window.addEventListener("resize", () => {
       "Pup": ["S1","S2","S3","S4"],
       "Be Cool": ["S1","S2"],
       "Gss Who": ["S1","S2"],
+        "N Scrappy": ["S1"],
       "Whts New": ["S1","S2"],
       "New Myst": ["S1"],
       "Myst Inc": ["S1","S2"],
       "13 Ghsts": ["S1"],
       "Show": ["S1","S2","S3"],
-      "N Scrappy": ["S1"],
       "Get Clue": ["S1"]
     },
     hasMovies: true
