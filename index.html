@@ -451,7 +451,6 @@
 .status-pill{
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   padding: 6px 10px;
   border-radius: var(--md-pill);
   background: var(--md-surface-2);
@@ -459,6 +458,7 @@
   color: var(--md-text-soft);
   font-size: 12px;
 
+  /* keep it compact (edit this) */
   width: 24ch;
   flex: 0 0 24ch;
 
@@ -481,21 +481,18 @@
   will-change: transform;
 }
 
-/* LEFT → RIGHT movement */
+/* TRUE seamless loop (left -> right) */
 .status-pill.mq-on .mq-track{
-  animation: mq-scroll var(--mq-duration, 12s) linear infinite reverse;
+  animation: mq-scroll var(--mq-duration, 12s) linear infinite;
 }
 
 @keyframes mq-scroll{
-  from { transform: translateX(0); }
-  to   { transform: translateX(calc(-1 * var(--mq-distance, 200px))); }
+  from { transform: translateX(calc(-1 * var(--mq-distance, 200px))); }
+  to   { transform: translateX(0); }
 }
 
-/* Accessibility */
 @media (prefers-reduced-motion: reduce){
-  .status-pill.mq-on .mq-track{
-    animation: none;
-  }
+  .status-pill.mq-on .mq-track{ animation: none; }
 }
 
 
@@ -1320,49 +1317,54 @@ window.addEventListener("scroll", () => {
 
     
 let __syncText = "";
+let __syncRendered = "";
 
 function setSyncStatus(text){
   __syncText = text || "";
   const el = document.getElementById("syncStatus");
   if(!el) return;
 
+  // If nothing changed, DO NOT rebuild / restart animation
+  if(__syncText === __syncRendered && el.classList.contains("mq-on")){
+    measureMarquee(el);
+    return;
+  }
+
+  __syncRendered = __syncText;
+
   const gapPx = 28;
   el.style.setProperty("--mq-gap", gapPx + "px");
 
-  // Build marquee: 3 copies = smoother loop
+  // Build marquee: 2 copies = perfect seamless loop
   el.classList.remove("mq-on");
   el.innerHTML = `
     <span class="mq-clip">
       <span class="mq-track">
         <span class="mq-item">${escapeHTML(__syncText)}</span>
         <span class="mq-item">${escapeHTML(__syncText)}</span>
-        <span class="mq-item">${escapeHTML(__syncText)}</span>
       </span>
     </span>
   `;
 
-  // IMPORTANT: measure after layout
-  requestAnimationFrame(() => {
-    const track = el.querySelector(".mq-track");
-    const first = el.querySelector(".mq-item");
-    if(!track || !first) return;
+  requestAnimationFrame(() => measureMarquee(el));
+}
 
-    const itemW = first.getBoundingClientRect().width;
-    const distance = itemW + gapPx;
+function measureMarquee(el){
+  if(!el) return;
 
-    // Force a reflow so animation restarts cleanly every time
-    track.style.animation = "none";
-    track.offsetHeight; // reflow
-    track.style.animation = "";
+  const gapPx = parseFloat(getComputedStyle(el).getPropertyValue("--mq-gap")) || 28;
+  const first = el.querySelector(".mq-item");
+  if(!first) return;
 
-    // Speed: ~42px/sec
-    const seconds = Math.max(8, distance / 42);
+  const itemW = first.getBoundingClientRect().width;
+  const distance = itemW + gapPx;
 
-    el.style.setProperty("--mq-distance", distance + "px");
-    el.style.setProperty("--mq-duration", seconds + "s");
+  // Speed: ~42px/sec (same as your logic)
+  const seconds = Math.max(8, distance / 42);
 
-    el.classList.add("mq-on"); // <-- this MUST happen for animation to run
-  });
+  el.style.setProperty("--mq-distance", distance + "px");
+  el.style.setProperty("--mq-duration", seconds + "s");
+  el.classList.add("mq-on");
 }
 
 function escapeHTML(s){
@@ -1374,11 +1376,11 @@ function escapeHTML(s){
     .replaceAll("'", "&#039;");
 }
 
-// Keep it correct on resize/rotate
+// Resize: only re-measure (no rebuild, no reset)
 window.addEventListener("resize", () => {
-  if(__syncText) setSyncStatus(__syncText);
+  const el = document.getElementById("syncStatus");
+  if(el && el.classList.contains("mq-on")) measureMarquee(el);
 }, { passive: true });
-
 
 
 
