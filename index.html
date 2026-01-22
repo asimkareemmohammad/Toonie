@@ -456,6 +456,40 @@
       font-size: 12px;
     }
 
+
+    /* --- marquee behavior (addon, not replacement) --- */
+.status-pill{
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.status-pill .mq-clip{
+  overflow: hidden;
+  width: 100%;
+}
+
+.status-pill .mq-track{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mq-gap, 28px);
+  will-change: transform;
+}
+
+/* LEFT → RIGHT movement */
+.status-pill.mq-on .mq-track{
+  animation: mq-scroll var(--mq-duration, 12s) linear infinite reverse;
+}
+
+@keyframes mq-scroll{
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-1 * var(--mq-distance, 200px))); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .status-pill.mq-on .mq-track{ animation: none; }
+}
+
+
 .title-row{
   display: flex;
   align-items: center;
@@ -1273,11 +1307,64 @@ window.addEventListener("scroll", () => {
       });
     });
 
-    function setSyncStatus(text) {
-      const el = document.getElementById("syncStatus");
-      if (el) el.textContent = text;
-    }
 
+
+    
+let __syncText = "";
+
+function setSyncStatus(text){
+  __syncText = text || "";
+  const el = document.getElementById("syncStatus");
+  if(!el) return;
+
+  const gapPx = 28;
+  el.style.setProperty("--mq-gap", gapPx + "px");
+
+  // Always render marquee structure (even if it fits)
+  el.classList.remove("mq-on");
+  el.innerHTML = `
+    <span class="mq-clip">
+      <span class="mq-track">
+        <span class="mq-item">${escapeHTML(__syncText)}</span>
+        <span class="mq-item">${escapeHTML(__syncText)}</span>
+      </span>
+    </span>
+  `;
+
+  // Measure distance (width of one full copy + gap)
+  requestAnimationFrame(() => {
+    const first = el.querySelector(".mq-item");
+    if(!first) return;
+
+    const distance = first.getBoundingClientRect().width + gapPx;
+
+    // Speed: ~42px/sec (smooth + readable)
+    const seconds = Math.max(8, distance / 42);
+
+    el.style.setProperty("--mq-distance", distance + "px");
+    el.style.setProperty("--mq-duration", seconds + "s");
+    el.classList.add("mq-on");
+  });
+}
+
+function escapeHTML(s){
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// Keep it perfect on rotate/resizes
+window.addEventListener("resize", () => {
+  if(__syncText) setSyncStatus(__syncText);
+}, { passive: true });
+
+
+
+
+    
     function ripple(e) {
       if (navigator.vibrate) navigator.vibrate(18);
 
@@ -1771,18 +1858,18 @@ function renderAllCartoonLastChips(){
         if(roomInput) roomInput.value = room;
 
         if(!room){
-          setSyncStatus("Sync: OFF (local only)");
+setSyncStatus(`Sync: OFF • Local only • Profile: ${activeProfile}`);
           updateRoomStatus("Sync is OFF (no room code). Local save only.");
           return;
         }
 
         if(!supabaseEnabled()){
-          setSyncStatus(`Sync: OFF (Room: ${room})`);
+setSyncStatus(`Sync: OFF • Room: ${room} • Profile: ${activeProfile}`);
           updateRoomStatus(`Room: ${room} → Sync OFF (Supabase not available).`);
           return;
         }
 
-        setSyncStatus(`Sync: ON (Room: ${room})`);
+setSyncStatus(`Sync: ON • Room: ${room} • Profile: ${activeProfile}`);
         updateRoomStatus(`Room: ${room} → Sync ON`);
       }
 
@@ -2146,6 +2233,7 @@ refreshRoomUI();
         saveStore(store);
 
         setProfileUI();
+        refreshRoomUI();         // 👈 ADD THIS LINE
         updateSaveHintForCartoon();
         if(activeMode === "recent") renderRecent();
         startPolling();
