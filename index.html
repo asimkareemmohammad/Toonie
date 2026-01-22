@@ -1336,6 +1336,7 @@ function setSyncStatus(text){
       <span class="mq-track">
         <span class="mq-item">${escapeHTML(__syncText)}</span>
         <span class="mq-item">${escapeHTML(__syncText)}</span>
+        <span class="mq-item">${escapeHTML(__syncText)}</span>
       </span>
     </span>
   `;
@@ -1346,6 +1347,8 @@ function setSyncStatus(text){
     if(!first) return;
 
     const distance = first.getBoundingClientRect().width + gapPx;
+track.style.transform = "translateX(0)";
+
 
     // Speed: ~42px/sec (smooth + readable)
     const seconds = Math.max(8, distance / 42);
