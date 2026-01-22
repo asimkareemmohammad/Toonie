@@ -1329,7 +1329,7 @@ function setSyncStatus(text){
   const gapPx = 28;
   el.style.setProperty("--mq-gap", gapPx + "px");
 
-  // Always render marquee structure (even if it fits)
+  // Build marquee: 3 copies = smoother loop
   el.classList.remove("mq-on");
   el.innerHTML = `
     <span class="mq-clip">
@@ -1341,21 +1341,27 @@ function setSyncStatus(text){
     </span>
   `;
 
-  // Measure distance (width of one full copy + gap)
+  // IMPORTANT: measure after layout
   requestAnimationFrame(() => {
+    const track = el.querySelector(".mq-track");
     const first = el.querySelector(".mq-item");
-    if(!first) return;
+    if(!track || !first) return;
 
-    const distance = first.getBoundingClientRect().width + gapPx;
-track.style.transform = "translateX(0)";
+    const itemW = first.getBoundingClientRect().width;
+    const distance = itemW + gapPx;
 
+    // Force a reflow so animation restarts cleanly every time
+    track.style.animation = "none";
+    track.offsetHeight; // reflow
+    track.style.animation = "";
 
-    // Speed: ~42px/sec (smooth + readable)
+    // Speed: ~42px/sec
     const seconds = Math.max(8, distance / 42);
 
     el.style.setProperty("--mq-distance", distance + "px");
     el.style.setProperty("--mq-duration", seconds + "s");
-    el.classList.add("mq-on");
+
+    el.classList.add("mq-on"); // <-- this MUST happen for animation to run
   });
 }
 
@@ -1368,7 +1374,7 @@ function escapeHTML(s){
     .replaceAll("'", "&#039;");
 }
 
-// Keep it perfect on rotate/resizes
+// Keep it correct on resize/rotate
 window.addEventListener("resize", () => {
   if(__syncText) setSyncStatus(__syncText);
 }, { passive: true });
@@ -1870,18 +1876,18 @@ function renderAllCartoonLastChips(){
         if(roomInput) roomInput.value = room;
 
         if(!room){
-setSyncStatus(`Sync: OFF • Local only • Profile: ${activeProfile}`);
+setSyncStatus(`Sync: OFF  •  Local only  •  Profile: ${activeProfile}`);
           updateRoomStatus("Sync is OFF (no room code). Local save only.");
           return;
         }
 
         if(!supabaseEnabled()){
-setSyncStatus(`Sync: OFF • Room: ${room} • Profile: ${activeProfile}`);
+setSyncStatus(`Sync: OFF  •  Room: ${room}  •  Profile: ${activeProfile}`);
           updateRoomStatus(`Room: ${room} → Sync OFF (Supabase not available).`);
           return;
         }
 
-setSyncStatus(`Sync: ON • Room: ${room} • Profile: ${activeProfile}`);
+setSyncStatus(`Sync: ON  •  Room: ${room}  •  Profile: ${activeProfile}`);
         updateRoomStatus(`Room: ${room} → Sync ON`);
       }
 
