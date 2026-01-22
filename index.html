@@ -1125,10 +1125,10 @@
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-newmyst')">New Myst</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-becool')">Be Cool</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-gsswho')">Gss Who</a>
-      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-mystinc')">Myst Inc</a>
-      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-13ghsts')">13 Ghsts</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-show')">Show</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-getclue')">Get Clue</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-mystinc')">Myst Inc</a>
+      <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-13ghsts')">13 Ghsts</a>
       <a class="md-btn md-tonal sd-tab" href="#" onclick="toggleSD(event,'sd-movies')">Movies</a>
     </div>
 
@@ -1207,20 +1207,6 @@
       </div>
     </div>
     
-    <!-- Mystery Inc -->
-    <div id="sd-mystinc" class="panel sd-panel">
-      <div class="grid">
-        <a class="md-btn md-outlined" href="" onclick="ripple(event)">MI-S1</a>
-        <a class="md-btn md-outlined" href="" onclick="ripple(event)">MI-S2</a>
-      </div>
-    </div>
-
-    <!-- 13 Ghosts -->
-    <div id="sd-13ghsts" class="panel sd-panel">
-      <div class="grid">
-        <a class="md-btn md-outlined" href="" onclick="ripple(event)">13G-S1</a>
-      </div>
-    </div>
 
     <!-- Show -->
     <div id="sd-show" class="panel sd-panel">
@@ -1239,6 +1225,22 @@
       </div>
     </div>
 
+ <!-- Mystery Inc -->
+    <div id="sd-mystinc" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">MI-S1</a>
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">MI-S2</a>
+      </div>
+    </div>
+
+    <!-- 13 Ghosts -->
+    <div id="sd-13ghsts" class="panel sd-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="" onclick="ripple(event)">13G-S1</a>
+      </div>
+    </div>
+
+    
     <!-- Movies -->
     <div id="sd-movies" class="panel sd-panel">
       <div class="grid-2">
@@ -1663,7 +1665,7 @@ window.addEventListener("resize", () => {
   "Scooby-Doo": {
     label: "SD",
     hasSeries: true,
-    series: ["WRU","New Mov","Scrappy","Pup","N Scrappy","Whts New","New Myst","Be Cool","Gss Who","Myst Inc","13 Ghsts","Show","Get Clue"],
+    series: ["WRU","New Mov","Scrappy","Pup","N Scrappy","Whts New","New Myst","Be Cool","Gss Who","Show","Get Clue","Myst Inc","13 Ghsts"],
     seasonsBySeries: {
       "WRU": ["S1","S2","S3"],
       "New Mov": ["S1","S2"],
@@ -1674,10 +1676,10 @@ window.addEventListener("resize", () => {
       "New Myst": ["S1"],
       "Be Cool": ["S1","S2"],
       "Gss Who": ["S1","S2"],
-      "Myst Inc": ["S1","S2"],
-      "13 Ghsts": ["S1"],
       "Show": ["S1","S2","S3"],
       "Get Clue": ["S1"]
+      "Myst Inc": ["S1","S2"],
+      "13 Ghsts": ["S1"],
     },
     hasMovies: true
   }
