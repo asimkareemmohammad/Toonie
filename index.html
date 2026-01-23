@@ -2175,22 +2175,40 @@ let seriesLabel = null;
 if (cfg.hasSeries && type !== "movie") {
   const s = seriesSelect.value;
 
-  seriesLabel =
-    (s === "Classic") ? "CL" :
-    (s === "Alien Force") ? "AF" :
-    (s === "Ultimate Alien") ? "UA" :
-    (s === "Omniverse") ? "OV" :
-    (s === "1981") ? "NH" :
-    (s === "Return") ? "NHR" :
-    (s === "Classic") ? "CL" :
-    (s === "Tales") ? "TL" :
-    (s === "Kids") ? "KD" :
-    (s === "Comedy") ? "CS" :
-    (s === "Show") ? "SH" :
-    (s === "New") ? "NS" :
-    (s === "NYC") ? "NYC" :
-     s;
-}
+ seriesLabel =
+  // Ben 10
+  (s === "Classic") ? "CL" :
+  (s === "Alien Force") ? "AF" :
+  (s === "Ultimate Alien") ? "UA" :
+  (s === "Omniverse") ? "OV" :
+
+  // Ninja Hattori
+  (s === "1981") ? "NH" :
+  (s === "Return") ? "NHR" :
+
+  // Tom and Jerry
+  (s === "Tales") ? "TL" :
+  (s === "Kids") ? "KD" :
+  (s === "Comedy") ? "CS" :
+  (s === "Show") ? "SH" :
+  (s === "New") ? "NS" :
+  (s === "NYC") ? "NYC" :
+
+  // Scooby-Doo (chip labels -> codes)
+  (s === "WRU") ? "WRU" :
+  (s === "New Mov") ? "MOV" :
+  (s === "Scrappy") ? "SCR" :
+  (s === "B Cool") ? "BC" :
+  (s === "Gss Who") ? "GSW" :
+  (s === "Pup") ? "PUP" :
+  (s === "Whts New") ? "WSN" :
+  (s === "New Myst") ? "NM" :
+  (s === "Myst Inc") ? "MI" :
+  (s === "13 Ghsts") ? "13G" :
+  (s === "Show") ? "SH" :
+  (s === "N Scrappy") ? "NSR" :
+  (s === "Gt Clu") ? "GAC" :
+  s;
 
 
   const seasonOrMovie = seasonOrMovieSelect.value;
