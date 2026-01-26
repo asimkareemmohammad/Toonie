@@ -591,6 +591,53 @@
   animation: rollUp 180ms ease-out;
 }
 
+/* ===== Number-only roll (for stepper middle text) ===== */
+.chip-head{
+  display:inline-block;
+}
+
+.num-roll-clip{
+  display:inline-block;
+  position: relative;
+  height: 1em;
+  overflow: hidden;
+  vertical-align: middle;
+  /* keeps width stable when going 9 -> 10 */
+  min-width: 2ch;
+}
+
+.num-roll-track{
+  display:block;
+  will-change: transform;
+}
+
+.num-roll-num{
+  display:block;
+  height: 1em;
+  line-height: 1em;
+}
+
+/* UP: old -> new (move up) */
+.num-roll-track.nr-up{
+  animation: numRollUp 180ms ease-out;
+}
+
+/* DOWN: old -> new (move down) */
+.num-roll-track.nr-down{
+  animation: numRollDown 180ms ease-out;
+}
+
+@keyframes numRollUp{
+  from { transform: translateY(0); }
+  to   { transform: translateY(-1em); }
+}
+
+@keyframes numRollDown{
+  from { transform: translateY(-1em); }
+  to   { transform: translateY(0); }
+}
+
+    
 .last-chip.roll-down{
   animation: rollDown 180ms ease-out;
 }
@@ -1833,16 +1880,73 @@ function setChip(id, entry){
 }
 
 const pendingChipAnim = {}; // e.g. { DM: +1, B10: -1 }
+const pendingChipAnimMeta = {}; // { lastChipDM: {delta, prevText, nextText}, ... }
+
+function splitTailNumber(t){
+  const m = String(t || "").match(/^(.*?)(\d+)\s*$/);
+  if(!m) return null;
+  return { head: m[1], num: m[2] };
+}
 
 function animateChip(id, delta){
   const el = document.getElementById(id);
   if(!el) return;
 
-  el.classList.remove("roll-up", "roll-down");
-  void el.offsetWidth; // restart animation
+  const meta = pendingChipAnimMeta[id];
+  if(!meta || !meta.prevText || !meta.nextText){
+    el.textContent = el.textContent;
+    return;
+  }
 
-  if(delta > 0) el.classList.add("roll-up");
-  else if(delta < 0) el.classList.add("roll-down");
+  const a = splitTailNumber(meta.prevText);
+  const b = splitTailNumber(meta.nextText);
+
+  if(!a || !b){
+    el.textContent = meta.nextText;
+    delete pendingChipAnimMeta[id];
+    return;
+  }
+
+  el.textContent = "";
+
+  const headSpan = document.createElement("span");
+  headSpan.className = "chip-head";
+  headSpan.textContent = b.head;
+
+  const clip = document.createElement("span");
+  clip.className = "num-roll-clip";
+
+  const track = document.createElement("span");
+  track.className = "num-roll-track";
+
+  const s1 = document.createElement("span");
+  s1.className = "num-roll-num";
+
+  const s2 = document.createElement("span");
+  s2.className = "num-roll-num";
+
+  if(meta.delta > 0){
+    s1.textContent = a.num;
+    s2.textContent = b.num;
+    track.classList.add("nr-up");
+  } else {
+    s1.textContent = b.num;
+    s2.textContent = a.num;
+    track.style.transform = "translateY(-1em)";
+    track.classList.add("nr-down");
+  }
+
+  track.appendChild(s1);
+  track.appendChild(s2);
+  clip.appendChild(track);
+
+  el.appendChild(headSpan);
+  el.appendChild(clip);
+
+  track.addEventListener("animationend", () => {
+    el.textContent = meta.nextText;
+    delete pendingChipAnimMeta[id];
+  }, { once:true });
 }
 
     
@@ -1857,6 +1961,16 @@ const STEPPER_MAP = {
   SD: { minus:"sdMinus", plus:"sdPlus" }
 };
 
+const LAST_CHIP_ID = {
+  DM: "lastChipDM",
+  B10: "lastChipB10",
+  NH: "lastChipNH",
+  SH: "lastChipSH",
+  SM: "lastChipSM",
+  TM: "lastChipTM",
+  TJ: "lastChipTJ",
+  SD: "lastChipSD",
+};
 
 
 function setStepperState(cartoonLabel, entry){
@@ -2394,6 +2508,16 @@ saveStore(store);
 
 // UI consistent (INSTANT feedback)
 saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
+const chipId = LAST_CHIP_ID[cartoonLabel];
+if (chipId) {
+  pendingChipAnimMeta[chipId] = {
+    delta,
+    prevText: chipTextFromEntry(last),
+    nextText: chipTextFromEntry(entry),
+  };
+}
+
+  
   pendingChipAnim[cartoonLabel] = delta;
 renderAllCartoonLastChips();
 updateSaveHintForCartoon(); 
