@@ -1445,14 +1445,54 @@ function toggleGroup(e, targetId, groupSelector){
   ripple(e);
 }
 
-function toggleDM(e, targetId){ toggleGroup(e, targetId, '.dm-panel'); }
-function toggleB10(e, targetId){ toggleGroup(e, targetId, '.b10-panel'); }
-function toggleNH(e, targetId){ toggleGroup(e, targetId, '.nh-panel'); }
-function toggleSH(e, targetId){ toggleGroup(e, targetId, '.sh-panel'); }
-function toggleSM(e, targetId){ toggleGroup(e, targetId, '.sm-panel'); }
-function toggleTM(e, targetId){ toggleGroup(e, targetId, '.tm-panel'); }
-function toggleTJ(e, targetId){ toggleGroup(e, targetId, '.tj-panel'); }
-function toggleSD(e, targetId){ toggleGroup(e, targetId, '.sd-panel'); }
+function toggleDM(e, targetId){
+  const ctx = ctxFromTargetId("DM", targetId);
+  if(ctx) setActiveContext("DM", ctx);
+  toggleGroup(e, targetId);
+  renderAllCartoonLastChips();
+}
+function toggleB10(e, targetId){
+  const ctx = ctxFromTargetId("B10", targetId);
+  if(ctx) setActiveContext("B10", ctx);
+  toggleGroup(e, targetId);
+  renderAllCartoonLastChips();
+}
+function toggleNH(e, targetId){
+  const ctx = ctxFromTargetId("NH", targetId);
+  if(ctx) setActiveContext("NH", ctx);
+  toggleGroup(e, targetId);
+  renderAllCartoonLastChips();
+}
+function toggleSH(e, targetId){
+  const ctx = ctxFromTargetId("SH", targetId);
+  if(ctx) setActiveContext("SH", ctx);
+  toggleGroup(e, targetId);
+  renderAllCartoonLastChips();
+}
+function toggleSM(e, targetId){
+  const ctx = ctxFromTargetId("SM", targetId);
+  if(ctx) setActiveContext("SM", ctx);
+  toggleGroup(e, targetId);
+  renderAllCartoonLastChips();
+}
+function toggleTM(e, targetId){
+  const ctx = ctxFromTargetId("TM", targetId);
+  if(ctx) setActiveContext("TM", ctx);
+  toggleGroup(e, targetId);
+  renderAllCartoonLastChips();
+}
+function toggleTJ(e, targetId){
+  const ctx = ctxFromTargetId("TJ", targetId);
+  if(ctx) setActiveContext("TJ", ctx);
+  toggleGroup(e, targetId);
+  renderAllCartoonLastChips();
+}
+function toggleSD(e, targetId){
+  const ctx = ctxFromTargetId("SD", targetId);
+  if(ctx) setActiveContext("SD", ctx);
+  toggleGroup(e, targetId);
+  renderAllCartoonLastChips();
+}
 
     
 function closeToolsSection(){
@@ -1885,6 +1925,95 @@ function setChip(id, entry){
 const pendingChipAnim = {}; // e.g. { DM: +1, B10: -1 }
 const pendingChipAnimMeta = {}; // { lastChipDM: {delta, prevText, nextText}, ... }
 
+// --- Active view context per profile+cartoon (seasons vs movies vs series) ---
+const ACTIVE_CTX_KEY = "toonie_active_ctx_v1"; 
+// shape: { [profile]: { [cartoonLabel]: "season" | "movie" | <seriesCode> } }
+
+function loadActiveCtxMap(){
+  try { return JSON.parse(localStorage.getItem(ACTIVE_CTX_KEY) || "{}") || {}; }
+  catch { return {}; }
+}
+function saveActiveCtxMap(map){
+  localStorage.setItem(ACTIVE_CTX_KEY, JSON.stringify(map || {}));
+}
+function setActiveContext(cartoonLabel, ctx, profile){
+  const p = profile || activeProfile || "Asim";
+  const map = loadActiveCtxMap();
+  if(!map[p]) map[p] = {};
+  if(ctx) map[p][cartoonLabel] = ctx;
+  else delete map[p][cartoonLabel];
+  saveActiveCtxMap(map);
+}
+function getActiveContext(cartoonLabel, profile){
+  const p = profile || activeProfile || "Asim";
+  const map = loadActiveCtxMap();
+  return (map[p] && map[p][cartoonLabel]) ? map[p][cartoonLabel] : null;
+}
+
+function ctxFromTargetId(cartoonLabel, targetId){
+  if(!targetId) return null;
+
+  // shared patterns
+  if(targetId.endsWith("-movies")) return "movie";
+  if(targetId.endsWith("-seasons")) return "season";
+
+  // special cases (series panels)
+  const MAP = {
+    B10: { "b10-classic":"CL", "b10-af":"AF", "b10-ua":"UA", "b10-ov":"OV" },
+    NH:  { "nh-1981":"NH", "nh-return":"NHR" },
+    TJ:  { "tj-classic":"CL", "tj-tales":"TL", "tj-kids":"KD", "tj-comedy":"CS", "tj-show":"SH", "tj-new":"NS", "tj-nyc":"NYC", "tj-movies":"movie" },
+    SD:  { "sd-wru":"WRU", "sd-newmov":"MOV", "sd-scrappy":"SCR", "sd-nscrappy":"NSR", "sd-whtsnew":"WSN", "sd-newmyst":"NM", "sd-pup":"PUP", "sd-bcool":"BC", "sd-gswho":"GSW", "sd-show":"SH", "sd-gtclu":"GAC", "sd-mystinc":"MI", "sd-13ghsts":"13G", "sd-movies":"movie" },
+    DM:  { "dm-movies":"movie", "dm-seasons":"season" },
+    SH:  { "sh-movies":"movie", "sh-seasons":"season" },
+    SM:  { "sm-seasons":"season" },
+    TM:  { "tm-seasons":"season" },
+  };
+
+  return (MAP[cartoonLabel] && MAP[cartoonLabel][targetId]) ? MAP[cartoonLabel][targetId] : null;
+}
+
+function defaultEntryForCtx(cartoonLabel, ctx){
+  const base = { cartoonLabel, seriesLabel: null, ts: nowISO() };
+  if(ctx === "movie"){
+    return { ...base, type: "movie", seasonOrMovie: "Movies", num: 1 };
+  }
+  if(ctx === "season"){
+    return { ...base, type: "season", seasonOrMovie: "S1", num: 1 };
+  }
+  // ctx is a series code
+  return { ...base, type: "season", seriesLabel: ctx, seasonOrMovie: "S1", num: 1 };
+}
+
+function getDisplayEntryForCartoon(cartoonLabel, store, profile){
+  const p = profile || activeProfile || "Asim";
+  const node = (store && store.data && store.data[p]) ? store.data[p][cartoonLabel] : null;
+  const ctx = getActiveContext(cartoonLabel, p);
+
+  // no active view chosen => show "last overall" (current behavior)
+  if(!ctx){
+    return node && node.last ? node.last : null;
+  }
+
+  const history = (node && Array.isArray(node.history)) ? node.history : [];
+  const latest = (pred) => history.find(pred) || null; // history is already sorted newest-first
+
+  if(ctx === "movie"){
+    return latest(it => it && it.type === "movie") || defaultEntryForCtx(cartoonLabel, "movie");
+  }
+
+  if(ctx === "season"){
+    // "season mode" = latest season progress WITHOUT a seriesLabel
+    return latest(it => it && it.type === "season" && !normalizeSeriesLocal(it.seriesLabel))
+      || defaultEntryForCtx(cartoonLabel, "season");
+  }
+
+  // series mode = latest season progress for that specific series code
+  return latest(it => it && it.type === "season" && normalizeSeriesLocal(it.seriesLabel) === ctx)
+    || defaultEntryForCtx(cartoonLabel, ctx);
+}
+
+
+    
 function splitTailNumber(t){
   const m = String(t || "").match(/^(.*?)(\d+)\s*$/);
   if(!m) return null;
@@ -2000,14 +2129,14 @@ function renderAllCartoonLastChips(){
   const p = st.activeProfile || "Asim";
   const data = (st.data && st.data[p]) ? st.data[p] : {};
 
-  const dm  = data.DM?.last || null;
-  const b10 = data.B10?.last || null;
-  const nh  = data.NH?.last || null;
-  const sh  = data.SH?.last || null;
-  const sm = data.SM?.last || null;
-  const tm = data.TM?.last || null;
-  const tj  = data.TJ?.last || null;
-  const sd  = data.SD?.last || null;
+   const dm = getDisplayEntryForCartoon("DM", st, p);
+  const b10 = getDisplayEntryForCartoon("B10", st, p);
+  const nh = getDisplayEntryForCartoon("NH", st, p);
+  const sh = getDisplayEntryForCartoon("SH", st, p);
+  const sm = getDisplayEntryForCartoon("SM", st, p);
+  const tm = getDisplayEntryForCartoon("TM", st, p);
+  const tj = getDisplayEntryForCartoon("TJ", st, p);
+  const sd = getDisplayEntryForCartoon("SD", st, p);
 
 
 
@@ -2482,28 +2611,23 @@ async function stepFromLast(cartoonLabel, delta){
   store = loadStore();
 
   const node = ensurePath(store, activeProfile, cartoonLabel);
-  const last = node.last;
-
-  if(!last){
+  const base = getDisplayEntryForCartoon(cartoonLabel, store, activeProfile);
+  if(!base){
     renderAllCartoonLastChips();
     return;
   }
 
-  const curNum = Math.max(1, Math.min(100, Number(last.num) || 1));
-  const nextNum = Math.max(1, Math.min(100, curNum + delta));
-  if(nextNum === curNum){
-    renderAllCartoonLastChips();
-    return;
-  }
+  const curNum = Number(base.num) || 0;
+  const nextNum = Math.max(1, curNum + delta);
 
   const entry = {
-    cartoonLabel: last.cartoonLabel,
-    seriesLabel: normalizeSeriesLocal(last.seriesLabel),
-    type: last.type,
-    seasonOrMovie: last.seasonOrMovie,
+    ...base,
+    cartoonLabel,
+    seriesLabel: normalizeSeriesLocal(base.seriesLabel),
     num: nextNum,
-    ts: nowISO()
+    ts: nowISO(),
   };
+
 
  upsertEntry(store, activeProfile, entry);
 store = normalizeAndDedupeStore(store);
@@ -2513,11 +2637,12 @@ saveStore(store);
 saveHint.textContent = `Saved: ${formatLine(entry)} (${displayLocal(entry.ts)})`;
 const chipId = LAST_CHIP_ID[cartoonLabel];
 if (chipId) {
-  pendingChipAnimMeta[chipId] = {
-    delta,
-    prevText: chipTextFromEntry(last),
-    nextText: chipTextFromEntry(entry),
-  };
+ pendingChipAnimMeta[chipId] = {
+  delta,
+  prevText: chipTextFromEntry(base),
+  nextText: chipTextFromEntry(entry),
+};
+
 }
 
   
