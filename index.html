@@ -521,9 +521,6 @@
   white-space: nowrap;
   overflow: hidden;
 
-  /* FIX: prevent pill resizing during number roll */
-  flex: 0 0 auto;
-
   background: rgba(208,188,255,0.10);
   border: 1px solid rgba(208,188,255,0.35);
   color: var(--md-primary);
@@ -539,16 +536,11 @@
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:0px 10px;
-  font-size:12px;
-  font-weight:600;
-  letter-spacing:0.1px;
-
-  /* FIX: prevent pill resize during number roll */
-  min-width:11ch;
-  white-space:nowrap;
+  padding: 0px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
 }
-
 
 /* Internal divider line: the "|" feel */
 .stepper-div{
