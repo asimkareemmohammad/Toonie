@@ -1302,6 +1302,43 @@
 </section>
 
 
+
+    <!-- Shaun the Sheep Section -->
+<section class="section">
+  <div class="card">
+
+    <div class="title-row">
+      <h2 class="section-title">Shaun the Sheep</h2>
+
+      <span class="last-stepper" id="stepperSTS">
+        <button class="stepper-btn" type="button" id="stsMinus" aria-label="Shaun the Sheep minus" disabled>−</button>
+        <span class="stepper-div"></span>
+        <span class="last-chip" id="lastChipSTS"></span>
+        <span class="stepper-div"></span>
+        <button class="stepper-btn" type="button" id="stsPlus" aria-label="Shaun the Sheep plus" disabled>+</button>
+      </span>
+    </div>
+
+    <div class="menu-row">
+      <a class="md-btn md-tonal" href="#" onclick="toggleSTS(event,'sts-seasons')">Seasons</a>
+    </div>
+
+    <div id="sts-seasons" class="panel sts-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/sts-s01-mak" onclick="ripple(event)">STS-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/sts-s02-mak" onclick="ripple(event)">STS-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/sts-s03-mak" onclick="ripple(event)">STS-S3</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/sts-s04-mak" onclick="ripple(event)">STS-S4</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/sts-s05-mak" onclick="ripple(event)">STS-S5</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/sts-s06-mak" onclick="ripple(event)">STS-S6</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/sts-s07-mak" onclick="ripple(event)">STS-S7</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
     
 <!-- tools Toggle Button (ALWAYS visible) -->
 <section class="section">
@@ -1500,6 +1537,13 @@ function toggleSD(e, targetId){
   toggleGroup(e, targetId, '.sd-panel');
   renderAllCartoonLastChips();
 }
+    function toggleSTS(e, targetId){
+  const ctx = ctxFromTargetId("STS", targetId);
+  if(ctx) setActiveContext("STS", ctx);
+  toggleGroup(e, targetId, '.sts-panel');
+  renderAllCartoonLastChips();
+}
+
 
 
     
@@ -1780,7 +1824,14 @@ window.addEventListener("resize", () => {
       "13 Ghsts": ["S1"],
     },
     hasMovies: true
-  }
+  },
+"Shaun the Sheep": {
+  label: "STS",
+  hasSeries: false,
+  seasons: ["S1","S2","S3","S4","S5","S6","S7"],
+  hasMovies: false
+}
+ 
 };
 
 
@@ -1976,6 +2027,8 @@ function ctxFromTargetId(cartoonLabel, targetId){
     SH:  { "sh-movies":"movie", "sh-seasons":"season" },
     SM:  { "sm-seasons":"season" },
     TM:  { "tm-seasons":"season" },
+    STS: { "sts-seasons":"season" },
+
   };
 
   return (MAP[cartoonLabel] && MAP[cartoonLabel][targetId]) ? MAP[cartoonLabel][targetId] : null;
@@ -2099,7 +2152,9 @@ const STEPPER_MAP = {
   SM: { minus:"smMinus", plus:"smPlus" },
   TM: { minus:"tmMinus", plus:"tmPlus" },
   TJ: { minus:"tjMinus", plus:"tjPlus" },
-  SD: { minus:"sdMinus", plus:"sdPlus" }
+  SD: { minus:"sdMinus", plus:"sdPlus" },
+  STS: { minus:"stsMinus", plus:"stsPlus" },
+
 };
 
 const LAST_CHIP_ID = {
@@ -2111,6 +2166,7 @@ const LAST_CHIP_ID = {
   TM: "lastChipTM",
   TJ: "lastChipTJ",
   SD: "lastChipSD",
+  STS: "lastChipSTS",
 };
 
 
@@ -2146,6 +2202,8 @@ function renderAllCartoonLastChips(){
   const tm = getDisplayEntryForCartoon("TM", st, p);
   const tj = getDisplayEntryForCartoon("TJ", st, p);
   const sd = getDisplayEntryForCartoon("SD", st, p);
+  const sts = getDisplayEntryForCartoon("STS", st, p);
+
 
 
 
@@ -2158,9 +2216,7 @@ function renderAllCartoonLastChips(){
   setChip("lastChipTM", tm);
   setChip("lastChipTJ", tj);
   setChip("lastChipSD", sd);
-
-
-
+  setChip("lastChipSTS", sts);
 
 
   setStepperState("DM", dm);
@@ -2171,6 +2227,8 @@ function renderAllCartoonLastChips(){
   setStepperState("TM", tm);
   setStepperState("TJ", tj);
   setStepperState("SD", sd);
+  setStepperState("STS", sts);
+
 
 
 
@@ -2185,6 +2243,7 @@ function renderAllCartoonLastChips(){
   if(pendingChipAnim.TM){ animateChip("lastChipTM", pendingChipAnim.TM); delete pendingChipAnim.TM; }
   if(pendingChipAnim.TJ){ animateChip("lastChipTJ", pendingChipAnim.TJ); delete pendingChipAnim.TJ; }
   if(pendingChipAnim.SD){ animateChip("lastChipSD", pendingChipAnim.SD); delete pendingChipAnim.SD; }
+  if(pendingChipAnim.STS){ animateChip("lastChipSTS", pendingChipAnim.STS); delete pendingChipAnim.STS; }
 }
 
 
@@ -2809,7 +2868,9 @@ refreshRoomUI();
 
       document.getElementById("sdMinus")?.addEventListener("click", () => stepFromLast("SD", -1));
       document.getElementById("sdPlus")?.addEventListener("click", () => stepFromLast("SD", +1));
-
+      
+      document.getElementById("stsMinus")?.addEventListener("click", () => stepFromLast("STS", -1));
+      document.getElementById("stsPlus")?.addEventListener("click", () => stepFromLast("STS", +1));
 
     }
 
