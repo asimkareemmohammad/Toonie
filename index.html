@@ -1932,6 +1932,7 @@ function setChip(id, entry){
 
 const pendingChipAnim = {}; // e.g. { DM: +1, B10: -1 }
 const pendingChipAnimMeta = {}; // { lastChipDM: {delta, prevText, nextText}, ... }
+let activeProfile = "Asim";
 
 // --- Active view context per profile+cartoon (seasons vs movies vs series) ---
 const ACTIVE_CTX_KEY = "toonie_active_ctx_v1"; 
@@ -2302,7 +2303,7 @@ function renderAllCartoonLastChips(){
       let store = loadStore();
       saveStore(store);
 
-      let activeProfile = store.activeProfile || "Asim";
+activeProfile = store.activeProfile || "Asim";
       let activeMode = "save";
       let pollTimer = null;
       let lastCloudOk = true;
