@@ -273,6 +273,51 @@
       to { transform: scale(3.8); opacity: 0; }
     }
 
+
+/* ===== Season chip "armed" progress fill ===== */
+.md-btn.season-armed,
+.md-btn.season-armed2{
+  border-color: rgba(208,188,255,0.55);
+  box-shadow:
+    0 0 0 1px rgba(208,188,255,0.18),
+    0 10px 26px rgba(208,188,255,0.08);
+}
+
+/* fill overlay */
+.md-btn.season-armed::before,
+.md-btn.season-armed2::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius: inherit;
+  background: rgba(208,188,255,0.14);
+  pointer-events:none;
+  transform-origin: left center;
+  transition: transform 160ms ease;
+  z-index: 0;
+}
+
+/* keep text above overlay */
+.md-btn.season-armed,
+.md-btn.season-armed2{
+  position: relative;
+}
+.md-btn.season-armed > *,
+.md-btn.season-armed2 > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* 50% = first click */
+.md-btn.season-armed::before{
+  transform: scaleX(0.5);
+}
+
+/* 100% = second click */
+.md-btn.season-armed2::before{
+  transform: scaleX(1);
+}
+    
     .grid{
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2454,24 +2499,48 @@ function renderAllCartoonLastChips(){
       const roomStatus = document.getElementById("roomStatus");
       
 let armedSeasonHref = null;
+let armedSeasonEl = null;
 
 document.addEventListener("click", (e) => {
   const a = e.target.closest('.panel a.md-btn[href*="archive.org"]');
-  if(!a) return;
+
+  // Click outside any season chip -> clear visual state
+  if(!a){
+    if(armedSeasonEl){
+      armedSeasonEl.classList.remove("season-armed", "season-armed2");
+      armedSeasonEl = null;
+      armedSeasonHref = null;
+    }
+    return;
+  }
 
   const hit = seasonCtxFromSeasonChipLink(a);
-  if(!hit) return; // not a season chip
+  if(!hit) return;
 
   const href = a.getAttribute("href") || "";
 
-  // If the same chip is clicked again -> allow navigation
+  // Second click -> show full fill and allow navigation
   if(armedSeasonHref && armedSeasonHref === href){
+    a.classList.remove("season-armed");
+    a.classList.add("season-armed2");
+
     armedSeasonHref = null;
-    return; // no preventDefault => browser will follow link
+    armedSeasonEl = null;
+
+    return; // no preventDefault => browser navigates
   }
 
-  // First click -> arm + update pill, stay on page
+  // First click -> arm + update pill
+  if(armedSeasonEl && armedSeasonEl !== a){
+    armedSeasonEl.classList.remove("season-armed", "season-armed2");
+  }
+
   armedSeasonHref = href;
+  armedSeasonEl = a;
+
+  a.classList.remove("season-armed2");
+  a.classList.add("season-armed");
+
   e.preventDefault();
 
   setActiveContext(hit.cartoonLabel, hit.nextCtx);
