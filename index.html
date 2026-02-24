@@ -2104,11 +2104,11 @@ function defaultEntryForCtx(cartoonLabel, ctx){
   const base = { cartoonLabel, seriesLabel: null, ts: nowISO() };
 
   if(kind === "movie"){
-    return { ...base, type: "movie", seasonOrMovie: som || "Movies", num: 1 };
+    return { ...base, type: "movie", seasonOrMovie: som || "Movies", num: 0 };
   }
 
   if(kind === "season"){
-    return { ...base, type: "season", seasonOrMovie: som || "S1", num: 1 };
+    return { ...base, type: "season", seasonOrMovie: som || "S1", num: 0 };
   }
 
   // kind is a series code (CL/AF/WRU/etc)
@@ -2117,7 +2117,7 @@ function defaultEntryForCtx(cartoonLabel, ctx){
     type: "season",
     seriesLabel: kind,
     seasonOrMovie: som || "S1",
-    num: 1
+    num: 0
   };
 }
 
