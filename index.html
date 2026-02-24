@@ -2497,6 +2497,22 @@ function renderAllCartoonLastChips(){
 let armedSeasonHref = null;
 let armedSeasonEl = null;
 
+
+      
+function clearSeasonArmedState(){
+  document.querySelectorAll('.panel a.md-btn.season-armed, .panel a.md-btn.season-armed2')
+    .forEach(el => el.classList.remove("season-armed", "season-armed2"));
+
+  armedSeasonHref = null;
+  armedSeasonEl = null;
+}
+
+window.addEventListener("pagehide", clearSeasonArmedState);
+window.addEventListener("pageshow", clearSeasonArmedState);
+
+
+
+      
 document.addEventListener("click", (e) => {
   const a = e.target.closest('.panel a.md-btn[href*="archive.org"]');
 
