@@ -2280,8 +2280,8 @@ function setStepperState(cartoonLabel, entry){
     return;
   }
 
-  const n = Number(entry.num) || 1;
-  minusBtn.disabled = n <= 1;
+  const n = Number(entry.num) || 0;
+  minusBtn.disabled = n <= 0;
   plusBtn.disabled  = n >= 100;
 }
 
