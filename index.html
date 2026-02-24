@@ -2793,7 +2793,7 @@ function fillSeasonOrMovie(){
             seriesLabel: normalizeSeriesLocal(r.series_label),
             type: r.type,
             seasonOrMovie: r.season_or_movie,
-            num: Number(r.num) || 1,
+            num: Number(r.num) || 0,
             ts: r.ts
           };
           upsertEntry(store, activeProfile, entry);
@@ -2832,7 +2832,7 @@ function fillSeasonOrMovie(){
         store = loadStore();
 
         const cur = currentKeyLabels();
-        const num = Math.max(1, Math.min(100, Number(numSelect.value) || 1));
+        const num = Math.max(1, Math.min(100, Number(numSelect.value) || 0));
 
         const entry = {
           cartoonLabel: cur.cartoonLabel,
