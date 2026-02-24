@@ -2119,6 +2119,7 @@ if(ctx.seasonOrMovie){
 
 return latest(it => it && it.type === "season" && normalizeSeriesLocal(it.seriesLabel) === ctx.kind)
   || defaultEntryForCtx(cartoonLabel, ctxRaw);
+}
 
 
     
