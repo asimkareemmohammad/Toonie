@@ -260,6 +260,19 @@
       color: var(--md-error);
     }
 
+   .tool-summary {
+  cursor: pointer;
+  user-select: none;
+}
+
+.tool-summary::-webkit-details-marker {
+  display: none;
+}
+
+.tool-details-body {
+  padding-top: 12px;
+}
+    
     .md-btn .ripple{
       position: absolute;
       border-radius: 50%;
@@ -1455,14 +1468,19 @@
       </div>
     </div>
 
-    <div class="card">
-      <h2 class="section-title">Progress Tracker</h2>
-      <div class="label" style="margin-top:2px; margin-bottom:6px;">Mode</div>
+ <details class="card tool-details">
+  <summary class="section-title tool-summary">
+    Progress Tracker
+  </summary>
 
-      <div class="seg" id="modeSeg">
-        <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
-        <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
-      </div>
+  <div class="tool-details-body">
+
+    <div class="label" style="margin-top:2px; margin-bottom:6px;">Mode</div>
+
+    <div class="seg" id="modeSeg">
+      <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
+      <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
+    </div>
 
         <div id="savePanel" style="margin-top:12px;">
          <div class="form-row">
@@ -1523,6 +1541,7 @@
           <div class="activity-list" id="activityList"></div>
         </div>
       </div>
+     </details>
     </section>
    </div>
   </main>
