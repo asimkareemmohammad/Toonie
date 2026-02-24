@@ -2806,8 +2806,7 @@ async function stepFromLast(cartoonLabel, delta){
   }
 
   const curNum = Number(base.num) || 0;
-  const nextNum = Math.max(1, curNum + delta);
-
+const nextNum = Math.max(0, curNum + delta);
   const entry = {
     ...base,
     cartoonLabel,
