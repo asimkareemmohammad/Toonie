@@ -2453,6 +2453,8 @@ function renderAllCartoonLastChips(){
       const roomSaveBtn = document.getElementById("roomSaveBtn");
       const roomStatus = document.getElementById("roomStatus");
       
+let armedSeasonHref = null;
+
 document.addEventListener("click", (e) => {
   const a = e.target.closest('.panel a.md-btn[href*="archive.org"]');
   if(!a) return;
@@ -2460,7 +2462,16 @@ document.addEventListener("click", (e) => {
   const hit = seasonCtxFromSeasonChipLink(a);
   if(!hit) return; // not a season chip
 
-  // Phase 1 behavior: stay on page and only switch stepper target
+  const href = a.getAttribute("href") || "";
+
+  // If the same chip is clicked again -> allow navigation
+  if(armedSeasonHref && armedSeasonHref === href){
+    armedSeasonHref = null;
+    return; // no preventDefault => browser will follow link
+  }
+
+  // First click -> arm + update pill, stay on page
+  armedSeasonHref = href;
   e.preventDefault();
 
   setActiveContext(hit.cartoonLabel, hit.nextCtx);
