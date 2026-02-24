@@ -274,48 +274,44 @@
     }
 
 
-/* ===== Season chip "armed" progress fill ===== */
-.md-btn.season-armed,
-.md-btn.season-armed2{
-  border-color: rgba(208,188,255,0.55);
+/* ===== Season chip armed/confirm visual (stable, no pseudo-element) ===== */
+
+/* Base protection so text never wraps/glitches */
+.panel a.md-btn{
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: center;
+  line-height: 1.15;
+  transition:
+    background-size 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
+}
+
+/* Armed states */
+.panel a.md-btn.season-armed,
+.panel a.md-btn.season-armed2{
+  border-color: rgba(208,188,255,0.60);
   box-shadow:
-    0 0 0 1px rgba(208,188,255,0.18),
-    0 10px 26px rgba(208,188,255,0.08);
+    0 0 0 1px rgba(208,188,255,0.16),
+    0 10px 24px rgba(208,188,255,0.06);
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(rgba(208,188,255,0.15), rgba(208,188,255,0.15));
+  background-size: 0% 100%;
+  background-position: left top;
 }
 
-/* fill overlay */
-.md-btn.season-armed::before,
-.md-btn.season-armed2::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius: inherit;
-  background: rgba(208,188,255,0.14);
-  pointer-events:none;
-  transform-origin: left center;
-  transition: transform 160ms ease;
-  z-index: 0;
+/* 1st click = 50% fill */
+.panel a.md-btn.season-armed{
+  background-size: 50% 100%;
 }
 
-/* keep text above overlay */
-.md-btn.season-armed,
-.md-btn.season-armed2{
-  position: relative;
-}
-.md-btn.season-armed > *,
-.md-btn.season-armed2 > *{
-  position: relative;
-  z-index: 1;
-}
-
-/* 50% = first click */
-.md-btn.season-armed::before{
-  transform: scaleX(0.5);
-}
-
-/* 100% = second click */
-.md-btn.season-armed2::before{
-  transform: scaleX(1);
+/* 2nd click = 100% fill */
+.panel a.md-btn.season-armed2{
+  background-size: 100% 100%;
 }
     
     .grid{
