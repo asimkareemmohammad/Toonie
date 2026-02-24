@@ -2009,7 +2009,20 @@ function getActiveContext(cartoonLabel, profile){
   const map = loadActiveCtxMap();
   return (map[p] && map[p][cartoonLabel]) ? map[p][cartoonLabel] : null;
 }
+    
+function parseCtx(ctx){
+  if(!ctx) return null;
 
+  // New format: "<kind>:<seasonOrMovie>" e.g. "CL:S2", "season:S4"
+  if(String(ctx).includes(":")){
+    const [kind, seasonOrMovie] = String(ctx).split(":");
+    return { kind, seasonOrMovie };
+  }
+
+  // Old format: "movie", "season", "CL", "AF", etc.
+  return { kind: String(ctx), seasonOrMovie: null };
+}
+    
 function ctxFromTargetId(cartoonLabel, targetId){
   if(!targetId) return null;
 
@@ -2035,44 +2048,77 @@ function ctxFromTargetId(cartoonLabel, targetId){
 }
 
 function defaultEntryForCtx(cartoonLabel, ctx){
+  const parsed = parseCtx(ctx);
+  const kind = parsed ? parsed.kind : null;
+  const som  = parsed ? parsed.seasonOrMovie : null;
+
   const base = { cartoonLabel, seriesLabel: null, ts: nowISO() };
-  if(ctx === "movie"){
-    return { ...base, type: "movie", seasonOrMovie: "Movies", num: 1 };
+
+  if(kind === "movie"){
+    return { ...base, type: "movie", seasonOrMovie: som || "Movies", num: 1 };
   }
-  if(ctx === "season"){
-    return { ...base, type: "season", seasonOrMovie: "S1", num: 1 };
+
+  if(kind === "season"){
+    return { ...base, type: "season", seasonOrMovie: som || "S1", num: 1 };
   }
-  // ctx is a series code
-  return { ...base, type: "season", seriesLabel: ctx, seasonOrMovie: "S1", num: 1 };
+
+  // kind is a series code (CL/AF/WRU/etc)
+  return {
+    ...base,
+    type: "season",
+    seriesLabel: kind,
+    seasonOrMovie: som || "S1",
+    num: 1
+  };
 }
 
 function getDisplayEntryForCartoon(cartoonLabel, store, profile){
   const p = profile || activeProfile || "Asim";
   const node = (store && store.data && store.data[p]) ? store.data[p][cartoonLabel] : null;
-  const ctx = getActiveContext(cartoonLabel, p);
-
-  // no active view chosen => show "last overall" (current behavior)
-  if(!ctx){
-    return node && node.last ? node.last : null;
-  }
-
-  const history = (node && Array.isArray(node.history)) ? node.history : [];
-  const latest = (pred) => history.find(pred) || null; // history is already sorted newest-first
-
-  if(ctx === "movie"){
-    return latest(it => it && it.type === "movie") || defaultEntryForCtx(cartoonLabel, "movie");
-  }
-
-  if(ctx === "season"){
-    // "season mode" = latest season progress WITHOUT a seriesLabel
-    return latest(it => it && it.type === "season" && !normalizeSeriesLocal(it.seriesLabel))
-      || defaultEntryForCtx(cartoonLabel, "season");
-  }
-
-  // series mode = latest season progress for that specific series code
-  return latest(it => it && it.type === "season" && normalizeSeriesLocal(it.seriesLabel) === ctx)
-    || defaultEntryForCtx(cartoonLabel, ctx);
+const ctxRaw = getActiveContext(cartoonLabel, p);
+const ctx = parseCtx(ctxRaw); // {kind, seasonOrMovie}
+ // no active view chosen => show "last overall"
+if(!ctxRaw){
+  return node && node.last ? node.last : null;
 }
+
+const history = (node && Array.isArray(node.history)) ? node.history : [];
+const latest = (pred) => history.find(pred) || null; // newest-first
+
+if(ctx.kind === "movie"){
+  if(ctx.seasonOrMovie){
+    return latest(it => it && it.type === "movie" && it.seasonOrMovie === ctx.seasonOrMovie)
+      || defaultEntryForCtx(cartoonLabel, ctxRaw);
+  }
+  return latest(it => it && it.type === "movie")
+    || defaultEntryForCtx(cartoonLabel, ctxRaw);
+}
+
+if(ctx.kind === "season"){
+  // season mode = WITHOUT seriesLabel
+  if(ctx.seasonOrMovie){
+    return latest(it =>
+      it && it.type === "season" &&
+      !normalizeSeriesLocal(it.seriesLabel) &&
+      it.seasonOrMovie === ctx.seasonOrMovie
+    ) || defaultEntryForCtx(cartoonLabel, ctxRaw);
+  }
+
+  return latest(it => it && it.type === "season" && !normalizeSeriesLocal(it.seriesLabel))
+    || defaultEntryForCtx(cartoonLabel, ctxRaw);
+}
+
+// series mode (ctx.kind is series code)
+if(ctx.seasonOrMovie){
+  return latest(it =>
+    it && it.type === "season" &&
+    normalizeSeriesLocal(it.seriesLabel) === ctx.kind &&
+    it.seasonOrMovie === ctx.seasonOrMovie
+  ) || defaultEntryForCtx(cartoonLabel, ctxRaw);
+}
+
+return latest(it => it && it.type === "season" && normalizeSeriesLocal(it.seriesLabel) === ctx.kind)
+  || defaultEntryForCtx(cartoonLabel, ctxRaw);
 
 
     
