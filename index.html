@@ -1380,6 +1380,44 @@
 </section>
 
 
+
+   <!-- Supa Strikas Section -->
+<section class="section">
+  <div class="card">
+
+    <div class="title-row">
+      <h2 class="section-title">Supa Strikas</h2>
+
+      <span class="last-stepper" id="stepperSS">
+        <button class="stepper-btn" type="button" id="ssMinus" aria-label="Supa Strikas minus" disabled>−</button>
+        <span class="stepper-div"></span>
+        <span class="last-chip" id="lastChipSS"></span>
+        <span class="stepper-div"></span>
+        <button class="stepper-btn" type="button" id="ssPlus" aria-label="Supa Strikas plus" disabled>+</button>
+      </span>
+    </div>
+
+    <div class="menu-row">
+      <a class="md-btn md-tonal" href="#" onclick="toggleSS(event,'ss-seasons')">Seasons</a>
+    </div>
+
+    <div id="ss-seasons" class="panel ss-panel">
+      <div class="grid">
+        <a class="md-btn md-outlined" href="https://archive.org/details/ss-s01-mak" onclick="ripple(event)">SS-S1</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/ss-s02-mak" onclick="ripple(event)">SS-S2</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/ss-s03-mak" onclick="ripple(event)">SS-S3</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/ss-s04-mak" onclick="ripple(event)">SS-S4</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/ss-s05-mak" onclick="ripple(event)">SS-S5</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/ss-s06-mak" onclick="ripple(event)">SS-S6</a>
+        <a class="md-btn md-outlined" href="https://archive.org/details/ss-s07-mak" onclick="ripple(event)">SS-S7</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+
     
 <!-- tools Toggle Button (ALWAYS visible) -->
 <section class="section">
@@ -1585,7 +1623,12 @@ function toggleSD(e, targetId){
   renderAllCartoonLastChips();
 }
 
-
+ function toggleSS(e, targetId){
+  const ctx = ctxFromTargetId("SS", targetId);
+  if(ctx) setActiveContext("SS", ctx);
+  toggleGroup(e, targetId, '.ss-panel');
+  renderAllCartoonLastChips();
+}
 
     
 function closeToolsSection(){
@@ -1872,7 +1915,12 @@ window.addEventListener("resize", () => {
   seasons: ["S1","S2","S3","S4","S5","S6","S7"],
   hasMovies: false
 }
- 
+ "Supa Strikas": {
+  label: "SS",
+  hasSeries: false,
+  seasons: ["S1","S2","S3","S4","S5","S6","S7"],
+  hasMovies: false
+ }
 };
 
 
@@ -2082,7 +2130,7 @@ function ctxFromTargetId(cartoonLabel, targetId){
     SM:  { "sm-seasons":"season" },
     TM:  { "tm-seasons":"season" },
     STS: { "sts-seasons":"season" },
-
+    SS: { "ss-seasons":"season" },
   };
 
   return (MAP[cartoonLabel] && MAP[cartoonLabel][targetId]) ? MAP[cartoonLabel][targetId] : null;
@@ -2105,6 +2153,7 @@ function getCartoonLabelFromPanel(panel){
     tj: "TJ",
     sd: "SD",
     sts: "STS"
+    ss: "SS"
   };
 
   return MAP[key] || null;
@@ -2291,6 +2340,8 @@ const STEPPER_MAP = {
   TJ: { minus:"tjMinus", plus:"tjPlus" },
   SD: { minus:"sdMinus", plus:"sdPlus" },
   STS: { minus:"stsMinus", plus:"stsPlus" },
+  SS: { minus:"ssMinus", plus:"ssPlus" },
+
 
 };
 
@@ -2304,6 +2355,8 @@ const LAST_CHIP_ID = {
   TJ: "lastChipTJ",
   SD: "lastChipSD",
   STS: "lastChipSTS",
+  SS: "lastChipSS",
+
 };
 
 
@@ -2340,6 +2393,8 @@ function renderAllCartoonLastChips(){
   const tj = getDisplayEntryForCartoon("TJ", st, p);
   const sd = getDisplayEntryForCartoon("SD", st, p);
   const sts = getDisplayEntryForCartoon("STS", st, p);
+  const ss = getDisplayEntryForCartoon("SS", st, p);
+
 
 
 
@@ -2354,6 +2409,7 @@ function renderAllCartoonLastChips(){
   setChip("lastChipTJ", tj);
   setChip("lastChipSD", sd);
   setChip("lastChipSTS", sts);
+  setChip("lastChipSS", ss);
 
 
   setStepperState("DM", dm);
@@ -2365,10 +2421,7 @@ function renderAllCartoonLastChips(){
   setStepperState("TJ", tj);
   setStepperState("SD", sd);
   setStepperState("STS", sts);
-
-
-
-
+  setStepperState("SS", ss);
 
 
     // play pending roll animations (set by +/-)
@@ -2381,6 +2434,8 @@ function renderAllCartoonLastChips(){
   if(pendingChipAnim.TJ){ animateChip("lastChipTJ", pendingChipAnim.TJ); delete pendingChipAnim.TJ; }
   if(pendingChipAnim.SD){ animateChip("lastChipSD", pendingChipAnim.SD); delete pendingChipAnim.SD; }
   if(pendingChipAnim.STS){ animateChip("lastChipSTS", pendingChipAnim.STS); delete pendingChipAnim.STS; }
+  if(pendingChipAnim.SS){ animateChip("lastChipSS", pendingChipAnim.SS); delete pendingChipAnim.SS; }
+
 }
 
 
@@ -3071,6 +3126,9 @@ refreshRoomUI();
       
       document.getElementById("stsMinus")?.addEventListener("click", () => stepFromLast("STS", -1));
       document.getElementById("stsPlus")?.addEventListener("click", () => stepFromLast("STS", +1));
+
+      document.getElementById("ssMinus")?.addEventListener("click", () => stepFromLast("SS", -1));
+      document.getElementById("ssPlus")?.addEventListener("click", () => stepFromLast("SS", +1));
 
     }
 
