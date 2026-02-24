@@ -2047,6 +2047,55 @@ function ctxFromTargetId(cartoonLabel, targetId){
   return (MAP[cartoonLabel] && MAP[cartoonLabel][targetId]) ? MAP[cartoonLabel][targetId] : null;
 }
 
+function getCartoonLabelFromPanel(panel){
+  if(!panel) return null;
+
+  const cls = [...panel.classList].find(c => c.endsWith("-panel") && c !== "panel");
+  if(!cls) return null;
+
+  const key = cls.replace("-panel", "");
+  const MAP = {
+    dm: "DM",
+    b10: "B10",
+    nh: "NH",
+    sh: "SH",
+    sm: "SM",
+    tm: "TM",
+    tj: "TJ",
+    sd: "SD",
+    sts: "STS"
+  };
+
+  return MAP[key] || null;
+}
+
+function seasonCtxFromSeasonChipLink(a){
+  if(!a) return null;
+
+  const panel = a.closest(".panel");
+  if(!panel || !panel.id) return null;
+
+  const cartoonLabel = getCartoonLabelFromPanel(panel);
+  if(!cartoonLabel) return null;
+
+  // Examples: CL-S2, AF-S1, DM-S14, STS-S3, 13G-S1
+  const txt = (a.textContent || "").trim().toUpperCase();
+  const m = txt.match(/^([A-Z0-9]+)-S(\d+)$/);
+  if(!m) return null; // ignore non-season buttons like MOVIES
+
+  const season = "S" + String(parseInt(m[2], 10)); // S02 -> S2
+  const baseCtx = ctxFromTargetId(cartoonLabel, panel.id);
+
+  if(!baseCtx || baseCtx === "movie") return null;
+
+  const nextCtx = (baseCtx === "season")
+    ? `season:${season}`        // plain season cartoons (DM/SH/SM/TM/STS)
+    : `${baseCtx}:${season}`;   // series cartoons (CL/AF/UA/OV etc.)
+
+  return { cartoonLabel, nextCtx };
+}
+
+    
 function defaultEntryForCtx(cartoonLabel, ctx){
   const parsed = parseCtx(ctx);
   const kind = parsed ? parsed.kind : null;
@@ -2403,7 +2452,20 @@ function renderAllCartoonLastChips(){
       const roomInput = document.getElementById("roomInput");
       const roomSaveBtn = document.getElementById("roomSaveBtn");
       const roomStatus = document.getElementById("roomStatus");
+      
+document.addEventListener("click", (e) => {
+  const a = e.target.closest('.panel a.md-btn[href*="archive.org"]');
+  if(!a) return;
 
+  const hit = seasonCtxFromSeasonChipLink(a);
+  if(!hit) return; // not a season chip
+
+  // Phase 1 behavior: stay on page and only switch stepper target
+  e.preventDefault();
+
+  setActiveContext(hit.cartoonLabel, hit.nextCtx);
+  renderAllCartoonLastChips();
+});
       if(!profileSeg || !modeSeg) return;
 
       let store = loadStore();
