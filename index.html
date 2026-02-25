@@ -451,6 +451,20 @@
       color: var(--md-primary);
     }
 
+.tool-mode-row{
+  margin-top: 2px;
+}
+
+.tool-mode-row .md-btn.active{
+  background: rgba(208,188,255,0.16);
+  border-color: rgba(208,188,255,0.35);
+  color: var(--md-primary);
+}
+
+.tracker-panel > div{
+  padding-top: 12px;
+}
+    
     .mini{
       font-size: 13px;
       color: var(--md-text-soft);
@@ -1455,70 +1469,80 @@
       </div>
     </div>
 
-    <div class="card">
-      <h2 class="section-title">Progress Tracker</h2>
-      <div class="label" style="margin-top:2px; margin-bottom:6px;">Mode</div>
+   <div class="card">
+  <h2 class="section-title">Progress Tracker</h2>
 
-      <div class="seg" id="modeSeg">
-        <button class="md-btn md-outlined" type="button" data-mode="save">Save</button>
-        <button class="md-btn md-outlined" type="button" data-mode="recent">Recent Activity</button>
-      </div>
-
-        <div id="savePanel" style="margin-top:12px;">
-         <div class="form-row">
-  <div class="field">
-    <div class="label">Cartoon</div>
-    <select id="cartoonSelect" class="select"></select>
+  <!-- Cartoon-card style tabs -->
+  <div class="menu-row tool-mode-row" id="modeSeg">
+    <button class="md-btn md-tonal" type="button" data-mode="save">Save</button>
+    <button class="md-btn md-tonal" type="button" data-mode="recent">Recent Activity</button>
   </div>
 
-  <div class="field">
-    <div class="label">Type</div>
-    <select id="typeSelect" class="select">
-      <option value="season">Season</option>
-      <option value="movie">Movies</option>
-    </select>
-  </div>
-</div>
-
-<div class="form-row" style="margin-top:12px;">
-  <div class="field" id="seriesField">
-    <div class="label">Series</div>
-    <select id="seriesSelect" class="select"></select>
-  </div>
-
-  <div class="field" id="seasonOrMovieField">
-    <div class="label" id="seasonLabel">Season</div>
-    <select id="seasonOrMovieSelect" class="select"></select>
-  </div>
-</div>
-
-
-          <div class="form-row" style="margin-top:12px;">
-            <div class="field">
-              <div class="label">Episode / Movie Number</div>
-              <select id="numSelect" class="select"></select>
-            </div>
-
-            <div class="field">
-              <div class="label">Action</div>
-              <button class="md-btn md-filled" id="saveBtn" type="button">Save</button>
-            </div>
-          </div>
-
-          <div class="mini" id="saveHint"></div>
+  <!-- Save panel -->
+  <div id="savePanel" class="panel tracker-panel">
+    <div>
+      <div class="form-row">
+        <div class="field">
+          <div class="label">Cartoon</div>
+          <select id="cartoonSelect" class="select"></select>
         </div>
 
-        <div id="recentPanel" class="hidden" style="margin-top:12px;">
-          <div class="form-row">
-            <div class="field">
-              <div class="label">Cartoon</div>
-              <select id="recentCartoonSelect" class="select"></select>
-            </div>
-            <div class="field">
-              <div class="label">Info</div>
-              <div class="mini" id="recentInfo">Select a cartoon to view full activity.</div>
-            </div>
-          </div>
+        <div class="field">
+          <div class="label">Type</div>
+          <select id="typeSelect" class="select">
+            <option value="season">Season</option>
+            <option value="movie">Movies</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:12px;">
+        <div class="field" id="seriesField">
+          <div class="label">Series</div>
+          <select id="seriesSelect" class="select"></select>
+        </div>
+
+        <div class="field" id="seasonOrMovieField">
+          <div class="label" id="seasonLabel">Season</div>
+          <select id="seasonOrMovieSelect" class="select"></select>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:12px;">
+        <div class="field">
+          <div class="label">Episode / Movie Number</div>
+          <select id="numSelect" class="select"></select>
+        </div>
+
+        <div class="field">
+          <div class="label">Action</div>
+          <button class="md-btn md-filled" id="saveBtn" type="button">Save</button>
+        </div>
+      </div>
+
+      <div class="mini" id="saveHint"></div>
+    </div>
+  </div>
+
+  <!-- Recent panel -->
+  <div id="recentPanel" class="panel tracker-panel">
+    <div>
+      <div class="form-row">
+        <div class="field">
+          <div class="label">Cartoon</div>
+          <select id="recentCartoonSelect" class="select"></select>
+        </div>
+
+        <div class="field">
+          <div class="label">Info</div>
+          <div class="mini" id="recentInfo">Select a cartoon to view full activity.</div>
+        </div>
+      </div>
+
+      <div class="activity-list" id="activityList"></div>
+    </div>
+  </div>
+</div>
 
           <div class="activity-list" id="activityList"></div>
         </div>
@@ -2656,19 +2680,19 @@ setSyncStatus(`Sync: ON  •  Room: ${room}  •  Profile: ${activeProfile}`);
       }
 
       function setModeUI(){
-        [...modeSeg.querySelectorAll("button")].forEach(b => {
-          b.classList.toggle("active", b.dataset.mode === activeMode);
-        });
+  [...modeSeg.querySelectorAll("button")].forEach(b => {
+    b.classList.toggle("active", b.dataset.mode === activeMode);
+  });
 
-        if(activeMode === "save"){
-          savePanel.classList.remove("hidden");
-          recentPanel.classList.add("hidden");
-        } else {
-          savePanel.classList.add("hidden");
-          recentPanel.classList.remove("hidden");
-          renderRecent();
-        }
-      }
+  const isSave = activeMode === "save";
+
+  setPanelOpen(savePanel, isSave);
+  setPanelOpen(recentPanel, !isSave);
+
+  if(!isSave){
+    renderRecent();
+  }
+}
 
       function cartoonsList(){ return Object.keys(MODEL); }
       function getCartoonCfg(name){ return MODEL[name]; }
