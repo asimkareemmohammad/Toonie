@@ -1286,6 +1286,134 @@ body::-webkit-scrollbar {
 .material-picker-option.is-selected .material-picker-check{
   opacity: 1;
 }
+
+/* ===== Web player overlay ===== */
+.web-player{
+  position: fixed;
+  inset: 0;
+  z-index: 10020;
+  background: rgba(0,0,0,0.92);
+  display: none;
+  flex-direction: column;
+}
+
+.web-player.open{
+  display: flex;
+}
+
+.web-player-top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  background: rgba(18,18,18,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.web-player-title{
+  min-width: 0;
+  flex: 1 1 auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--md-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.web-player-top-actions{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.web-player-icon-btn{
+  min-width: 42px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 999px;
+}
+
+.web-player-body{
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.web-player-video-wrap{
+  width: min(100%, 1100px);
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.web-player-video{
+  width: 100%;
+  max-height: calc(100vh - 160px);
+  background: #000;
+  border-radius: 18px;
+  outline: none;
+}
+
+.web-player-bottom{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 16px 18px;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  background: rgba(18,18,18,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.web-player-bottom .md-btn{
+  min-width: 110px;
+}
+
+.web-player-meta{
+  font-size: 12px;
+  color: var(--md-text-soft);
+  text-align: center;
+  margin-top: 8px;
+}
+
+body.web-player-lock{
+  overflow: hidden !important;
+}
+
+@media (max-width: 640px){
+  .web-player-top{
+    padding: 12px;
+  }
+
+  .web-player-body{
+    padding: 10px;
+  }
+
+  .web-player-bottom{
+    padding: 12px;
+    flex-wrap: wrap;
+  }
+
+  .web-player-bottom .md-btn{
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .web-player-video{
+    max-height: calc(100vh - 190px);
+  }
+}
+
+    
   </style>
 </head>
 
@@ -2385,6 +2513,36 @@ body::-webkit-scrollbar {
     </section>
    </div>
   </main>
+
+<div id="webPlayerOverlay" class="web-player" aria-hidden="true">
+  <div class="web-player-top">
+    <div id="webPlayerTitle" class="web-player-title">Now Playing</div>
+
+    <div class="web-player-top-actions">
+      <button id="webPlayerWishBtn" type="button" class="md-btn md-tonal web-player-icon-btn" aria-label="Toggle wishlist">☆</button>
+      <button id="webPlayerCloseBtn" type="button" class="md-btn md-danger web-player-icon-btn" aria-label="Close player">✕</button>
+    </div>
+  </div>
+
+  <div class="web-player-body">
+    <div class="web-player-video-wrap">
+      <video
+        id="webPlayerVideo"
+        class="web-player-video"
+        controls
+        playsinline
+        webkit-playsinline
+        preload="metadata"
+      ></video>
+    </div>
+  </div>
+
+  <div class="web-player-bottom">
+    <button id="webPlayerPrevBtn" type="button" class="md-btn md-outlined">Prev</button>
+    <button id="webPlayerNextBtn" type="button" class="md-btn md-outlined">Next</button>
+  </div>
+</div>
+  
   <div id="materialPicker" class="material-picker hidden" aria-hidden="true">
   <div class="material-picker-backdrop" id="materialPickerBackdrop"></div>
   <div id="materialPickerMenu" class="material-picker-menu">
@@ -4571,6 +4729,209 @@ function getPlaybackStartIndex(queue, entry){
   return idx >= 0 ? idx : 0;
 }
 
+const webPlayerState = {
+  queue: [],
+  index: 0,
+  source: "direct_card",
+  bound: false
+};
+
+function getWebPlayerEls(){
+  return {
+    overlay: document.getElementById("webPlayerOverlay"),
+    video: document.getElementById("webPlayerVideo"),
+    title: document.getElementById("webPlayerTitle"),
+    closeBtn: document.getElementById("webPlayerCloseBtn"),
+    wishBtn: document.getElementById("webPlayerWishBtn"),
+    prevBtn: document.getElementById("webPlayerPrevBtn"),
+    nextBtn: document.getElementById("webPlayerNextBtn")
+  };
+}
+
+function currentWebPlayerItem(){
+  if(!Array.isArray(webPlayerState.queue) || !webPlayerState.queue.length) return null;
+  return webPlayerState.queue[webPlayerState.index] || null;
+}
+
+function refreshWebPlayerWishlistButton(){
+  const { wishBtn } = getWebPlayerEls();
+  if(!wishBtn) return;
+
+  const item = currentWebPlayerItem();
+  if(!item){
+    wishBtn.textContent = "☆";
+    return;
+  }
+
+  wishBtn.textContent = isWishlisted(item, activeProfile) ? "★" : "☆";
+}
+
+function refreshWebPlayerNavButtons(){
+  const { prevBtn, nextBtn } = getWebPlayerEls();
+  const len = Array.isArray(webPlayerState.queue) ? webPlayerState.queue.length : 0;
+
+  if(prevBtn){
+    prevBtn.disabled = len <= 1 || webPlayerState.index <= 0;
+  }
+
+  if(nextBtn){
+    nextBtn.disabled = len <= 1 || webPlayerState.index >= len - 1;
+  }
+}
+
+async function loadWebPlayerIndex(nextIndex, autoplay = true){
+  const { video, title } = getWebPlayerEls();
+  if(!video) return false;
+
+  const len = Array.isArray(webPlayerState.queue) ? webPlayerState.queue.length : 0;
+  if(!len) return false;
+
+  const clamped = Math.max(0, Math.min(nextIndex, len - 1));
+  webPlayerState.index = clamped;
+
+  const item = currentWebPlayerItem();
+  if(!item) return false;
+
+  if(title){
+    title.textContent = String(item.title || formatPlayerTitle(item) || "Now Playing");
+  }
+
+  video.src = String(item.url || "");
+  video.load();
+
+  refreshWebPlayerWishlistButton();
+  refreshWebPlayerNavButtons();
+
+  if(autoplay){
+    try{
+      await video.play();
+    } catch(err){
+      console.warn("web video autoplay blocked:", err);
+    }
+  }
+
+  return true;
+}
+
+function closeWebPlayer(){
+  const { overlay, video } = getWebPlayerEls();
+
+  if(video){
+    try{
+      video.pause();
+    } catch(e){}
+    video.removeAttribute("src");
+    video.load();
+  }
+
+  webPlayerState.queue = [];
+  webPlayerState.index = 0;
+  webPlayerState.source = "direct_card";
+
+  if(overlay){
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  document.body.classList.remove("web-player-lock");
+}
+
+async function openWebPlayer(entry, meta, source = "direct_card"){
+  const { overlay } = getWebPlayerEls();
+  if(!overlay) return false;
+
+  const cleanEntry = normalizePlaybackEntry(entry);
+  const queue = buildPlaybackQueue(cleanEntry);
+  const startIndex = getPlaybackStartIndex(queue, cleanEntry);
+
+  if(!Array.isArray(queue) || !queue.length){
+    alert("No playable items found for this entry.");
+    return false;
+  }
+
+  webPlayerState.queue = queue;
+  webPlayerState.index = startIndex;
+  webPlayerState.source = String(source || "direct_card");
+
+  overlay.classList.add("open");
+  overlay.setAttribute("aria-hidden", "false");
+  document.body.classList.add("web-player-lock");
+
+  await loadWebPlayerIndex(startIndex, true);
+  return true;
+}
+
+function ensureWebPlayerBound(){
+  if(webPlayerState.bound) return;
+  webPlayerState.bound = true;
+
+  const { overlay, video, closeBtn, wishBtn, prevBtn, nextBtn } = getWebPlayerEls();
+  if(!overlay || !video) return;
+
+  closeBtn?.addEventListener("click", (e) => {
+    if(e) ripple(e);
+    closeWebPlayer();
+  });
+
+  wishBtn?.addEventListener("click", async (e) => {
+    if(e) ripple(e);
+
+    const item = currentWebPlayerItem();
+    if(!item) return;
+
+    toggleWishlist(item, activeProfile);
+
+    try{
+      await syncWishlistForCurrentRoom(activeProfile);
+    } catch(err){
+      console.error("wishlist sync failed:", err);
+    }
+
+    refreshWebPlayerWishlistButton();
+
+    if(activeMode === "wishlist"){
+      await renderWishlist();
+    }
+  });
+
+  prevBtn?.addEventListener("click", async (e) => {
+    if(e) ripple(e);
+    if(webPlayerState.index <= 0) return;
+    await loadWebPlayerIndex(webPlayerState.index - 1, true);
+  });
+
+  nextBtn?.addEventListener("click", async (e) => {
+    if(e) ripple(e);
+    if(webPlayerState.index >= webPlayerState.queue.length - 1) return;
+    await loadWebPlayerIndex(webPlayerState.index + 1, true);
+  });
+
+  video.addEventListener("ended", async () => {
+    if(webPlayerState.index < webPlayerState.queue.length - 1){
+      await loadWebPlayerIndex(webPlayerState.index + 1, true);
+    }
+  });
+
+  document.addEventListener("keydown", async (e) => {
+    const { overlay } = getWebPlayerEls();
+    if(!overlay || !overlay.classList.contains("open")) return;
+
+    if(e.key === "Escape"){
+      closeWebPlayer();
+      return;
+    }
+
+    if(e.key === "ArrowLeft" && webPlayerState.index > 0){
+      await loadWebPlayerIndex(webPlayerState.index - 1, true);
+      return;
+    }
+
+    if(e.key === "ArrowRight" && webPlayerState.index < webPlayerState.queue.length - 1){
+      await loadWebPlayerIndex(webPlayerState.index + 1, true);
+    }
+  });
+}
+  
 
 function getNativePlayerPlugin(){
   const cap = window.Capacitor;
@@ -4680,40 +5041,38 @@ async function resumeProgressAndWishlistWithRetry(tries = 6, waitMs = 300){
 }
 
 async function openNativePlayer(entry, meta, source = "direct_card"){
+  ensureWebPlayerBound();
+
   const NativePlayer = getNativePlayerPlugin();
-
-  if(!NativePlayer?.openPlayer){
-    console.error("Native player plugin not available");
-    return false;
-  }
-
   const cleanEntry = normalizePlaybackEntry(entry);
   const queue = buildPlaybackQueue(cleanEntry);
   const startIndex = getPlaybackStartIndex(queue, cleanEntry);
 
-  awaitingNativeWishlistSync = true;
+  if(NativePlayer?.openPlayer){
+    awaitingNativeWishlistSync = true;
 
-  try{
-    await NativePlayer.openPlayer({
-      url: meta.url || "",
-      title: meta.title || "",
-      cartoonLabel: cleanEntry.cartoonLabel || "",
-      seriesLabel: cleanEntry.seriesLabel || "",
-      type: cleanEntry.type || "",
-      seasonOrMovie: cleanEntry.seasonOrMovie || "",
-      num: Number(cleanEntry.num) || 0,
-      profile: activeProfile || "Asim",
-      queue,
-      startIndex,
-      source: String(source || "direct_card")
-    });
-    return true;
-  } catch(err){
-    awaitingNativeWishlistSync = false;
-    console.error("Native player open failed:", err);
-    alert("Failed to open native player.");
-    return false;
+    try{
+      await NativePlayer.openPlayer({
+        url: meta.url || "",
+        title: meta.title || "",
+        cartoonLabel: cleanEntry.cartoonLabel || "",
+        seriesLabel: cleanEntry.seriesLabel || "",
+        type: cleanEntry.type || "",
+        seasonOrMovie: cleanEntry.seasonOrMovie || "",
+        num: Number(cleanEntry.num) || 0,
+        profile: activeProfile || "Asim",
+        queue,
+        startIndex,
+        source: String(source || "direct_card")
+      });
+      return true;
+    } catch(err){
+      awaitingNativeWishlistSync = false;
+      console.error("Native player open failed:", err);
+    }
   }
+
+  return await openWebPlayer(cleanEntry, meta, source);
 }
 async function openMediaFromEntry(entry, source = "direct_card"){
   const cleanEntry = {
