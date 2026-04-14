@@ -1522,7 +1522,79 @@ body.web-player-lock{
   font-size: 22px;
   flex: 0 0 auto;
 }
+.web-player-progress{
+  flex: 1 1 auto;
+  min-width: 180px;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
+.web-player-time-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.web-player-time{
+  font-size: 12px;
+  color: rgba(255,255,255,0.82);
+  line-height: 1;
+}
+
+.web-player-seek{
+  width: 100%;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.22);
+  outline: none;
+  cursor: pointer;
+}
+
+.web-player-seek::-webkit-slider-thumb{
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fff;
+  border: 0;
+}
+
+.web-player-seek::-moz-range-thumb{
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fff;
+  border: 0;
+}
+
+.web-player-seek::-moz-range-track{
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.22);
+}
+
+@media (max-width: 640px){
+  .web-player-bottombar{
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .web-player-progress{
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .web-player-hint{
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
 .web-player-hint{
   flex: 0 1 auto;
 }
@@ -2670,6 +2742,25 @@ body.web-player-lock{
 
 <div class="web-player-bottombar">
   <button id="webPlayerPlayBtn" type="button" class="web-player-fab web-player-play-btn" aria-label="Play or pause">▶</button>
+
+  <div class="web-player-progress">
+    <div class="web-player-time-row">
+      <span id="webPlayerCurrentTime" class="web-player-time">0:00</span>
+      <span id="webPlayerDuration" class="web-player-time">0:00</span>
+    </div>
+
+    <input
+      id="webPlayerSeek"
+      class="web-player-seek"
+      type="range"
+      min="0"
+      max="100"
+      step="0.1"
+      value="0"
+      aria-label="Seek video"
+    >
+  </div>
+
   <div id="webPlayerHint" class="web-player-hint">Tap player to show or hide controls</div>
 </div>
   </div>
@@ -4882,7 +4973,10 @@ function getWebPlayerEls(){
     prevBtn: document.getElementById("webPlayerPrevBtn"),
     nextBtn: document.getElementById("webPlayerNextBtn"),
     playBtn: document.getElementById("webPlayerPlayBtn"),
-    hint: document.getElementById("webPlayerHint")
+    hint: document.getElementById("webPlayerHint"),
+    seek: document.getElementById("webPlayerSeek"),
+    currentTime: document.getElementById("webPlayerCurrentTime"),
+    duration: document.getElementById("webPlayerDuration")
   };
 }
 
@@ -4946,6 +5040,30 @@ function refreshWebPlayerPlayButton(){
   playBtn.textContent = video.paused ? "▶" : "⏸";
 }
 
+function formatPlayerClock(seconds){
+  const total = Math.max(0, Math.floor(Number(seconds) || 0));
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
+function refreshWebPlayerTimeUI(){
+  const { video, seek, currentTime, duration } = getWebPlayerEls();
+  if(!video || !seek || !currentTime || !duration) return;
+
+  const dur = Number(video.duration) || 0;
+  const cur = Number(video.currentTime) || 0;
+
+  currentTime.textContent = formatPlayerClock(cur);
+  duration.textContent = formatPlayerClock(dur);
+
+  if(dur > 0){
+    seek.value = String((cur / dur) * 100);
+  } else {
+    seek.value = "0";
+  }
+}
+    
 function clearWebPlayerChromeTimer(){
   if(webPlayerState.chromeTimer){
     clearTimeout(webPlayerState.chromeTimer);
@@ -5057,6 +5175,7 @@ async function loadWebPlayerIndex(nextIndex, autoplay = true){
   refreshWebPlayerWishlistButton();
   refreshWebPlayerNavButtons();
   refreshWebPlayerPlayButton();
+  refreshWebPlayerTimeUI();
   showWebPlayerChromeTemporarily();
 
   if(autoplay){
@@ -5128,17 +5247,18 @@ function ensureWebPlayerBound(){
   if(webPlayerState.bound) return;
   webPlayerState.bound = true;
 
-  const {
-    overlay,
-    stage,
-    video,
-    closeBtn,
-    wishBtn,
-    fullscreenBtn,
-    prevBtn,
-    nextBtn,
-    playBtn
-  } = getWebPlayerEls();
+ const {
+  overlay,
+  stage,
+  video,
+  closeBtn,
+  wishBtn,
+  fullscreenBtn,
+  prevBtn,
+  nextBtn,
+  playBtn,
+  seek
+} = getWebPlayerEls();
 
   if(!overlay || !stage || !video) return;
 
@@ -5149,26 +5269,25 @@ function ensureWebPlayerBound(){
     closeWebPlayer();
   });
 
-  wishBtn?.addEventListener("click", async (e) => {
-    if(e) ripple(e);
+ wishBtn?.addEventListener("click", async (e) => {
+  if(e) ripple(e);
 
-    const item = currentWebPlayerItem();
-    if(!item) return;
+  const item = currentWebPlayerItem();
+  if(!item) return;
 
-    toggleWishlist(item, activeProfile);
+  try{
+    await toggleWishlistItemShared(item, activeProfile);
     refreshWebPlayerWishlistButton();
-    showWebPlayerChromeTemporarily();
-
-    try{
-      await syncWishlistForCurrentRoom(activeProfile);
-    } catch(err){
-      console.error("wishlist sync failed:", err);
-    }
 
     if(activeMode === "wishlist"){
       await renderWishlist();
     }
-  });
+  } catch(err){
+    console.error("wishlist toggle failed:", err);
+  }
+
+  showWebPlayerChromeTemporarily();
+});
 
   fullscreenBtn?.addEventListener("click", async (e) => {
     if(e) ripple(e);
@@ -5231,6 +5350,27 @@ function ensureWebPlayerBound(){
     }
   });
 
+video.addEventListener("timeupdate", () => {
+  refreshWebPlayerTimeUI();
+});
+
+video.addEventListener("loadedmetadata", () => {
+  refreshWebPlayerPlayButton();
+  refreshWebPlayerTimeUI();
+});
+
+seek?.addEventListener("input", () => {
+  const { video, seek } = getWebPlayerEls();
+  if(!video || !seek) return;
+
+  const dur = Number(video.duration) || 0;
+  if(dur <= 0) return;
+
+  const pct = Number(seek.value) || 0;
+  video.currentTime = (pct / 100) * dur;
+  refreshWebPlayerTimeUI();
+});
+  
   document.addEventListener("fullscreenchange", () => {
     showWebPlayerChromeTemporarily();
   });
@@ -9643,6 +9783,22 @@ async function getWishlistItemsShared(profile = activeProfile){
   return getWishlistItems(profile);
 }
 
+async function addWishlistItemShared(entry, profile = activeProfile){
+  addToWishlist(entry, profile);
+  await syncWishlistFromNativeToCloud(profile);
+  return true;
+}
+
+async function toggleWishlistItemShared(entry, profile = activeProfile){
+  if(isWishlisted(entry, profile)){
+    await removeWishlistItemShared(entry, profile);
+    return { added: false };
+  }
+
+  await addWishlistItemShared(entry, profile);
+  return { added: true };
+}
+      
 async function removeWishlistItemShared(entry, profile = activeProfile){
   const NativePlayer = getNativePlayerPlugin();
   let removedInNative = false;
