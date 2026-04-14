@@ -1510,6 +1510,35 @@ body.web-player-lock{
     font-size: 17px;
   }
 }
+
+.web-player-bottombar{
+  gap: 14px;
+  align-items: center;
+}
+
+.web-player-play-btn{
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+  flex: 0 0 auto;
+}
+
+.web-player-hint{
+  flex: 0 1 auto;
+}
+
+.web-player.chrome-hidden .web-player-play-btn{
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 640px){
+  .web-player-play-btn{
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
+  }
+}
     
   </style>
 </head>
@@ -2639,9 +2668,10 @@ body.web-player-lock{
       <button id="webPlayerNextBtn" type="button" class="web-player-nav-btn next" aria-label="Next">❯</button>
     </div>
 
-    <div class="web-player-bottombar">
-      <div class="web-player-hint">Tap player to show or hide controls</div>
-    </div>
+<div class="web-player-bottombar">
+  <button id="webPlayerPlayBtn" type="button" class="web-player-fab web-player-play-btn" aria-label="Play or pause">▶</button>
+  <div id="webPlayerHint" class="web-player-hint">Tap player to show or hide controls</div>
+</div>
   </div>
 </div>
   
@@ -4850,8 +4880,15 @@ function getWebPlayerEls(){
     wishBtn: document.getElementById("webPlayerWishBtn"),
     fullscreenBtn: document.getElementById("webPlayerFullscreenBtn"),
     prevBtn: document.getElementById("webPlayerPrevBtn"),
-    nextBtn: document.getElementById("webPlayerNextBtn")
+    nextBtn: document.getElementById("webPlayerNextBtn"),
+    playBtn: document.getElementById("webPlayerPlayBtn"),
+    hint: document.getElementById("webPlayerHint")
   };
+}
+
+function currentWebPlayerItem(){
+  if(!Array.isArray(webPlayerState.queue) || !webPlayerState.queue.length) return null;
+  return webPlayerState.queue[webPlayerState.index] || null;
 }
 
 function formatWebPlayerSubtitle(item){
@@ -4863,11 +4900,50 @@ function formatWebPlayerSubtitle(item){
   const num = Number(item.num || 0);
 
   if(type === "movie"){
-    return `${cartoon} • Movie ${num || seasonOrMovie.replace(/^M/i, "")}`;
+    return `${cartoon} • ${seasonOrMovie || `Movie ${num || 0}`}`;
   }
 
-  const seasonLabel = seasonOrMovie || "";
-  return `${cartoon} • ${seasonLabel} • Episode ${num || 0}`;
+  return `${cartoon} • ${seasonOrMovie} • Episode ${num || 0}`;
+}
+
+function setWebPlayerHint(text = ""){
+  const { hint } = getWebPlayerEls();
+  if(hint){
+    hint.textContent = text;
+  }
+}
+
+function refreshWebPlayerWishlistButton(){
+  const { wishBtn } = getWebPlayerEls();
+  if(!wishBtn) return;
+
+  const item = currentWebPlayerItem();
+  if(!item){
+    wishBtn.textContent = "☆";
+    return;
+  }
+
+  wishBtn.textContent = isWishlisted(item, activeProfile) ? "★" : "☆";
+}
+
+function refreshWebPlayerNavButtons(){
+  const { prevBtn, nextBtn } = getWebPlayerEls();
+  const len = Array.isArray(webPlayerState.queue) ? webPlayerState.queue.length : 0;
+
+  if(prevBtn){
+    prevBtn.disabled = len <= 1 || webPlayerState.index <= 0;
+  }
+
+  if(nextBtn){
+    nextBtn.disabled = len <= 1 || webPlayerState.index >= len - 1;
+  }
+}
+
+function refreshWebPlayerPlayButton(){
+  const { video, playBtn } = getWebPlayerEls();
+  if(!playBtn || !video) return;
+
+  playBtn.textContent = video.paused ? "▶" : "⏸";
 }
 
 function clearWebPlayerChromeTimer(){
@@ -4895,6 +4971,49 @@ function showWebPlayerChromeTemporarily(){
   }, 2600);
 }
 
+function toggleWebPlayerChrome(){
+  const { overlay } = getWebPlayerEls();
+  if(!overlay) return;
+
+  if(overlay.classList.contains("chrome-hidden")){
+    showWebPlayerChromeTemporarily();
+  } else {
+    clearWebPlayerChromeTimer();
+    hideWebPlayerChrome();
+  }
+}
+
+async function requestWebPlayerPlay(){
+  const { video } = getWebPlayerEls();
+  if(!video) return false;
+
+  try{
+    await video.play();
+    refreshWebPlayerPlayButton();
+    setWebPlayerHint("Tap player to show or hide controls");
+    return true;
+  } catch(err){
+    console.warn("web video autoplay/play blocked:", err);
+    refreshWebPlayerPlayButton();
+    setWebPlayerHint("Press ▶ to start playback");
+    return false;
+  }
+}
+
+async function toggleWebPlayerPlayPause(){
+  const { video } = getWebPlayerEls();
+  if(!video) return;
+
+  if(video.paused){
+    await requestWebPlayerPlay();
+  } else {
+    video.pause();
+    refreshWebPlayerPlayButton();
+  }
+
+  showWebPlayerChromeTemporarily();
+}
+
 async function toggleWebPlayerFullscreen(){
   const { stage } = getWebPlayerEls();
   if(!stage) return;
@@ -4907,37 +5026,6 @@ async function toggleWebPlayerFullscreen(){
     }
   } catch(err){
     console.warn("fullscreen toggle failed:", err);
-  }
-}
-    
-function currentWebPlayerItem(){
-  if(!Array.isArray(webPlayerState.queue) || !webPlayerState.queue.length) return null;
-  return webPlayerState.queue[webPlayerState.index] || null;
-}
-
-function refreshWebPlayerWishlistButton(){
-  const { wishBtn } = getWebPlayerEls();
-  if(!wishBtn) return;
-
-  const item = currentWebPlayerItem();
-  if(!item){
-    wishBtn.textContent = "☆";
-    return;
-  }
-
-  wishBtn.textContent = isWishlisted(item, activeProfile) ? "★" : "☆";
-}
-
-function refreshWebPlayerNavButtons(){
-  const { prevBtn, nextBtn } = getWebPlayerEls();
-  const len = Array.isArray(webPlayerState.queue) ? webPlayerState.queue.length : 0;
-
-  if(prevBtn){
-    prevBtn.disabled = len <= 1 || webPlayerState.index <= 0;
-  }
-
-  if(nextBtn){
-    nextBtn.disabled = len <= 1 || webPlayerState.index >= len - 1;
   }
 }
 
@@ -4968,14 +5056,13 @@ async function loadWebPlayerIndex(nextIndex, autoplay = true){
 
   refreshWebPlayerWishlistButton();
   refreshWebPlayerNavButtons();
+  refreshWebPlayerPlayButton();
   showWebPlayerChromeTemporarily();
 
   if(autoplay){
-    try{
-      await video.play();
-    } catch(err){
-      console.warn("web video autoplay blocked:", err);
-    }
+    await requestWebPlayerPlay();
+  } else {
+    setWebPlayerHint("Press ▶ to start playback");
   }
 
   return true;
@@ -5034,7 +5121,6 @@ async function openWebPlayer(entry, meta, source = "direct_card"){
   document.body.classList.add("web-player-lock");
 
   await loadWebPlayerIndex(startIndex, true);
-  showWebPlayerChromeTemporarily();
   return true;
 }
 
@@ -5042,8 +5128,21 @@ function ensureWebPlayerBound(){
   if(webPlayerState.bound) return;
   webPlayerState.bound = true;
 
-  const { overlay, stage, video, closeBtn, wishBtn, fullscreenBtn, prevBtn, nextBtn } = getWebPlayerEls();
-  if(!overlay || !video || !stage) return;
+  const {
+    overlay,
+    stage,
+    video,
+    closeBtn,
+    wishBtn,
+    fullscreenBtn,
+    prevBtn,
+    nextBtn,
+    playBtn
+  } = getWebPlayerEls();
+
+  if(!overlay || !stage || !video) return;
+
+  video.controls = false;
 
   closeBtn?.addEventListener("click", (e) => {
     if(e) ripple(e);
@@ -5060,6 +5159,12 @@ function ensureWebPlayerBound(){
     refreshWebPlayerWishlistButton();
     showWebPlayerChromeTemporarily();
 
+    try{
+      await syncWishlistForCurrentRoom(activeProfile);
+    } catch(err){
+      console.error("wishlist sync failed:", err);
+    }
+
     if(activeMode === "wishlist"){
       await renderWishlist();
     }
@@ -5069,6 +5174,11 @@ function ensureWebPlayerBound(){
     if(e) ripple(e);
     await toggleWebPlayerFullscreen();
     showWebPlayerChromeTemporarily();
+  });
+
+  playBtn?.addEventListener("click", async (e) => {
+    if(e) ripple(e);
+    await toggleWebPlayerPlayPause();
   });
 
   prevBtn?.addEventListener("click", async (e) => {
@@ -5084,16 +5194,31 @@ function ensureWebPlayerBound(){
   });
 
   stage.addEventListener("click", (e) => {
-    const clickedBtn = e.target.closest("button");
-    if(clickedBtn) return;
-    showWebPlayerChromeTemporarily();
+    const target = e.target;
+    if(target instanceof HTMLElement && target.closest("button")){
+      return;
+    }
+    toggleWebPlayerChrome();
   });
 
   video.addEventListener("play", () => {
+    refreshWebPlayerPlayButton();
+    setWebPlayerHint("Tap player to show or hide controls");
     showWebPlayerChromeTemporarily();
   });
 
   video.addEventListener("pause", () => {
+    refreshWebPlayerPlayButton();
+    showWebPlayerChromeTemporarily();
+  });
+
+  video.addEventListener("loadedmetadata", () => {
+    refreshWebPlayerPlayButton();
+  });
+
+  video.addEventListener("error", () => {
+    refreshWebPlayerPlayButton();
+    setWebPlayerHint("This video could not be played");
     showWebPlayerChromeTemporarily();
   });
 
@@ -5101,6 +5226,7 @@ function ensureWebPlayerBound(){
     if(webPlayerState.index < webPlayerState.queue.length - 1){
       await loadWebPlayerIndex(webPlayerState.index + 1, true);
     } else {
+      refreshWebPlayerPlayButton();
       showWebPlayerChromeTemporarily();
     }
   });
@@ -5135,12 +5261,7 @@ function ensureWebPlayerBound(){
 
     if(e.key === " "){
       e.preventDefault();
-      if(video.paused){
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-      }
-      showWebPlayerChromeTemporarily();
+      await toggleWebPlayerPlayPause();
     }
   });
 }
