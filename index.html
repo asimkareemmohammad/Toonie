@@ -1286,6 +1286,267 @@ body::-webkit-scrollbar {
 .material-picker-option.is-selected .material-picker-check{
   opacity: 1;
 }
+
+/* ===== Web Player Overlay ===== */
+body.player-open{
+  overflow: hidden;
+}
+
+.web-player-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #000;
+  display: none;
+  overflow: hidden;
+}
+
+.web-player-overlay.open{
+  display: block;
+}
+
+.web-player-overlay.chrome-hidden .web-player-top,
+.web-player-overlay.chrome-hidden .web-player-center,
+.web-player-overlay.chrome-hidden .web-player-bottom{
+  opacity: 0;
+  pointer-events: none;
+}
+
+.web-player-stage{
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+
+.web-player-video{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  display: block;
+}
+
+.web-player-top,
+.web-player-center,
+.web-player-bottom{
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  transition: opacity 180ms ease;
+}
+
+.web-player-top{
+  top: 0;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 18px)
+    18px
+    0
+    18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.web-player-close{
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.web-player-title{
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+  padding-top: 6px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.web-player-wish{
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+}
+
+.web-player-wish.is-active{
+  color: #fff;
+}
+
+.web-player-center{
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 0 14px;
+}
+
+.web-player-ctrl{
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.web-player-ctrl.side{
+  width: 56px;
+  height: 56px;
+  font-size: 30px;
+}
+
+.web-player-ctrl.skip{
+  width: 64px;
+  height: 64px;
+  font-size: 26px;
+}
+
+.web-player-ctrl.play{
+  width: 78px;
+  height: 78px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.94);
+  color: #111;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.web-player-ctrl:disabled{
+  opacity: 0.35;
+  cursor: default;
+}
+
+.web-player-bottom{
+  bottom: 0;
+  padding:
+    0 18px
+    calc(env(safe-area-inset-bottom, 0px) + 16px)
+    18px;
+}
+
+.web-player-seek-wrap{
+  margin-bottom: 12px;
+}
+
+.web-player-seek{
+  width: 100%;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.web-player-seek::-webkit-slider-runnable-track{
+  height: 4px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 999px;
+}
+
+.web-player-seek::-webkit-slider-thumb{
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  margin-top: -7px;
+  border: 0;
+  background: #fff;
+}
+
+.web-player-seek::-moz-range-track{
+  height: 4px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 999px;
+}
+
+.web-player-seek::-moz-range-thumb{
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.web-player-meta{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.web-player-time{
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.web-player-actions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.web-player-mini{
+  width: 38px;
+  height: 38px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.web-player-mini.rate{
+  font-size: 16px;
+  font-weight: 700;
+  min-width: 44px;
+}
+
+@media (max-width: 640px){
+  .web-player-title{
+    font-size: 16px;
+  }
+
+  .web-player-center{
+    gap: 10px;
+  }
+
+  .web-player-ctrl.side{
+    width: 46px;
+    height: 46px;
+    font-size: 26px;
+  }
+
+  .web-player-ctrl.skip{
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+
+  .web-player-ctrl.play{
+    width: 68px;
+    height: 68px;
+    font-size: 28px;
+  }
+}
+    
   </style>
 </head>
 
@@ -4715,6 +4976,449 @@ async function openNativePlayer(entry, meta, source = "direct_card"){
     return false;
   }
 }
+const WEB_PLAYER_SPEEDS = [1, 1.25, 1.5, 1.75, 2];
+
+const webPlayerState = {
+  open: false,
+  queue: [],
+  currentIndex: 0,
+  source: "direct_card",
+  hideTimer: null
+};
+
+function getWebPlayerEls(){
+  return {
+    overlay: document.getElementById("webPlayerOverlay"),
+    video: document.getElementById("webPlayerVideo"),
+    close: document.getElementById("webPlayerClose"),
+    title: document.getElementById("webPlayerTitle"),
+    wish: document.getElementById("webPlayerWish"),
+    prev: document.getElementById("webPlayerPrev"),
+    back5: document.getElementById("webPlayerBack5"),
+    playPause: document.getElementById("webPlayerPlayPause"),
+    forward15: document.getElementById("webPlayerForward15"),
+    next: document.getElementById("webPlayerNext"),
+    seek: document.getElementById("webPlayerSeek"),
+    time: document.getElementById("webPlayerTime"),
+    rate: document.getElementById("webPlayerRate"),
+    fullscreen: document.getElementById("webPlayerFullscreen")
+  };
+}
+
+function normalizeWebQueueItem(item, fallbackMeta = null){
+  const clean = normalizePlaybackEntry(item || {});
+  const meta = fallbackMeta || getMediaMeta(clean) || {};
+
+  return {
+    cartoonLabel: clean.cartoonLabel || "",
+    seriesLabel: normalizeSeriesLocal(clean.seriesLabel),
+    type: String(clean.type || "season"),
+    seasonOrMovie: String(clean.seasonOrMovie || ""),
+    num: Number(clean.num) || 0,
+    title: String(item?.title || meta?.title || formatPlayerTitle(clean) || "Now Playing"),
+    url: String(item?.url || meta?.url || "")
+  };
+}
+
+function getCurrentWebPlayerItem(){
+  return webPlayerState.queue[webPlayerState.currentIndex] || null;
+}
+
+function formatWebPlayerTime(seconds){
+  const safe = Math.max(0, Math.floor(Number(seconds) || 0));
+  const mins = Math.floor(safe / 60);
+  const secs = safe % 60;
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function setWebPlayerOpen(isOpen){
+  const { overlay } = getWebPlayerEls();
+  if(!overlay) return;
+
+  webPlayerState.open = !!isOpen;
+  overlay.classList.toggle("open", !!isOpen);
+  overlay.setAttribute("aria-hidden", isOpen ? "false" : "true");
+  document.body.classList.toggle("player-open", !!isOpen);
+}
+
+function showWebPlayerChromeTemporarily(){
+  const { overlay } = getWebPlayerEls();
+  if(!overlay || !webPlayerState.open) return;
+
+  overlay.classList.remove("chrome-hidden");
+
+  if(webPlayerState.hideTimer){
+    clearTimeout(webPlayerState.hideTimer);
+  }
+
+  webPlayerState.hideTimer = setTimeout(() => {
+    const els = getWebPlayerEls();
+    if(els.overlay && webPlayerState.open){
+      els.overlay.classList.add("chrome-hidden");
+    }
+  }, 2800);
+}
+
+function hideWebPlayerChromeNow(){
+  const { overlay } = getWebPlayerEls();
+  if(!overlay) return;
+  overlay.classList.add("chrome-hidden");
+}
+
+function refreshWebPlayerButtons(){
+  const els = getWebPlayerEls();
+  const { video } = els;
+  const current = getCurrentWebPlayerItem();
+
+  if(els.title){
+    els.title.textContent = current ? formatPlayerTitle(current) : "Now Playing";
+  }
+
+  if(els.wish){
+    const wished = current ? isWishlisted(current, activeProfile) : false;
+    els.wish.textContent = wished ? "★" : "☆";
+    els.wish.classList.toggle("is-active", wished);
+  }
+
+  if(els.prev){
+    els.prev.disabled = !(webPlayerState.currentIndex > 0);
+  }
+
+  if(els.next){
+    els.next.disabled = !(webPlayerState.currentIndex < webPlayerState.queue.length - 1);
+  }
+
+  if(els.playPause && video){
+    els.playPause.textContent = video.paused ? "▶" : "❚❚";
+  }
+
+  if(els.rate && video){
+    els.rate.textContent = `${Number(video.playbackRate || 1).toFixed(video.playbackRate % 1 ? 2 : 0).replace(/\.00$/, "")}x`;
+  }
+}
+
+function refreshWebPlayerSeekUi(){
+  const els = getWebPlayerEls();
+  const { video, seek, time } = els;
+  if(!video || !seek || !time) return;
+
+  const duration = Number.isFinite(video.duration) ? video.duration : 0;
+  const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+
+  if(duration > 0){
+    seek.value = String(Math.max(0, Math.min(1000, Math.round((current / duration) * 1000))));
+  } else {
+    seek.value = "0";
+  }
+
+  time.textContent = `${formatWebPlayerTime(current)} • ${formatWebPlayerTime(duration)}`;
+}
+
+async function pushWishlistSnapshotFromBrowser(){
+  try{
+    if(typeof sbUpsertWishlistSnapshot === "function" &&
+       typeof getRoomCode === "function" &&
+       typeof supabaseEnabled === "function" &&
+       getRoomCode() &&
+       supabaseEnabled()){
+      await sbUpsertWishlistSnapshot(activeProfile, getWishlistItems(activeProfile));
+    }
+  } catch(err){
+    console.error("Browser wishlist cloud push failed:", err);
+  }
+}
+
+async function toggleWishlistFromWebPlayer(){
+  const current = getCurrentWebPlayerItem();
+  if(!current) return;
+
+  toggleWishlist(current, activeProfile);
+  refreshWebPlayerButtons();
+  await pushWishlistSnapshotFromBrowser();
+
+  if(activeMode === "wishlist" && typeof renderWishlist === "function"){
+    await renderWishlist();
+  }
+
+  showWebPlayerChromeTemporarily();
+}
+
+async function goWebPlayerToIndex(index, autoplay = true){
+  if(index < 0 || index >= webPlayerState.queue.length) return false;
+
+  const els = getWebPlayerEls();
+  const { video } = els;
+  if(!video) return false;
+
+  const item = webPlayerState.queue[index];
+  const url = String(item?.url || "");
+
+  if(!url){
+    alert(`Missing media URL for ${item?.cartoonLabel || ""} ${item?.seasonOrMovie || ""} #${item?.num || 0}`);
+    return false;
+  }
+
+  webPlayerState.currentIndex = index;
+
+  if(video.dataset.currentUrl !== url){
+    video.dataset.currentUrl = url;
+    video.src = url;
+    video.load();
+  }
+
+  refreshWebPlayerButtons();
+  refreshWebPlayerSeekUi();
+  showWebPlayerChromeTemporarily();
+
+  if(autoplay){
+    try{
+      await video.play();
+    } catch(err){
+      console.error("Web player autoplay failed:", err);
+    }
+    refreshWebPlayerButtons();
+  }
+
+  return true;
+}
+
+async function goWebPlayerRelative(step){
+  return await goWebPlayerToIndex(webPlayerState.currentIndex + step, true);
+}
+
+function seekWebPlayerBy(seconds){
+  const { video } = getWebPlayerEls();
+  if(!video) return;
+  video.currentTime = Math.max(0, (Number(video.currentTime) || 0) + Number(seconds || 0));
+  refreshWebPlayerSeekUi();
+  showWebPlayerChromeTemporarily();
+}
+
+function cycleWebPlayerSpeed(){
+  const { video } = getWebPlayerEls();
+  if(!video) return;
+
+  const current = Number(video.playbackRate || 1);
+  let idx = WEB_PLAYER_SPEEDS.findIndex(v => Math.abs(v - current) < 0.001);
+  idx = (idx + 1) % WEB_PLAYER_SPEEDS.length;
+  video.playbackRate = WEB_PLAYER_SPEEDS[idx];
+  refreshWebPlayerButtons();
+  showWebPlayerChromeTemporarily();
+}
+
+async function closeWebPlayer(){
+  const els = getWebPlayerEls();
+  const { video } = els;
+
+  if(webPlayerState.hideTimer){
+    clearTimeout(webPlayerState.hideTimer);
+    webPlayerState.hideTimer = null;
+  }
+
+  if(video){
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+    video.dataset.currentUrl = "";
+    video.playbackRate = 1;
+  }
+
+  webPlayerState.queue = [];
+  webPlayerState.currentIndex = 0;
+  setWebPlayerOpen(false);
+}
+
+async function toggleWebPlayerFullscreen(){
+  const { overlay } = getWebPlayerEls();
+  if(!overlay) return;
+
+  try{
+    if(document.fullscreenElement){
+      await document.exitFullscreen();
+    } else if(overlay.requestFullscreen){
+      await overlay.requestFullscreen();
+    }
+  } catch(err){
+    console.error("Fullscreen toggle failed:", err);
+  }
+
+  showWebPlayerChromeTemporarily();
+}
+
+async function openWebPlayer(entry, meta, source = "direct_card"){
+  const cleanEntry = normalizePlaybackEntry(entry || {});
+  const rawQueue = buildPlaybackQueue(cleanEntry);
+
+  let queue = Array.isArray(rawQueue) && rawQueue.length
+    ? rawQueue.map(item => normalizeWebQueueItem(item))
+    : [normalizeWebQueueItem(cleanEntry, meta)];
+
+  queue = queue.filter(item => item && item.url);
+
+  if(!queue.length){
+    alert(`Missing media URL for ${cleanEntry.cartoonLabel} ${cleanEntry.seasonOrMovie} #${cleanEntry.num}`);
+    return false;
+  }
+
+  webPlayerState.queue = queue;
+  webPlayerState.currentIndex = getPlaybackStartIndex(queue, cleanEntry);
+  webPlayerState.source = String(source || "direct_card");
+
+  setWebPlayerOpen(true);
+  hideWebPlayerChromeNow();
+
+  return await goWebPlayerToIndex(webPlayerState.currentIndex, true);
+}
+
+function initWebPlayer(){
+  const els = getWebPlayerEls();
+  const {
+    overlay,
+    video,
+    close,
+    wish,
+    prev,
+    back5,
+    playPause,
+    forward15,
+    next,
+    seek,
+    rate,
+    fullscreen
+  } = els;
+
+  if(!overlay || !video || overlay.dataset.bound === "1"){
+    return;
+  }
+
+  overlay.dataset.bound = "1";
+  video.controls = false;
+
+  close?.addEventListener("click", () => {
+    closeWebPlayer();
+  });
+
+  wish?.addEventListener("click", async () => {
+    await toggleWishlistFromWebPlayer();
+  });
+
+  prev?.addEventListener("click", async () => {
+    await goWebPlayerRelative(-1);
+  });
+
+  next?.addEventListener("click", async () => {
+    await goWebPlayerRelative(1);
+  });
+
+  back5?.addEventListener("click", () => {
+    seekWebPlayerBy(-5);
+  });
+
+  forward15?.addEventListener("click", () => {
+    seekWebPlayerBy(15);
+  });
+
+  playPause?.addEventListener("click", async () => {
+    if(video.paused){
+      try{
+        await video.play();
+      } catch(err){
+        console.error("Web player play failed:", err);
+      }
+    } else {
+      video.pause();
+    }
+
+    refreshWebPlayerButtons();
+    showWebPlayerChromeTemporarily();
+  });
+
+  rate?.addEventListener("click", () => {
+    cycleWebPlayerSpeed();
+  });
+
+  fullscreen?.addEventListener("click", async () => {
+    await toggleWebPlayerFullscreen();
+  });
+
+  seek?.addEventListener("input", () => {
+    const duration = Number.isFinite(video.duration) ? video.duration : 0;
+    if(duration > 0){
+      const ratio = (Number(seek.value) || 0) / 1000;
+      video.currentTime = duration * ratio;
+      refreshWebPlayerSeekUi();
+    }
+  });
+
+  video.addEventListener("loadedmetadata", () => {
+    refreshWebPlayerButtons();
+    refreshWebPlayerSeekUi();
+    showWebPlayerChromeTemporarily();
+  });
+
+  video.addEventListener("timeupdate", () => {
+    refreshWebPlayerButtons();
+    refreshWebPlayerSeekUi();
+  });
+
+  video.addEventListener("play", () => {
+    refreshWebPlayerButtons();
+  });
+
+  video.addEventListener("pause", () => {
+    refreshWebPlayerButtons();
+    showWebPlayerChromeTemporarily();
+  });
+
+  video.addEventListener("click", () => {
+    if(overlay.classList.contains("chrome-hidden")){
+      showWebPlayerChromeTemporarily();
+    } else {
+      hideWebPlayerChromeNow();
+    }
+  });
+
+  video.addEventListener("ended", async () => {
+    if(webPlayerState.currentIndex < webPlayerState.queue.length - 1){
+      await goWebPlayerRelative(1);
+      return;
+    }
+
+    refreshWebPlayerButtons();
+    showWebPlayerChromeTemporarily();
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    showWebPlayerChromeTemporarily();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if(!webPlayerState.open) return;
+
+    if(e.key === "Escape"){
+      if(document.fullscreenElement){
+        document.exitFullscreen().catch(() => {});
+      } else {
+        closeWebPlayer();
+      }
+    }
+  });
+
+  overlay.addEventListener("mousemove", () => {
+    if(webPlayerState.open){
+      showWebPlayerChromeTemporarily();
+    }
+  });
+
+  overlay.addEventListener("touchstart", () => {
+    if(webPlayerState.open){
+      showWebPlayerChromeTemporarily();
+    }
+  }, { passive: true });
+}
+
+document.addEventListener("DOMContentLoaded", initWebPlayer);
+
 async function openMediaFromEntry(entry, source = "direct_card"){
   const cleanEntry = {
     cartoonLabel: entry?.cartoonLabel || "",
@@ -4731,7 +5435,13 @@ async function openMediaFromEntry(entry, source = "direct_card"){
     return false;
   }
 
-  return await openNativePlayer(cleanEntry, meta, source);
+  const NativePlayer = getNativePlayerPlugin();
+
+  if(NativePlayer?.openPlayer){
+    return await openNativePlayer(cleanEntry, meta, source);
+  }
+
+  return await openWebPlayer(cleanEntry, meta, source);
 }
 
 function playEntryFromGrid(e, entry){
@@ -9341,5 +10051,45 @@ window.addEventListener("load", async () => {
   }
 });
   </script>
+  <div id="webPlayerOverlay" class="web-player-overlay" aria-hidden="true">
+  <div class="web-player-stage">
+    <video
+      id="webPlayerVideo"
+      class="web-player-video"
+      playsinline
+      webkit-playsinline
+      preload="metadata"
+    ></video>
+
+    <div class="web-player-top">
+      <button id="webPlayerClose" class="web-player-close" type="button" aria-label="Close player">×</button>
+      <div id="webPlayerTitle" class="web-player-title">Now Playing</div>
+      <button id="webPlayerWish" class="web-player-wish" type="button" aria-label="Toggle wishlist">☆</button>
+    </div>
+
+    <div class="web-player-center">
+      <button id="webPlayerPrev" class="web-player-ctrl side" type="button" aria-label="Previous episode">|&lt;</button>
+      <button id="webPlayerBack5" class="web-player-ctrl skip" type="button" aria-label="Back 5 seconds">↺5</button>
+      <button id="webPlayerPlayPause" class="web-player-ctrl play" type="button" aria-label="Play or pause">❚❚</button>
+      <button id="webPlayerForward15" class="web-player-ctrl skip" type="button" aria-label="Forward 15 seconds">15↻</button>
+      <button id="webPlayerNext" class="web-player-ctrl side" type="button" aria-label="Next episode">&gt;|</button>
+    </div>
+
+    <div class="web-player-bottom">
+      <div class="web-player-seek-wrap">
+        <input id="webPlayerSeek" class="web-player-seek" type="range" min="0" max="1000" value="0" step="1">
+      </div>
+
+      <div class="web-player-meta">
+        <div id="webPlayerTime" class="web-player-time">00:00 • 00:00</div>
+
+        <div class="web-player-actions">
+          <button id="webPlayerRate" class="web-player-mini rate" type="button" aria-label="Playback speed">1x</button>
+          <button id="webPlayerFullscreen" class="web-player-mini" type="button" aria-label="Fullscreen">⛶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
