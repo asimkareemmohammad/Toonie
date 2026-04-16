@@ -8338,10 +8338,27 @@ async function applyProgressEditAction(kind){
   renderAllCartoonLastChips();
   refreshProgressEditInfo();
 
-  // sync in background
-  syncStoreToCloud(activeProfile)
-    .catch(() => {});
-}
+// push new boundary to cloud
+  const editEntry = getProgressEditEntry();
+  if(editEntry){
+    const node = ensurePath(store, activeProfile, editEntry.cartoonLabel);
+    const newBoundary = editEntry.type === "movie"
+      ? editEntry.num
+      : getSeasonBoundary(node, editEntry).boundary;
+
+    const room = getRoomCode();
+    if(room && supabaseEnabled()){
+      sbUpsertProgress({
+        profile: activeProfile,
+        cartoon_label: editEntry.cartoonLabel,
+        series_label: normalizeSeriesLocal(editEntry.seriesLabel) || "-",
+        type: editEntry.type,
+        season_or_movie: editEntry.type === "movie" ? `M${editEntry.num}` : editEntry.seasonOrMovie,
+        num: newBoundary,
+        ts: nowISO()
+      }).then(() => pollFromCloud()).catch(() => {});
+    }
+  }
 
 function clearProgressResetTimer(){
   if(progressResetTimer){
