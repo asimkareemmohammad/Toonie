@@ -3200,57 +3200,8 @@ function watchedItemKey(entry){
   ].join("|");
 }
 
-function ensureManualUnmarked(node){
-  if(!node.manualUnmarked || typeof node.manualUnmarked !== "object"){
-    node.manualUnmarked = {};
-  }
-  return node.manualUnmarked;
-}
 
-function setManualUnmarked(node, entry){
-  const n = Number(entry?.num) || 0;
-  if(!node || n < 1) return;
-  ensureManualUnmarked(node)[watchedItemKey(entry)] = true;
-}
 
-function clearManualUnmarked(node, entry){
-  const n = Number(entry?.num) || 0;
-  if(!node || n < 1 || !node.manualUnmarked) return;
-  delete node.manualUnmarked[watchedItemKey(entry)];
-}
-
-function clearManualUnmarkedByContext(node, entry){
-  if(!node || !node.manualUnmarked) return;
-  const prefix = `${contextKeyFor(entry)}|`;
-
-  for(const key of Object.keys(node.manualUnmarked)){
-    if(key.startsWith(prefix)){
-      delete node.manualUnmarked[key];
-    }
-  }
-}
-
-function clearManualUnmarkedByType(node, type){
-  if(!node || !node.manualUnmarked) return;
-  const prefix = `${String(type || "")}|`;
-
-  for(const key of Object.keys(node.manualUnmarked)){
-    if(key.startsWith(prefix)){
-      delete node.manualUnmarked[key];
-    }
-  }
-}
-
-function clearAllManualUnmarked(node){
-  if(!node) return;
-  node.manualUnmarked = {};
-}
-
-function isManualUnmarked(node, entry){
-  const n = Number(entry?.num) || 0;
-  if(!node || n < 1) return false;
-  return !!ensureManualUnmarked(node)[watchedItemKey(entry)];
-}
 function cloneEntry(entry){
   if(!entry) return null;
   return {
@@ -3413,50 +3364,69 @@ function getHighestWatchedForContext(cartoonLabel, node, ctxRaw){
   return cloneEntry(candidates[0]);
 }
 
+function getSeasonBoundary(node, entry){
+  if(!node || !node.watched) return { boundary: 0, boundary_ts: "" };
+  const key = contextKeyFor(entry);
+  const bucket = node.watched[key];
+  if(!bucket) return { boundary: 0, boundary_ts: "" };
+  return {
+    boundary: Math.max(0, Number(bucket.boundary || 0)),
+    boundary_ts: String(bucket.boundary_ts || "")
+  };
+}
+
+function setSeasonBoundary(node, entry, boundary, ts){
+  if(!node) return;
+  if(!node.watched) node.watched = {};
+  const key = contextKeyFor(entry);
+  const n = Math.max(0, Number(boundary) || 0);
+  const t = String(ts || nowISO());
+  if(!node.watched[key]){
+    node.watched[key] = {
+      type: String(entry?.type || "season"),
+      seasonOrMovie: String(entry?.seasonOrMovie || ""),
+      seriesLabel: normalizeSeriesLocal(entry?.seriesLabel),
+      boundary: n,
+      boundary_ts: t
+    };
+  } else {
+    node.watched[key].boundary = n;
+    node.watched[key].boundary_ts = t;
+  }
+}
+
+function addMovieNum(node, entry, num){
+  const n = Number(num) || 0;
+  if(n < 1 || !node) return;
+  if(!node.watched) node.watched = {};
+  const key = contextKeyFor(entry);
+  if(!node.watched[key]){
+    node.watched[key] = {
+      type: "movie",
+      seasonOrMovie: String(entry?.seasonOrMovie || ""),
+      seriesLabel: normalizeSeriesLocal(entry?.seriesLabel),
+      nums: [n]
+    };
+  } else {
+    if(!Array.isArray(node.watched[key].nums)) node.watched[key].nums = [];
+    if(!node.watched[key].nums.includes(n)){
+      node.watched[key].nums.push(n);
+      node.watched[key].nums.sort((a,b) => a-b);
+    }
+  }
+}
+
 function addWatchedNum(node, entry, num){
   const n = Number(num) || 0;
-  if(n < 1) return;
-
-  const bucket = ensureWatchedBucket(node, entry);
-  if(!bucket.nums.includes(n)){
-    bucket.nums.push(n);
-    bucket.nums.sort((a,b) => a - b);
+  if(n < 1 || !node) return;
+  const type = String(entry?.type || "season");
+  if(type === "movie"){
+    addMovieNum(node, entry, n);
+    return;
   }
-}
-
-function getWatchedNumsForEntry(node, entry){
-  const bucket = getWatchedBucket(node, entry);
-  if(!bucket) return [];
-
-  return (Array.isArray(bucket.nums) ? bucket.nums : [])
-    .map(v => Number(v) || 0)
-    .filter(v => v >= 1)
-    .sort((a,b) => a - b);
-}
-
-function setManualUnmarkedForNums(node, entry, nums){
-  if(!node) return;
-
-  const cleanNums = Array.from(
-    new Set((Array.isArray(nums) ? nums : [])
-      .map(v => Number(v) || 0)
-      .filter(v => v >= 1))
-  ).sort((a,b) => a - b);
-
-  for(const n of cleanNums){
-    setManualUnmarked(node, {
-      ...entry,
-      num: n
-    });
-  }
-}
-
-function seedLegacyRange(node, entry){
-  const max = Number(entry?.num) || 0;
-  if(max < 1) return;
-
-  for(let i = 1; i <= max; i++){
-    addWatchedNum(node, entry, i);
+  const current = getSeasonBoundary(node, entry);
+  if(n > current.boundary){
+    setSeasonBoundary(node, entry, n, nowISO());
   }
 }
 
@@ -3512,24 +3482,7 @@ function getWatchedBucket(node, entry){
   return node.watched[contextKeyFor(entry)] || null;
 }
 
-function removeWatchedNum(node, entry, num){
-  const n = Number(num) || 0;
-  if(n < 1 || !node) return;
 
-  const bucket = getWatchedBucket(node, entry);
-  if(!bucket) return;
-
-  bucket.nums = (Array.isArray(bucket.nums) ? bucket.nums : [])
-    .map(v => Number(v) || 0)
-    .filter(v => v >= 1 && v !== n)
-    .sort((a,b) => a - b);
-
-  if(!bucket.nums.length){
-    delete node.watched[contextKeyFor(entry)];
-  }
-
-  recomputeEditorDisplayPointers(node);
-}
 
 function markWatchedByEditor(store, profile, entry){
   const clean = cloneEntry({
@@ -6287,25 +6240,22 @@ function getWatchedNumsForContext(cartoonLabel, type, seasonOrMovie = "", series
   const st = loadStore();
   const p = st.activeProfile || activeProfile || "Asim";
   const node = st.data?.[p]?.[cartoonLabel];
+  if(!node || !node.watched) return new Set();
 
-  if(!node || !node.watched || typeof node.watched !== "object"){
-    return new Set();
+  const entry = { type, seasonOrMovie, seriesLabel };
+  const key = contextKeyFor(entry);
+  const bucket = node.watched[key];
+  if(!bucket) return new Set();
+
+  if(type === "movie"){
+    const nums = Array.isArray(bucket.nums) ? bucket.nums : [];
+    return new Set(nums.map(n => Number(n)||0).filter(n => n >= 1));
   }
 
-  const key = [
-    String(type || "season"),
-    String(seasonOrMovie || ""),
-    normalizeSeriesLocal(seriesLabel) || ""
-  ].join("|");
-
-  const bucket = node.watched?.[key];
-  const nums = Array.isArray(bucket?.nums) ? bucket.nums : [];
-
-  return new Set(
-    nums
-      .map(n => Number(n) || 0)
-      .filter(n => n >= 1)
-  );
+  const boundary = Math.max(0, Number(bucket.boundary || 0));
+  const result = new Set();
+  for(let i = 1; i <= boundary; i++) result.add(i);
+  return result;
 }
 
 function getWatchedEpisodeSet(cartoonLabel, seasonOrMovie, seriesLabel = ""){
