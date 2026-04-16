@@ -8694,7 +8694,7 @@ function formatWishlistLine(entry){
 
         store = loadStore();
 
- for(const r of res.rows){
+for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
             seriesLabel: normalizeSeriesLocal(r.series_label),
@@ -8704,17 +8704,19 @@ function formatWishlistLine(entry){
             ts: r.ts
           };
           upsertEntry(store, activeProfile, entry);
-       const node = ensurePath(store, activeProfile, entry.cartoonLabel);
-          if(entry.type === "season"){
-            const max = Number(entry.num) || 0;
-            for(let i = 1; i <= max; i++){
-              if(!isManualUnmarked(node, {...entry, num: i})){
-                addWatchedNum(node, entry, i);
-              }
-            }
+
+          const node = ensurePath(store, activeProfile, entry.cartoonLabel);
+
+          if(entry.type === "movie"){
+            addMovieNum(node, entry, entry.num);
           } else {
-            if(!isManualUnmarked(node, entry)){
-              addWatchedNum(node, entry, entry.num);
+            const current = getSeasonBoundary(node, entry);
+            const incomingTs = String(entry.ts || "");
+            const currentTs = String(current.boundary_ts || "");
+            if(!current.boundary_ts || incomingTs >= currentTs){
+              if(entry.num > current.boundary){
+                setSeasonBoundary(node, entry, entry.num, entry.ts);
+              }
             }
           }
         }
