@@ -3431,7 +3431,11 @@ function addWatchedNum(node, entry, num){
   }
   const current = getSeasonBoundary(node, entry);
   if(n > current.boundary){
-    setSeasonBoundary(node, entry, n, nowISO());
+    const incomingTs = String(entry?.ts || "");
+    const currentTs = String(current.boundary_ts || "");
+    if(!currentTs || !incomingTs || incomingTs >= currentTs){
+      setSeasonBoundary(node, entry, n, entry.ts || nowISO());
+    }
   }
 }
 
