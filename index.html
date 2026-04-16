@@ -3392,12 +3392,25 @@ function setSeasonBoundary(node, entry, boundary, ts){
       seasonOrMovie: String(entry?.seasonOrMovie || ""),
       seriesLabel: normalizeSeriesLocal(entry?.seriesLabel),
       boundary: n,
-      boundary_ts: t
+      boundary_ts: t,
+      lastDirect: null
     };
   } else {
     node.watched[key].boundary = n;
     node.watched[key].boundary_ts = t;
   }
+
+  const pointer = n >= 1 ? cloneEntry({
+    cartoonLabel: entry?.cartoonLabel || node.lastDirectQualified?.cartoonLabel || "",
+    seriesLabel: normalizeSeriesLocal(entry?.seriesLabel),
+    type: String(entry?.type || "season"),
+    seasonOrMovie: String(entry?.seasonOrMovie || ""),
+    num: n,
+    ts: t
+  }) : null;
+
+  node.watched[key].lastDirect = pointer;
+  node.lastDirectQualified = pointer;
 }
 
 function addMovieNum(node, entry, num){
