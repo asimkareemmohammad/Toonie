@@ -8646,6 +8646,7 @@ function addToWishlist(entry, profile = activeProfile){
 
   list.unshift(item);
   saveWishlistStore(store);
+  pushWishlistToCloud(profile).catch(() => {});
   return true;
 }
 
@@ -8659,6 +8660,7 @@ function removeFromWishlist(entry, profile = activeProfile){
 
   store[profile] = next;
   saveWishlistStore(store);
+  pushWishlistToCloud(profile).catch(() => {});
   return true;
 }
 
@@ -8675,7 +8677,12 @@ function toggleWishlist(entry, profile = activeProfile){
 function formatWishlistLine(entry){
   return formatLine(normalizeWishlistEntry(entry));
 }
-
+async function pushWishlistToCloud(profile = activeProfile){
+  const room = getRoomCode();
+  if(!room || !supabaseEnabled()) return;
+  const items = getWishlistItems(profile);
+  await sbUpsertWishlistSnapshot(profile, items).catch(() => {});
+}
 
       function updateSaveHintForCartoon(){
         store = loadStore();
@@ -9705,6 +9712,7 @@ starBtn.addEventListener("click", ()=>{
     playerToggleWishlist(item);
     refreshStar();
     try{ if(typeof window.renderWishlist==="function") window.renderWishlist(); }catch(e){}
+    try{ if(typeof window.pushWishlistToCloud==="function") window.pushWishlistToCloud(); }catch(e){}
     showUI();
   });
 
