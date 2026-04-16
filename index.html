@@ -978,6 +978,17 @@ body::-webkit-scrollbar {
   color: #f4efff;
 }
 
+@media (min-width: 600px){
+  .ep-btn{
+    min-height: 36px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+  .episode-grid{
+    gap: 7px;
+    max-height: 180px;
+  }
+}
 /* ===== Wishlist card cleanup ===== */
 #wishlistList{
   display: flex;
@@ -1320,9 +1331,9 @@ body::-webkit-scrollbar {
 
 #bp-top{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:space-between;
-  padding:16px 16px 24px;
+  padding:12px 16px 20px;
   background:linear-gradient(to bottom,rgba(0,0,0,0.75) 0%,transparent 100%);
 }
 #bp-title{
@@ -9551,11 +9562,45 @@ window.addEventListener("load", async () => {
 
   function currentItem(){ return queue[currentIndex]; }
 
+function playerWishKey(item){
+    const s = String(item.seriesLabel||"").trim();
+    const sl = (!s||s==="-"||s.toLowerCase()==="null"||s.toLowerCase()==="undefined"||s.toLowerCase()==="none") ? "-" : s;
+    return [item.cartoonLabel||"",sl,item.type||"season",item.seasonOrMovie||"",Number(item.num)||0].join("|");
+  }
+  function playerGetProfile(){
+    try{ return (typeof activeProfile!=="undefined"&&activeProfile) ? activeProfile : "Asim"; }catch(e){ return "Asim"; }
+  }
+  function playerIsWishlisted(item){
+    try{
+      const store = JSON.parse(localStorage.getItem("toonie_wishlist_v1")||"{}");
+      const list = store[playerGetProfile()]||[];
+      const key = playerWishKey(item);
+      return list.some(x=>playerWishKey(x)===key);
+    }catch(e){ return false; }
+  }
+  function playerToggleWishlist(item){
+    try{
+      const profile = playerGetProfile();
+      const store = JSON.parse(localStorage.getItem("toonie_wishlist_v1")||"{}");
+      if(!store[profile]) store[profile]=[];
+      const list = store[profile];
+      const key = playerWishKey(item);
+      const idx = list.findIndex(x=>playerWishKey(x)===key);
+      if(idx>=0){
+        list.splice(idx,1);
+        localStorage.setItem("toonie_wishlist_v1",JSON.stringify(store));
+        return false;
+      } else {
+        list.unshift({cartoonLabel:item.cartoonLabel||"",seriesLabel:String(item.seriesLabel||"").trim(),type:item.type||"season",seasonOrMovie:item.seasonOrMovie||"",num:Number(item.num)||0,ts:new Date().toISOString()});
+        localStorage.setItem("toonie_wishlist_v1",JSON.stringify(store));
+        return true;
+      }
+    }catch(e){ console.error("playerToggleWishlist:",e); return false; }
+  }
   function refreshStar(){
     const item = currentItem();
     if(!item) return;
-const wl = typeof window.isWishlisted === "function" ? window.isWishlisted(item) : false;
-    starBtn.textContent = wl ? "★" : "☆";
+    starBtn.textContent = playerIsWishlisted(item) ? "★" : "☆";
   }
 
   function refreshTitle(){
@@ -9666,15 +9711,9 @@ const wl = typeof window.isWishlisted === "function" ? window.isWishlisted(item)
 starBtn.addEventListener("click", ()=>{
     const item = currentItem();
     if(!item) return;
-    try{
-      if(typeof window.toggleWishlist === "function"){
-        window.toggleWishlist(item);
-      }
-    }catch(e){ console.error("wishlist toggle failed:", e); }
+    playerToggleWishlist(item);
     refreshStar();
-    try{
-      if(typeof window.renderWishlist === "function") window.renderWishlist();
-    }catch(e){}
+    try{ if(typeof window.renderWishlist==="function") window.renderWishlist(); }catch(e){}
     showUI();
   });
 
