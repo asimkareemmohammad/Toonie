@@ -854,6 +854,17 @@ body::-webkit-scrollbar {
   padding-right: 4px;
 }
 
+@media (min-width: 600px){
+  .episode-grid{
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .ep-btn{
+    min-height: 44px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+}
 
 
 .episode-grid.grid-switching{
