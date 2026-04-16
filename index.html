@@ -4871,8 +4871,13 @@ async function openMediaFromEntry(entry, source = "direct_card"){
     return false;
   }
 
-  return await openNativePlayer(cleanEntry, meta, source);
-}
+if(window.Capacitor?.isNativePlatform?.()){
+    return await openNativePlayer(cleanEntry, meta, source);
+  }
+  const queue = buildPlaybackQueue(cleanEntry);
+  const startIndex = getPlaybackStartIndex(queue, cleanEntry);
+  openBrowserPlayer(queue, startIndex, source);
+  return true;}
 
 function playEntryFromGrid(e, entry){
   ripple(e);
@@ -9481,5 +9486,244 @@ window.addEventListener("load", async () => {
   }
 });
   </script>
+  <!-- ========== BROWSER PLAYER HTML ========== -->
+<div id="bp-overlay">
+  <video id="bp-video" playsinline></video>
+  <div id="bp-ui">
+    <div id="bp-top">
+      <div id="bp-title">Now Playing</div>
+      <button id="bp-star" class="bp-ctrl">☆</button>
+    </div>
+    <div id="bp-mid">
+      <button class="bp-ctrl bp-ep-btn" id="bp-prev" title="Previous episode">⏮</button>
+      <button class="bp-ctrl bp-seek-btn" id="bp-back5" title="Back 5s">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="12" y="15" text-anchor="middle" font-size="6" fill="white" font-weight="bold">5</text></svg>
+      </button>
+      <button class="bp-ctrl" id="bp-playpause">▶</button>
+      <button class="bp-ctrl bp-seek-btn" id="bp-fwd15" title="Forward 15s">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 5V2l4 4-4 4V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/><text x="12" y="15" text-anchor="middle" font-size="6" fill="white" font-weight="bold">15</text></svg>
+      </button>
+      <button class="bp-ctrl bp-ep-btn" id="bp-next" title="Next episode">⏭</button>
+    </div>
+    <div id="bp-bottom">
+      <input type="range" id="bp-seek" value="0" min="0" step="0.1">
+      <div id="bp-bottom-row">
+        <div id="bp-time">0:00 · 0:00</div>
+        <div id="bp-right-btns">
+          <button id="bp-speed-btn">1×</button>
+          <button id="bp-fs-btn">⛶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const overlay  = document.getElementById("bp-overlay");
+  const video    = document.getElementById("bp-video");
+  const ui       = document.getElementById("bp-ui");
+  const titleEl  = document.getElementById("bp-title");
+  const starBtn  = document.getElementById("bp-star");
+  const prevBtn  = document.getElementById("bp-prev");
+  const nextBtn  = document.getElementById("bp-next");
+  const back5    = document.getElementById("bp-back5");
+  const fwd15    = document.getElementById("bp-fwd15");
+  const ppBtn    = document.getElementById("bp-playpause");
+  const seekBar  = document.getElementById("bp-seek");
+  const timeEl   = document.getElementById("bp-time");
+  const speedBtn = document.getElementById("bp-speed-btn");
+  const fsBtn    = document.getElementById("bp-fs-btn");
+
+  let queue = [], currentIndex = 0, launchSource = "direct_card";
+  let hideTimer = null;
+  let watchedMs = 0, maxPositionSec = 0, lastTickTime = null;
+  let qualified = false;
+  const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+  let speedIdx = 2;
+
+  function fmt(s){
+    s = Math.floor(s||0);
+    const m = Math.floor(s/60), sec = s%60;
+    return m+":"+(sec<10?"0":"")+sec;
+  }
+
+  function currentItem(){ return queue[currentIndex]; }
+
+  function refreshStar(){
+    const item = currentItem();
+    if(!item) return;
+    const wl = typeof isWishlisted === "function" ? isWishlisted(item) : false;
+    starBtn.textContent = wl ? "★" : "☆";
+  }
+
+  function refreshTitle(){
+    const item = currentItem();
+    titleEl.textContent = item?.title || "Now Playing";
+  }
+
+  function refreshPrevNext(){
+    prevBtn.style.opacity = currentIndex > 0 ? "1" : "0.3";
+    nextBtn.style.opacity = currentIndex < queue.length-1 ? "1" : "0.3";
+  }
+
+  function resetWatchState(){
+    watchedMs = 0; maxPositionSec = 0;
+    lastTickTime = null; qualified = false;
+  }
+
+  function tickWatch(){
+    if(!video.paused && !video.ended && lastTickTime !== null){
+      watchedMs += (Date.now() - lastTickTime);
+    }
+    lastTickTime = Date.now();
+    const dur = video.duration || 0;
+    const pos = video.currentTime || 0;
+    if(pos > maxPositionSec) maxPositionSec = pos;
+    if(!qualified && dur > 0){
+      const watched30 = watchedMs >= dur*1000*0.30;
+      const reached70 = maxPositionSec >= dur*0.70;
+      if(watched30 && reached70){
+        qualified = true;
+        const item = currentItem();
+        if(item && typeof window.applyProgress === "function"){
+          window.applyProgress(item.cartoonLabel,{
+            seriesLabel: item.seriesLabel||"",
+            type: item.type||"season",
+            seasonOrMovie: item.seasonOrMovie||"",
+            num: Number(item.num)||0,
+            source: launchSource,
+            ts: new Date().toISOString()
+          }).catch(()=>{});
+        }
+      }
+    }
+  }
+
+  let tickInterval = null;
+  function startTick(){ tickInterval = setInterval(tickWatch,250); }
+  function stopTick(){ clearInterval(tickInterval); tickInterval=null; lastTickTime=null; }
+
+  function loadAndPlayIndex(idx){
+    if(idx < 0 || idx >= queue.length) return;
+    currentIndex = idx;
+    resetWatchState();
+    const item = currentItem();
+    video.src = item.url;
+    video.load();
+    video.play().catch(()=>{});
+    refreshTitle();
+    refreshStar();
+    refreshPrevNext();
+    ppBtn.textContent = "⏸";
+  }
+
+  function showUI(){
+    ui.classList.remove("bp-hidden");
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(()=>{ if(!video.paused) ui.classList.add("bp-hidden"); }, 2500);
+  }
+
+  function openBrowserPlayerInternal(q, startIdx, src){
+    queue = q; launchSource = src||"direct_card";
+    overlay.classList.add("bp-active");
+    document.body.style.overflow = "hidden";
+    loadAndPlayIndex(startIdx||0);
+    showUI();
+  }
+
+  window.openBrowserPlayer = openBrowserPlayerInternal;
+
+  function closeBrowserPlayer(){
+    stopTick();
+    video.pause();
+    video.src = "";
+    overlay.classList.remove("bp-active");
+    document.body.style.overflow = "";
+  }
+
+  // Controls
+  ppBtn.addEventListener("click", ()=>{
+    if(video.paused){ video.play(); ppBtn.textContent="⏸"; }
+    else { video.pause(); ppBtn.textContent="▶"; }
+    showUI();
+  });
+
+  prevBtn.addEventListener("click", ()=>{
+    if(currentIndex > 0) loadAndPlayIndex(currentIndex-1);
+    showUI();
+  });
+
+  nextBtn.addEventListener("click", ()=>{
+    if(currentIndex < queue.length-1) loadAndPlayIndex(currentIndex+1);
+    showUI();
+  });
+
+  back5.addEventListener("click", ()=>{ video.currentTime=Math.max(0,video.currentTime-5); showUI(); });
+  fwd15.addEventListener("click", ()=>{ video.currentTime=Math.min(video.duration||0,video.currentTime+15); showUI(); });
+
+  starBtn.addEventListener("click", ()=>{
+    const item = currentItem();
+    if(!item) return;
+    if(typeof toggleWishlist === "function") toggleWishlist(item);
+    refreshStar();
+    if(typeof renderWishlist === "function") renderWishlist();
+    showUI();
+  });
+
+  speedBtn.addEventListener("click", ()=>{
+    speedIdx = (speedIdx+1)%SPEEDS.length;
+    video.playbackRate = SPEEDS[speedIdx];
+    speedBtn.textContent = SPEEDS[speedIdx]+"×";
+    showUI();
+  });
+
+  fsBtn.addEventListener("click", ()=>{
+    if(!document.fullscreenElement){
+      overlay.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+    showUI();
+  });
+
+  seekBar.addEventListener("input", ()=>{
+    video.currentTime = parseFloat(seekBar.value);
+    showUI();
+  });
+
+  video.addEventListener("timeupdate", ()=>{
+    const cur = video.currentTime||0, dur = video.duration||0;
+    seekBar.max = dur;
+    seekBar.value = cur;
+    timeEl.textContent = fmt(cur)+" · "+fmt(dur);
+  });
+
+  video.addEventListener("play",  ()=>{ ppBtn.textContent="⏸"; startTick(); });
+  video.addEventListener("pause", ()=>{ ppBtn.textContent="▶"; stopTick(); });
+
+  video.addEventListener("ended", ()=>{
+    stopTick();
+    tickWatch();
+    if(currentIndex < queue.length-1){
+      loadAndPlayIndex(currentIndex+1);
+    }
+  });
+
+  overlay.addEventListener("click", (e)=>{
+    if(e.target === overlay || e.target === video || e.target === ui) showUI();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener("keydown", (e)=>{
+    if(!overlay.classList.contains("bp-active")) return;
+    if(e.code==="Space"){ e.preventDefault(); ppBtn.click(); }
+    if(e.code==="ArrowRight"){ video.currentTime+=15; showUI(); }
+    if(e.code==="ArrowLeft"){ video.currentTime-=5; showUI(); }
+    if(e.code==="KeyF"){ fsBtn.click(); }
+    if(e.code==="Escape"){ closeBrowserPlayer(); }
+  });
+})();
+</script>
 </body>
 </html>
