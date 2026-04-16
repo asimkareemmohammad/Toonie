@@ -3485,42 +3485,42 @@ function getWatchedBucket(node, entry){
 
 
 function markWatchedByEditor(store, profile, entry){
-  const clean = cloneEntry({
-    ...entry,
-    source: "editor",
-    ts: nowISO()
-  });
+  const clean = cloneEntry({...entry, source: "editor", ts: nowISO()});
   if(!clean) return false;
 
   const node = ensurePath(store, profile, clean.cartoonLabel);
-  clearManualUnmarked(node, clean);
-  addWatchedNum(node, clean, clean.num);
-  recomputeEditorDisplayPointers(node);
 
-  if(node.schemaVersion < 2){
-    node.schemaVersion = 2;
+  if(clean.type === "movie"){
+    addMovieNum(node, clean, clean.num);
+  } else {
+    const current = getSeasonBoundary(node, clean);
+    const newBoundary = Math.max(current.boundary, clean.num);
+    setSeasonBoundary(node, clean, newBoundary, nowISO());
   }
 
+  recomputeEditorDisplayPointers(node);
   return true;
 }
 
 function unmarkWatchedByEditor(store, profile, entry){
-  const clean = cloneEntry({
-    ...entry,
-    source: "editor",
-    ts: nowISO()
-  });
+  const clean = cloneEntry({...entry, source: "editor", ts: nowISO()});
   if(!clean) return false;
 
   const node = ensurePath(store, profile, clean.cartoonLabel);
-  removeWatchedNum(node, clean, clean.num);
-  setManualUnmarked(node, clean);
-  recomputeEditorDisplayPointers(node);
 
-  if(node.schemaVersion < 2){
-    node.schemaVersion = 2;
+  if(clean.type === "movie"){
+    const key = contextKeyFor(clean);
+    const bucket = node.watched?.[key];
+    if(bucket && Array.isArray(bucket.nums)){
+      bucket.nums = bucket.nums.filter(n => n !== clean.num);
+      if(!bucket.nums.length) delete node.watched[key];
+    }
+  } else {
+    const newBoundary = Math.max(0, clean.num - 1);
+    setSeasonBoundary(node, clean, newBoundary, nowISO());
   }
 
+  recomputeEditorDisplayPointers(node);
   return true;
 }
 
