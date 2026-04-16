@@ -9491,6 +9491,7 @@ window.addEventListener("load", async () => {
   <video id="bp-video" playsinline></video>
   <div id="bp-ui">
     <div id="bp-top">
+<button id="bp-back" onclick="document.getElementById('bp-overlay').classList.remove('bp-active');document.getElementById('bp-video').pause();document.getElementById('bp-video').src='';document.body.style.overflow='';" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 10px 4px 0;line-height:1;opacity:0.9;flex-shrink:0;">&#8592;</button>
       <div id="bp-title">Now Playing</div>
       <button id="bp-star" class="bp-ctrl">☆</button>
     </div>
@@ -9553,7 +9554,7 @@ window.addEventListener("load", async () => {
   function refreshStar(){
     const item = currentItem();
     if(!item) return;
-    const wl = typeof isWishlisted === "function" ? isWishlisted(item) : false;
+const wl = typeof window.isWishlisted === "function" ? window.isWishlisted(item) : false;
     starBtn.textContent = wl ? "★" : "☆";
   }
 
@@ -9662,12 +9663,18 @@ window.addEventListener("load", async () => {
   back5.addEventListener("click", ()=>{ video.currentTime=Math.max(0,video.currentTime-5); showUI(); });
   fwd15.addEventListener("click", ()=>{ video.currentTime=Math.min(video.duration||0,video.currentTime+15); showUI(); });
 
-  starBtn.addEventListener("click", ()=>{
+starBtn.addEventListener("click", ()=>{
     const item = currentItem();
     if(!item) return;
-    if(typeof toggleWishlist === "function") toggleWishlist(item);
+    try{
+      if(typeof window.toggleWishlist === "function"){
+        window.toggleWishlist(item);
+      }
+    }catch(e){ console.error("wishlist toggle failed:", e); }
     refreshStar();
-    if(typeof renderWishlist === "function") renderWishlist();
+    try{
+      if(typeof window.renderWishlist === "function") window.renderWishlist();
+    }catch(e){}
     showUI();
   });
 
