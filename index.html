@@ -3317,32 +3317,38 @@ function getHighestWatchedForContext(cartoonLabel, node, ctxRaw){
   const ctx = parseCtx(ctxRaw);
   if(!ctx) return null;
 
-  const buckets = Object.values(node.watched || {});
   const candidates = [];
 
-  for(const bucket of buckets){
+  for(const [key, bucket] of Object.entries(node.watched || {})){
     if(!bucket) continue;
-
-    const nums = Array.isArray(bucket.nums) ? bucket.nums : [];
-    if(!nums.length) continue;
 
     const type = String(bucket.type || "season");
     const seasonOrMovie = String(bucket.seasonOrMovie || "");
     const seriesLabel = normalizeSeriesLocal(bucket.seriesLabel);
-    const maxNum = Math.max(...nums);
+
+    let maxNum = 0;
+
+    if(type === "movie"){
+      const nums = Array.isArray(bucket.nums) ? bucket.nums : [];
+      if(!nums.length) continue;
+      maxNum = Math.max(...nums);
+    } else {
+      maxNum = Math.max(0, Number(bucket.boundary || 0));
+      if(maxNum < 1) continue;
+    }
 
     let match = false;
 
     if(ctx.kind === "movie"){
-      match = (type === "movie") &&
+      match = type === "movie" &&
         (!ctx.seasonOrMovie || seasonOrMovie === ctx.seasonOrMovie);
     } else if(ctx.kind === "season"){
-      match = (type === "season") &&
+      match = type === "season" &&
         !seriesLabel &&
         (!ctx.seasonOrMovie || seasonOrMovie === ctx.seasonOrMovie);
     } else {
-      match = (type === "season") &&
-        (seriesLabel === ctx.kind) &&
+      match = type === "season" &&
+        seriesLabel === ctx.kind &&
         (!ctx.seasonOrMovie || seasonOrMovie === ctx.seasonOrMovie);
     }
 
@@ -3354,12 +3360,11 @@ function getHighestWatchedForContext(cartoonLabel, node, ctxRaw){
       type,
       seasonOrMovie,
       num: maxNum,
-      ts: nowISO()
+      ts: String(bucket.boundary_ts || bucket.ts || nowISO())
     });
   }
 
   if(!candidates.length) return null;
-
   candidates.sort((a,b) => b.num - a.num);
   return cloneEntry(candidates[0]);
 }
