@@ -8766,11 +8766,18 @@ function formatWishlistLine(entry){
             ts: r.ts
           };
           upsertEntry(store, activeProfile, entry);
-          const node = ensurePath(store, activeProfile, entry.cartoonLabel);
+       const node = ensurePath(store, activeProfile, entry.cartoonLabel);
           if(entry.type === "season"){
-            seedLegacyRange(node, entry);
+            const max = Number(entry.num) || 0;
+            for(let i = 1; i <= max; i++){
+              if(!isManualUnmarked(node, {...entry, num: i})){
+                addWatchedNum(node, entry, i);
+              }
+            }
           } else {
-            addWatchedNum(node, entry, entry.num);
+            if(!isManualUnmarked(node, entry)){
+              addWatchedNum(node, entry, entry.num);
+            }
           }
         }
 
