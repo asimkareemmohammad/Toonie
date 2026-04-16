@@ -9050,7 +9050,10 @@ async function syncWishlistFromCloudToLocal(profile = activeProfile){
     return getWishlistItems(profile);
   }
 
-  return saveWishlistItemsForProfile(profile, res.items);
+  const local = getWishlistItems(profile);
+  const cloud = Array.isArray(res.items) ? res.items : [];
+  const merged = normalizeWishlistItemsList([...local, ...cloud]);
+  return saveWishlistItemsForProfile(profile, merged);
 }
 
 async function syncWishlistForCurrentRoom(profile = activeProfile){
