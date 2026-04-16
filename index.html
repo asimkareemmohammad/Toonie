@@ -4283,7 +4283,6 @@ function upsertEntry(store, profile, entry){
   const cleanEntry = cloneEntry(entry);
   if(!cleanEntry) return;
 
-  // Block stale replay after a reset, but allow fresh new watches later.
   if(entrySource !== "editor" && shouldIgnoreEntryBecauseOfRecentReset(cleanEntry)){
     return;
   }
@@ -4293,7 +4292,6 @@ function upsertEntry(store, profile, entry){
   }
 
   const keySeries = cleanEntry.seriesLabel || null;
-
   const idx = node.history.findIndex(h =>
     (h.type === cleanEntry.type) &&
     (h.seasonOrMovie === cleanEntry.seasonOrMovie) &&
@@ -4311,21 +4309,11 @@ function upsertEntry(store, profile, entry){
 
   node.history.sort((a,b) => String(b.ts).localeCompare(String(a.ts)));
 
-  // Fresh direct-card rewatch should override old manual-unmark lock
-  if(entrySource === "direct_card"){
-    clearManualUnmarked(node, cleanEntry);
-  }
-
-  if(!isManualUnmarked(node, cleanEntry)){
+  if(entrySource !== "wishlist"){
     addWatchedNum(node, cleanEntry, cleanEntry.num);
-  }
-
-  if(entrySource === "direct_card"){
-    setLastDirectQualified(node, cleanEntry);
-  }
-
-  if(node.schemaVersion < 2){
-    node.schemaVersion = 2;
+    if(entrySource === "direct_card"){
+      setLastDirectQualified(node, cleanEntry);
+    }
   }
 }
 
@@ -8758,8 +8746,8 @@ function formatWishlistLine(entry){
           pollTimer = null;
         }
       }
-
 window.applyProgress = async function(cartoonLabel, partial){
+  if(String(partial.source || "") === "wishlist") return;
   store = loadStore();
 
   const entry = {
