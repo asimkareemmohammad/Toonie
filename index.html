@@ -8774,13 +8774,16 @@ for(const r of res.rows){
         renderAllCartoonLastChips();
       }
 
-      function startPolling(){
+function startPolling(){
         stopPolling();
         const room = getRoomCode();
         if(!room || !supabaseEnabled()) return;
 
         pollTimer = setInterval(() => {
           pollFromCloud().catch(() => {});
+          syncWishlistFromCloudToLocal(activeProfile)
+            .then(() => { renderWishlist(); })
+            .catch(() => {});
         }, SYNC_POLL_MS);
 
         pollFromCloud().catch(() => {});
