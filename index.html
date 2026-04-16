@@ -8756,7 +8756,7 @@ function formatWishlistLine(entry){
 
         store = loadStore();
 
-        for(const r of res.rows){
+ for(const r of res.rows){
           const entry = {
             cartoonLabel: r.cartoon_label,
             seriesLabel: normalizeSeriesLocal(r.series_label),
@@ -8766,6 +8766,12 @@ function formatWishlistLine(entry){
             ts: r.ts
           };
           upsertEntry(store, activeProfile, entry);
+          const node = ensurePath(store, activeProfile, entry.cartoonLabel);
+          if(entry.type === "season"){
+            seedLegacyRange(node, entry);
+          } else {
+            addWatchedNum(node, entry, entry.num);
+          }
         }
 
         store = normalizeAndDedupeStore(store);
