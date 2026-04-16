@@ -8748,14 +8748,12 @@ for(const r of res.rows){
 
           if(entry.type === "movie"){
             addMovieNum(node, entry, entry.num);
-          } else {
+      } else {
             const current = getSeasonBoundary(node, entry);
             const incomingTs = String(entry.ts || "");
             const currentTs = String(current.boundary_ts || "");
-            if(!current.boundary_ts || incomingTs >= currentTs){
-              if(entry.num > current.boundary){
-                setSeasonBoundary(node, entry, entry.num, entry.ts);
-              }
+            if(!currentTs || incomingTs >= currentTs){
+              setSeasonBoundary(node, entry, entry.num, entry.ts);
             }
           }
         }
