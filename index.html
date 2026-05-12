@@ -8679,9 +8679,17 @@ function formatWishlistLine(entry){
 }
 async function pushWishlistToCloud(profile = activeProfile){
   const room = getRoomCode();
-  if(!room || !supabaseEnabled()) return;
+  console.log("[WL PUSH] called, room=", room, "profile=", profile);
+  if(!room || !supabaseEnabled()){
+    console.log("[WL PUSH] skipped - no room or supabase");
+    return;
+  }
   const items = getWishlistItems(profile);
-  await sbUpsertWishlistSnapshot(profile, items).catch(() => {});
+  console.log("[WL PUSH] pushing items:", items);
+  const result = await sbUpsertWishlistSnapshot(profile, items).catch(err => {
+    console.error("[WL PUSH] ERROR:", err);
+  });
+  console.log("[WL PUSH] result:", result);
 }
 window.pushWishlistToCloud = pushWishlistToCloud;
       
