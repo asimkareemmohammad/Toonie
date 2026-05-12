@@ -8683,7 +8683,8 @@ async function pushWishlistToCloud(profile = activeProfile){
   const items = getWishlistItems(profile);
   await sbUpsertWishlistSnapshot(profile, items).catch(() => {});
 }
-
+window.pushWishlistToCloud = pushWishlistToCloud;
+      
       function updateSaveHintForCartoon(){
         store = loadStore();
         const cfg = getCartoonCfg(cartoonSelect.value);
