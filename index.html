@@ -8751,7 +8751,28 @@ for(const r of res.rows){
           }
         }
 
-        store = normalizeAndDedupeStore(store);
+store = normalizeAndDedupeStore(store);
+
+        const localFresh = loadStore();
+        for(const prof of ["Asim","Marwa"]){
+          for(const cl of Object.keys(store.data[prof] || {})){
+            const ourNode = store.data[prof][cl];
+            const freshNode = localFresh.data?.[prof]?.[cl];
+            if(!freshNode) continue;
+            for(const key of Object.keys(ourNode?.watched || {})){
+              const ourBucket = ourNode.watched[key];
+              const freshBucket = freshNode.watched?.[key];
+              if(!freshBucket) continue;
+              if(String(freshBucket.boundary_ts||"") > String(ourBucket.boundary_ts||"")){
+                ourNode.watched[key] = freshBucket;
+              }
+            }
+            if(String(freshNode.lastDirectQualified?.ts||"") > String(ourNode.lastDirectQualified?.ts||"")){
+              ourNode.lastDirectQualified = freshNode.lastDirectQualified;
+            }
+          }
+        }
+
         saveStore(store);
 
         updateSaveHintForCartoon();
