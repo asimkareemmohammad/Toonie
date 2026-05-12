@@ -3557,19 +3557,10 @@ function resetSeasonByEditor(store, profile, entry){
   const node = ensurePath(store, profile, clean.cartoonLabel);
   const key = contextKeyFor(clean);
 
-  const numsToLock = getWatchedNumsForEntry(node, clean);
-  setManualUnmarkedForNums(node, clean, numsToLock);
-
-  if(node.watched && node.watched[key]){
-    delete node.watched[key];
-  }
+  setSeasonBoundary(node, clean, 0, nowISO());
 
   recomputeEditorDisplayPointers(node);
-
-  if(node.schemaVersion < 2){
-    node.schemaVersion = 2;
-  }
-
+  node.schemaVersion = 2;
   return true;
 }
 
@@ -3581,29 +3572,11 @@ function resetMoviesByEditor(store, profile, cartoonLabel){
   for(const key of Object.keys(node.watched || {})){
     const bucket = node.watched[key];
     if(String(bucket?.type || "") !== "movie") continue;
-
-    const entryBase = {
-      cartoonLabel,
-      seriesLabel: normalizeSeriesLocal(bucket.seriesLabel),
-      type: "movie",
-      seasonOrMovie: String(bucket.seasonOrMovie || "Movies"),
-      num: 1
-    };
-
-    const numsToLock = (Array.isArray(bucket.nums) ? bucket.nums : [])
-      .map(v => Number(v) || 0)
-      .filter(v => v >= 1);
-
-    setManualUnmarkedForNums(node, entryBase, numsToLock);
     delete node.watched[key];
   }
 
   recomputeEditorDisplayPointers(node);
-
-  if(node.schemaVersion < 2){
-    node.schemaVersion = 2;
-  }
-
+  node.schemaVersion = 2;
   return true;
 }
 
@@ -3611,32 +3584,9 @@ function resetAllProgressByEditor(store, profile, cartoonLabel){
   if(!cartoonLabel) return false;
 
   const node = ensurePath(store, profile, cartoonLabel);
-
-  for(const bucket of Object.values(node.watched || {})){
-    if(!bucket) continue;
-
-    const entryBase = {
-      cartoonLabel,
-      seriesLabel: normalizeSeriesLocal(bucket.seriesLabel),
-      type: String(bucket.type || "season"),
-      seasonOrMovie: String(bucket.seasonOrMovie || ""),
-      num: 1
-    };
-
-    const numsToLock = (Array.isArray(bucket.nums) ? bucket.nums : [])
-      .map(v => Number(v) || 0)
-      .filter(v => v >= 1);
-
-    setManualUnmarkedForNums(node, entryBase, numsToLock);
-  }
-
   node.watched = {};
   node.lastDirectQualified = null;
-
-  if(node.schemaVersion < 2){
-    node.schemaVersion = 2;
-  }
-
+  node.schemaVersion = 2;
   return true;
 }
 
@@ -3676,6 +3626,15 @@ function ensurePath(store, profile, cartoonLabel){
 
   return node;
 }
+
+function seedLegacyRange(node, entry){
+  if(!node || !entry) return;
+  const n = Number(entry.num) || 0;
+  if(n < 1) return;
+  if(String(entry.type || "season") === "movie") return;
+  setSeasonBoundary(node, entry, n, entry.ts || nowISO());
+}
+    
 function normalizeAndDedupeStore(store){
   const profiles = ["Asim","Marwa"];
 
@@ -3747,6 +3706,8 @@ function normalizeAndDedupeStore(store){
         bucket.lastDirect = bucket.lastDirect ? cloneEntry(bucket.lastDirect) : null;
       }
 
+
+      
       // one-time migration from old pointer model
       if(node.schemaVersion < 2){
         for(const it of node.history){
@@ -8562,7 +8523,23 @@ async function applyProgressResetAction(){
   disarmProgressReset();
   refreshProgressEditorAllUI();
 
-  syncStoreToCloud(activeProfile).catch(() => {});
+const room = getRoomCode();
+  if(room && supabaseEnabled()){
+    const resetEntry = buildProgressResetEntry();
+    if(mode === "season" && resetEntry){
+      sbUpsertProgress({
+        profile: activeProfile,
+        cartoon_label: resetEntry.cartoonLabel,
+        series_label: normalizeSeriesLocal(resetEntry.seriesLabel) || "-",
+        type: "season",
+        season_or_movie: resetEntry.seasonOrMovie,
+        num: 0,
+        ts: resetTs
+      }).then(() => pollFromCloud()).catch(() => {});
+    } else {
+      pollFromCloud().catch(() => {});
+    }
+  }
 }
 
 const WISHLIST_STORAGE_KEY = "toonie_wishlist_v1";
