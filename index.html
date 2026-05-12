@@ -9053,16 +9053,11 @@ async function syncWishlistFromCloudToLocal(profile = activeProfile){
   if(!room || !supabaseEnabled()){
     return getWishlistItems(profile);
   }
-
   const res = await sbFetchWishlistSnapshot(room, profile);
   if(!res.ok){
     return getWishlistItems(profile);
   }
-
-  const local = getWishlistItems(profile);
-  const cloud = Array.isArray(res.items) ? res.items : [];
-  const merged = normalizeWishlistItemsList([...local, ...cloud]);
-  return saveWishlistItemsForProfile(profile, merged);
+  return saveWishlistItemsForProfile(profile, res.items);
 }
 
 async function syncWishlistForCurrentRoom(profile = activeProfile){
@@ -9085,9 +9080,15 @@ async function handleWishlistResumeSync(){
     await syncWishlistFromNativeToCloud(activeProfile);
     awaitingNativeWishlistSync = false;
   } else if(getRoomCode() && supabaseEnabled()){
-    await syncWishlistFromCloudToLocal(activeProfile);
+    const res = await sbFetchWishlistSnapshot(getRoomCode(), activeProfile);
+    if(res.ok){
+      const local = getWishlistItems(activeProfile);
+      const cloud = Array.isArray(res.items) ? res.items : [];
+      const merged = normalizeWishlistItemsList([...local, ...cloud]);
+      saveWishlistItemsForProfile(activeProfile, merged);
+      await pushWishlistToCloud(activeProfile);
+    }
   }
-
   if(activeMode === "wishlist"){
     await renderWishlist();
   }
