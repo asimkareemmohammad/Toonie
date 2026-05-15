@@ -1,3 +1,7 @@
+
+<!-- ============================================================
+     SECTION 01 · HEAD — Meta, Fonts, External Scripts
+     ============================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,6 +28,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
+
+<!-- ============================================================
+     SECTION 02 · CSS — All Styles
+     (base layout, cards, buttons, panels, chips, player, wishlist)
+     ============================================================ -->
   
     :root{
       --boot-min-show: 900ms;
@@ -1438,6 +1447,12 @@ body::-webkit-scrollbar {
 #bp-fs-btn{ font-size:20px; }
 /* ========== END BROWSER PLAYER ========== */
   </style>
+
+<!-- ============================================================
+     SECTION 03 · HTML BODY — Cartoon Cards
+     (Doraemon, Ben10, Ninja Hattori, Shinchan, Spider-Man,
+      TMNT, Tom & Jerry, Scooby-Doo, Shaun, Supa Strikas)
+     ============================================================ -->
 </head>
 
 <body>
@@ -2282,6 +2297,12 @@ body::-webkit-scrollbar {
 
     
 <!-- tools Toggle Button (ALWAYS visible) -->
+
+<!-- ============================================================
+     SECTION 04 · HTML BODY — Tools Section
+     (Profile & Sync, Wishlist, History, Progress Editor,
+      Reset Panel, Material Picker overlay)
+     ============================================================ -->
 <section class="section">
   <div class="card">
     <div class="tools-grid">
@@ -2544,6 +2565,12 @@ body::-webkit-scrollbar {
 </div>
   <script>
     
+
+/* ============================================================
+   SECTION 05 · NOTIFICATIONS & REMINDERS
+   haptic(), ensureNotifPermission(), scheduleWatchReminders(),
+   CARTOON_NAME_MAP, notificationBodyFromEntry(), refreshRemindersFromEntry()
+   ============================================================ */
     function haptic(ms = 12){
   try{
     if (navigator.vibrate) navigator.vibrate(ms);
@@ -2692,6 +2719,11 @@ async function refreshRemindersFromEntry(entry){
   const bodyText = notificationBodyFromEntry(entry);
   await scheduleWatchReminders(bodyText);
 }
+
+/* ============================================================
+   SECTION 06 · PANEL TOGGLE FUNCTIONS
+   setPanelOpen(), toggleGroup(), toggleDM/B10/NH/SH/SM/TM/TJ/SD/STS/SS()
+   ============================================================ */
 function setPanelOpen(panel, open){
   if(!panel) return;
 
@@ -2843,6 +2875,12 @@ queueRenderAllCartoonLastChips();}
 queueRenderAllCartoonLastChips();}
 
     
+
+/* ============================================================
+   SECTION 07 · TOOLS SECTION & SYNC STATUS
+   closeToolsSection(), toggletoolsSection(),
+   setSyncStatus(), measureMarquee(), escapeHTML()
+   ============================================================ */
 function closeToolsSection(){
   const wrap = document.getElementById("toolsSection");
   const btn = document.getElementById("toolsToggleBtn");
@@ -2982,6 +3020,11 @@ window.addEventListener("resize", () => {
 
 
     
+
+/* ============================================================
+   SECTION 08 · UTILITY FUNCTIONS
+   ripple(), boot loader animation
+   ============================================================ */
     function ripple(e) {
       const H = window.Capacitor?.Plugins?.Haptics;
       if (H?.impact) H.impact({ style: 'LIGHT' });
@@ -3025,6 +3068,12 @@ window.addEventListener("resize", () => {
     });
 
 
+
+/* ============================================================
+   SECTION 09 · CONFIG & CARTOON MODEL
+   Supabase credentials, table names, storage keys,
+   SYNC_POLL_MS, supabaseClient, MODEL (all cartoon definitions)
+   ============================================================ */
     const SUPABASE_URL = "https://tdpyeauwzdktfihqqyxc.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe";
     const TABLE_NAME = "toonie_progress";
@@ -3140,6 +3189,11 @@ let awaitingNativeWishlistSync = false;
 };
 
 
+
+/* ============================================================
+   SECTION 10 · ROOM CODE & TIME UTILITIES
+   getRoomCode(), setRoomCode(), nowISO(), displayLocal()
+   ============================================================ */
     function getRoomCode() {
       return (localStorage.getItem(ROOM_KEY) || "").trim();
     }
@@ -3174,6 +3228,11 @@ let awaitingNativeWishlistSync = false;
       return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
     }
 
+
+/* ============================================================
+   SECTION 11 · DATA NORMALIZATION HELPERS
+   normalizeSeriesLocal(), contextKeyFor(), watchedItemKey(), cloneEntry()
+   ============================================================ */
   function normalizeSeriesLocal(x){
   const v = (x == null) ? null : String(x).trim();
   if(!v) return null;
@@ -3214,6 +3273,14 @@ function cloneEntry(entry){
   };
 }
 
+
+/* ============================================================
+   SECTION 12 · PROGRESS MODEL — CORE
+   ensureWatchedBucket(), setLastDirectQualified(),
+   getLastDirectForContext(), getHighestWatchedForContext(),
+   getSeasonBoundary(), setSeasonBoundary(),
+   addMovieNum(), addWatchedNum(), recomputeEditorDisplayPointers()
+   ============================================================ */
 function ensureWatchedBucket(node, entry){
   if(!node.watched) node.watched = {};
 
@@ -3506,6 +3573,12 @@ function getWatchedBucket(node, entry){
 
 
 
+
+/* ============================================================
+   SECTION 13 · PROGRESS EDITOR ACTIONS
+   markWatchedByEditor(), unmarkWatchedByEditor(),
+   resetSeasonByEditor(), resetMoviesByEditor(), resetAllProgressByEditor()
+   ============================================================ */
 function markWatchedByEditor(store, profile, entry){
   const clean = cloneEntry({...entry, source: "editor", ts: nowISO()});
   if(!clean) return false;
@@ -3590,6 +3663,12 @@ function resetAllProgressByEditor(store, profile, cartoonLabel){
   return true;
 }
 
+
+/* ============================================================
+   SECTION 14 · STORE MANAGEMENT
+   ensurePath(), seedLegacyRange(), normalizeAndDedupeStore(),
+   loadStore(), saveStore()
+   ============================================================ */
 function ensurePath(store, profile, cartoonLabel){
   if(!store.data[profile][cartoonLabel]){
     store.data[profile][cartoonLabel] = {
@@ -3764,6 +3843,13 @@ if(node.last){
       localStorage.setItem(STORE_KEY, JSON.stringify(store));
     }
 
+
+/* ============================================================
+   SECTION 15 · UI STATE & ACTIVE CONTEXT
+   formatLine(), chipTextFromEntry(), setChip(), activeProfile,
+   ACTIVE_CTX_KEY, loadActiveCtxMap(), setActiveContext(),
+   parseCtx(), ctxFromTargetId(), getDisplayEntryForCartoon()
+   ============================================================ */
     function formatLine(entry){
       const parts = [];
       parts.push(entry.cartoonLabel);
@@ -3958,6 +4044,13 @@ function getDisplayEntryForCartoon(cartoonLabel, store, profile){
 }
 
     
+
+/* ============================================================
+   SECTION 16 · CHIP ANIMATION & STEPPER
+   splitTailNumber(), animateChip(),
+   STEPPER_MAP, LAST_CHIP_ID, setStepperState(),
+   renderAllCartoonLastChips()
+   ============================================================ */
 function splitTailNumber(t){
   const m = String(t || "").match(/^(.*?)(\d+)\s*$/);
   if(!m) return null;
@@ -4189,6 +4282,13 @@ function syncShMoviePanel(){
 }
 
 
+
+/* ============================================================
+   SECTION 17 · RESET GUARDS
+   RECENT_RESET_GUARD_MS, recentResetGuards map,
+   armRecentResetGuardAll/Movies/Context(),
+   shouldIgnoreEntryBecauseOfRecentReset(), upsertEntry()
+   ============================================================ */
 const RECENT_RESET_GUARD_MS = 15000;
 const recentResetGuards = new Map();
 
@@ -4305,6 +4405,11 @@ function upsertEntry(store, profile, entry){
       return !!(SUPABASE_URL && SUPABASE_ANON_KEY && supabaseClient);
     }
 
+
+/* ============================================================
+   SECTION 18 · CLOUD — PROGRESS SYNC (Supabase)
+   sbUpsertProgress(), sbFetchProgress()
+   ============================================================ */
     async function sbUpsertProgress(row){
       const room = getRoomCode();
       if(!room) return { ok: false, skipped: true };
@@ -4354,6 +4459,11 @@ function upsertEntry(store, profile, entry){
       }
       return { ok: true, rows: data || [] };
     }
+
+/* ============================================================
+   SECTION 19 · CLOUD — WISHLIST SYNC (Supabase)
+   sbUpsertWishlistSnapshot(), sbFetchWishlistSnapshot()
+   ============================================================ */
 async function sbUpsertWishlistSnapshot(profile, items){
   const room = getRoomCode();
   if(!room) return { ok: false, skipped: true };
@@ -4401,6 +4511,14 @@ async function sbFetchWishlistSnapshot(room, profile){
 
   return {
     ok: true,
+
+/* ============================================================
+   SECTION 20 · PLAYBACK UTILITIES
+   PLAYER_CARTOON_NAME_MAP, PLAYER_SERIES_NAME_MAP,
+   getPlayerCartoonName(), formatPlayerTitle(), getMediaMeta(),
+   normalizePlaybackEntry(), buildPlaybackQueue(),
+   getPlaybackStartIndex(), openMediaFromEntry(), playEntryFromGrid()
+   ============================================================ */
     found: !!data,
     items: Array.isArray(data?.items_json) ? data.items_json : [],
     updatedAt: data?.updated_at || ""
@@ -4648,6 +4766,13 @@ function getPlaybackStartIndex(queue, entry){
 }
 
 
+
+/* ============================================================
+   SECTION 21 · NATIVE PLAYER & PROGRESS RESUME
+   getNativePlayerPlugin(), consumePendingNativeProgress(),
+   consumePendingWebProgress(), handleNativeProgressResume(),
+   resumeProgressAndWishlistWithRetry(), openNativePlayer()
+   ============================================================ */
 function getNativePlayerPlugin(){
   const cap = window.Capacitor;
   if(!cap) return null;
@@ -4855,6 +4980,12 @@ function playEntryFromGrid(e, entry){
   ripple(e);
   openMediaFromEntry(entry, "direct_card");
 }
+
+/* ============================================================
+   SECTION 22 · EPISODE & MOVIE COUNT MAPS
+   EPISODE_COUNT_MAP — all cartoons and seasons
+   MOVIE_COUNT_MAP — cartoons with movies
+   ============================================================ */
 const EPISODE_COUNT_MAP = {
   SS: {
     S1: 13,
@@ -4964,6 +5095,13 @@ const MOVIE_COUNT_MAP = {
   NH: 2,
   SD: 37
 };
+
+/* ============================================================
+   SECTION 23 · DORAEMON MEDIA INDEX
+   DM_ITEM_MAP, DM_MOVIE_INDEX,
+   buildArchiveEpisodeMap(), buildArchiveMovieMap(),
+   buildManualSeasonFromPrefix(), buildManualSeasonWithSuffix()
+   ============================================================ */
 function buildArchiveEpisodeMap(itemId, prefix, seasonKey, total, opts = {}){
   const out = {};
   const pad = Number(opts.pad || 0);
@@ -5165,6 +5303,13 @@ function buildManualSeasonWithSuffix(prefix, total, pad = 2, suffix = "%20.ia.mp
   return out;
 }
 
+
+/* ============================================================
+   SECTION 24 · ALL CARTOON MEDIA INDEXES
+   B10_MEDIA_INDEX, NH_MEDIA_INDEX, SH_MEDIA_INDEX,
+   SM_MEDIA_INDEX, TM_MEDIA_INDEX, TJ_MEDIA_INDEX,
+   SD_MEDIA_INDEX, STS_MEDIA_INDEX, SS_MEDIA_INDEX
+   ============================================================ */
 const B10_MEDIA_INDEX = {
   season: {
     CL: {
@@ -6105,6 +6250,12 @@ const SS_MEDIA_INDEX = {
   movie: {}
 };
 
+
+/* ============================================================
+   SECTION 25 · MASTER MEDIA INDEX
+   MEDIA_INDEX (combines all cartoon indexes),
+   getMaxForEntry(), clampStepperNum()
+   ============================================================ */
 const MEDIA_INDEX = {
   DM: {
     season: {
@@ -6229,6 +6380,12 @@ function getMaxForEntry(entry){
     return Number(cartoonMap?.[seriesLabel]?.[seasonOrMovie]) || 0;
   }
 
+
+/* ============================================================
+   SECTION 26 · WATCHED NUMBER UTILITIES
+   getWatchedNumsForContext(), getWatchedEpisodeSet(),
+   getWatchedMovieSet(), getSavedEpisodeNumber(), getSavedMovieNumber()
+   ============================================================ */
   return Number(cartoonMap?.[seasonOrMovie]) || 0;
 }
 
@@ -6329,6 +6486,14 @@ function getSavedMovieNumber(cartoonLabel, seriesLabel = ""){
 }
 
 
+
+/* ============================================================
+   SECTION 27 · EPISODE GRID RENDERERS
+   render*EpisodeGrid() for each cartoon,
+   toggle*EpisodePanel(), sync*EpisodePanel(),
+   forceClose*EpisodePanel(), sync*SeasonActiveState()
+   Cartoons: SS, STS, SM, TM, SH, DM, TJ, NH, B10, SD
+   ============================================================ */
 function renderSsEpisodeGrid(seasonKey = "S1", animate = false){
   const panel = document.getElementById("ssEpisodePanel");
   const grid = document.getElementById("ssEpisodeGrid");
@@ -7639,6 +7804,12 @@ function syncSdMoviePanel(){
   renderSdMovieGrid();
 }
 
+
+/* ============================================================
+   SECTION 28 · initTracker() — MAIN UI CONTROLLER
+   All Tools UI logic, DOM bindings, event listeners.
+   Sub-sections below:
+   ============================================================ */
     function initTracker(){
       const profileSeg = document.getElementById("profileSeg");
       const modeSeg = document.getElementById("modeSeg");
@@ -7819,6 +7990,8 @@ activeProfile = store.activeProfile || "Asim";
 
       function vib(){ if(navigator.vibrate) navigator.vibrate(16); }
 
+
+    /* ── 28a · Material Picker (custom dropdown UI) ── */
 function getMaterialSelectText(selectEl){
   if(!selectEl) return "";
   const opt = selectEl.options?.[selectEl.selectedIndex];
@@ -7917,6 +8090,8 @@ function bindMaterialSelectTrigger(triggerEl, selectEl, titleText){
   });
 
   syncMaterialSelectTrigger(triggerEl, selectEl);
+
+    /* ── 28b · Room & Profile UI ── */
 }
 
 
@@ -7950,6 +8125,8 @@ setSyncStatus(`Sync: ON  •  Room: ${room}  •  Profile: ${activeProfile}`);
         });
       }
 
+
+    /* ── 28c · Mode & Panel Switching (Wishlist / History) ── */
 function setModeUI(){
 if(activeMode === "save"){
   activeMode = "wishlist";
@@ -7975,6 +8152,8 @@ if(activeMode === "save"){
 }      function cartoonsList(){ return Object.keys(MODEL); }
       function getCartoonCfg(name){ return MODEL[name]; }
 
+
+    /* ── 28d · Save Panel — Cartoon/Series/Season/Episode Dropdowns ── */
 function fillCartoonSelects(){
   const opts = cartoonsList().map(c => `<option value="${c}">${c}</option>`).join("");
   cartoonSelect.innerHTML = opts;
@@ -8102,6 +8281,8 @@ function refreshNumDropdown(){
   return { cartoonLabel, seriesLabel, type, seasonOrMovie };
 }
 
+
+    /* ── 28e · Progress Editor — Edit Mode (Mark / Unmark) ── */
 function editorSeriesKeyFromName(name){
   return (
     (name === "Classic") ? "CL" :
@@ -8378,6 +8559,8 @@ function editorResetSeriesKeyFromName(name){
   return editorSeriesKeyFromName(name);
 }
 
+
+    /* ── 28f · Progress Editor — Reset Mode ── */
 function fillProgressResetCartoons(){
   const names = cartoonsList();
   progressResetCartoonSelect.innerHTML = names
@@ -8522,6 +8705,8 @@ function startProgressResetCountdown(){
   }, 1000);
 }
 
+
+    /* ── 28g · applyProgressResetAction() ── */
 async function applyProgressResetAction(){
   const cfg = getCartoonCfg(progressResetCartoonSelect.value);
   if(!cfg) return;
@@ -8578,6 +8763,8 @@ const room = getRoomCode();
   }
 }
 
+
+    /* ── 28h · Wishlist Store (localStorage CRUD) ── */
 const WISHLIST_STORAGE_KEY = "toonie_wishlist_v1";
 
 function loadWishlistStore(){
@@ -8690,6 +8877,8 @@ function toggleWishlist(entry, profile = activeProfile){
 function formatWishlistLine(entry){
   return formatLine(normalizeWishlistEntry(entry));
 }
+
+    /* ── 28i · pushWishlistToCloud() ── */
 async function pushWishlistToCloud(profile = activeProfile){
   const room = getRoomCode();
   console.log("[WL PUSH] called, room=", room, "profile=", profile);
@@ -8697,6 +8886,8 @@ async function pushWishlistToCloud(profile = activeProfile){
     console.log("[WL PUSH] skipped - no room or supabase");
     return;
   }
+
+    /* ── 28j · Save Hint & Recent History Renderer ── */
   const items = getWishlistItems(profile);
   console.log("[WL PUSH] pushing items:", items);
   const result = await sbUpsertWishlistSnapshot(profile, items).catch(err => {
@@ -8745,6 +8936,8 @@ window.pushWishlistToCloud = pushWishlistToCloud;
           .join("");
       }
 
+
+    /* ── 28k · pollFromCloud() — Progress Sync Poller ── */
       async function pollFromCloud(){
         const room = getRoomCode();
         if(!room || !supabaseEnabled()) return;
@@ -8817,6 +9010,8 @@ store = normalizeAndDedupeStore(store);
         renderAllCartoonLastChips();
       }
 
+
+    /* ── 28l · startPolling() / stopPolling() ── */
 function startPolling(){
         stopPolling();
         const room = getRoomCode();
@@ -8837,6 +9032,8 @@ function startPolling(){
           clearInterval(pollTimer);
           pollTimer = null;
         }
+
+    /* ── 28m · applyProgress() — Web Progress Save ── */
       }
 window.applyProgress = async function(cartoonLabel, partial){
   if(String(partial.source || "") === "wishlist") return;
@@ -8877,6 +9074,8 @@ window.applyProgress = async function(cartoonLabel, partial){
     profile: activeProfile,
     cartoon_label: entry.cartoonLabel,
     series_label: entry.seriesLabel || "-",
+
+    /* ── 28n · doSave() — Manual Save (Save Panel) ── */
     type: entry.type,
     season_or_movie: entry.seasonOrMovie,
     num: entry.num,
@@ -8942,6 +9141,8 @@ if(push.ok){
 
 
 
+
+    /* ── 28o · stepFromLast() — Stepper +/- buttons ── */
 async function stepFromLast(cartoonLabel, delta){
   vib();
   store = loadStore();
@@ -9026,6 +9227,15 @@ await refreshRemindersFromEntry(entry);
     saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
   }
 }
+
+/* ============================================================
+   SECTION 29 · WISHLIST SYNC UTILITIES
+   normalizeWishlistItemsList(), saveWishlistItemsForProfile(),
+   getNativeWishlistSnapshot(), syncWishlistFromNativeToCloud(),
+   syncWishlistFromCloudToLocal(), syncWishlistForCurrentRoom(),
+   handleWishlistResumeSync(), getWishlistItemsShared(),
+   removeWishlistItemShared(), renderWishlist()
+   ============================================================ */
 function normalizeWishlistItemsList(items){
   const map = new Map();
 
@@ -9377,6 +9587,12 @@ cartoonSelect.addEventListener("change", () => {
   const cfg = getCartoonCfg(cartoonSelect.value);
   if(!cfg.hasMovies) typeSelect.value = "season";
 
+
+/* ============================================================
+   SECTION 30 · initTracker() INIT CALLS & EVENT LISTENERS
+   DOM bindings, profileSeg, modeSeg, cartoonSelect,
+   progressEditor, wishlistSelect, roomSaveBtn, focus/visibility
+   ============================================================ */
   fillSeasonOrMovie();
   refreshNumDropdown();
   updateSaveHintForCartoon();
@@ -9530,6 +9746,11 @@ document.addEventListener("visibilitychange", async () => {
 
 
 
+
+/* ============================================================
+   SECTION 31 · APP ENTRY POINT
+   window.addEventListener('load') — boots initTracker()
+   ============================================================ */
 window.addEventListener("load", async () => {
   try{
     initTracker();
@@ -9545,6 +9766,12 @@ window.addEventListener("load", async () => {
   }
 });
   </script>
+
+<!-- ============================================================
+     SECTION 32 · BROWSER PLAYER (Overlay Fallback)
+     HTML structure + IIFE script for the in-page video player
+     (used as fallback if player.html tab is blocked by browser)
+     ============================================================ -->
   <!-- ========== BROWSER PLAYER HTML ========== -->
 <div id="bp-overlay">
   <video id="bp-video" playsinline></video>
@@ -9822,3 +10049,4 @@ starBtn.addEventListener("click", ()=>{
 </script>
 </body>
 </html>
+
