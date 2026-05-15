@@ -4729,11 +4729,36 @@ async function sleep(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function consumePendingWebProgress(){
+  try{
+    const raw = localStorage.getItem("toonie_pending_progress_v1");
+    if(!raw) return false;
+    const items = JSON.parse(raw);
+    if(!Array.isArray(items) || !items.length) return false;
+    localStorage.removeItem("toonie_pending_progress_v1");
+    for(const item of items){
+      if(!item.cartoonLabel) continue;
+      await window.applyProgress(item.cartoonLabel, {
+        seriesLabel: item.seriesLabel || "",
+        type: item.type || "season",
+        seasonOrMovie: item.seasonOrMovie || "",
+        num: Number(item.num) || 0,
+        source: item.source || "direct_card",
+        ts: item.ts || new Date().toISOString()
+      });
+    }
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+    
 async function resumeProgressAndWishlistWithRetry(tries = 6, waitMs = 300){
   let applied = false;
 
   for(let i = 0; i < tries; i++){
-    const changed = await handleNativeProgressResume();
+const changed = await handleNativeProgressResume();
+    await consumePendingWebProgress();
     await handleWishlistResumeSync();
 
     if(changed){
@@ -4810,9 +4835,20 @@ async function openMediaFromEntry(entry, source = "direct_card"){
 if(window.Capacitor?.isNativePlatform?.()){
     return await openNativePlayer(cleanEntry, meta, source);
   }
-  const queue = buildPlaybackQueue(cleanEntry);
+const queue = buildPlaybackQueue(cleanEntry);
   const startIndex = getPlaybackStartIndex(queue, cleanEntry);
-  openBrowserPlayer(queue, startIndex, source);
+
+  localStorage.setItem("toonie_player_session_v1", JSON.stringify({
+    queue,
+    startIndex,
+    source,
+    profile: activeProfile || "Asim"
+  }));
+
+  const newTab = window.open("player.html", "_blank");
+  if(!newTab){
+    openBrowserPlayer(queue, startIndex, source);
+  }
   return true;}
 
 function playEntryFromGrid(e, entry){
