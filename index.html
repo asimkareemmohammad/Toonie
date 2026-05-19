@@ -3227,8 +3227,13 @@ function syncTvScrollArrows(){
     down.className = "tv-scroll-btn";
     down.textContent = "▼";
     down.onclick = () => { haptic(); grid.scrollTop += 110; };
-    grid.before(up);
-    grid.after(down);
+grid.before(up);
+    const gridPanel = grid.closest('.episode-panel');
+    if(gridPanel){
+      gridPanel.after(down);
+    } else {
+      grid.after(down);
+    }
   });
 }
 
