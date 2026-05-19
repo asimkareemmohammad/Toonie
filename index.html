@@ -1446,6 +1446,96 @@ body::-webkit-scrollbar {
 }
 #bp-fs-btn{ font-size:20px; }
 /* ========== END BROWSER PLAYER ========== */
+
+/* ============================================================
+   TV MODE — Toggle switch + native selects + scroll arrows
+   ============================================================ */
+
+.tv-mode-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.tv-mode-label{
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-text);
+}
+
+.toggle-switch{
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.toggle-switch input{ opacity: 0; width: 0; height: 0; }
+
+.toggle-slider{
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--md-surface-3);
+  border-radius: 999px;
+  border: 1px solid var(--md-outline);
+  transition: 0.3s;
+}
+.toggle-slider:before{
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--md-text-faint);
+  border-radius: 50%;
+  transition: 0.3s;
+}
+.toggle-switch input:checked + .toggle-slider{
+  background: rgba(208,188,255,0.25);
+  border-color: rgba(208,188,255,0.5);
+}
+.toggle-switch input:checked + .toggle-slider:before{
+  transform: translateX(22px);
+  background: var(--md-primary);
+}
+
+/* TV mode — show native selects, hide custom triggers */
+body.tv-mode .material-select-trigger{ display: none !important; }
+body.tv-mode .material-select-native{
+  position: static !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: 100% !important;
+  height: 44px !important;
+  border-radius: var(--md-radius-md);
+  border: 1px solid var(--md-outline);
+  background: var(--md-surface-2);
+  color: var(--md-text);
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+/* TV mode — episode grid scroll arrows */
+.tv-scroll-btn{
+  display: none;
+  width: 100%;
+  padding: 10px;
+  background: rgba(208,188,255,0.08);
+  border: 1px solid rgba(208,188,255,0.22);
+  border-radius: var(--md-radius-sm);
+  color: var(--md-primary);
+  font-size: 20px;
+  cursor: pointer;
+  text-align: center;
+  margin: 4px 0;
+  letter-spacing: 2px;
+}
+body.tv-mode .tv-scroll-btn{ display: block; }
+       
   </style>
 
 <!-- ============================================================
@@ -2333,6 +2423,14 @@ body::-webkit-scrollbar {
     <div class="field">
       <button class="md-btn md-filled" id="roomSaveBtn" type="button">Save Room Code</button>
     </div>
+</div>
+
+  <div class="tv-mode-row">
+    <span class="tv-mode-label">📺 TV Mode</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="tvModeToggle">
+      <span class="toggle-slider"></span>
+    </label>
   </div>
 </div>
 
@@ -3086,6 +3184,40 @@ window.addEventListener("resize", () => {
 const WISHLIST_TABLE_NAME = "toonie_wishlist_state";
 let awaitingNativeWishlistSync = false;
 
+/* ── TV Mode ── */
+const TV_MODE_KEY = "toonie_tv_mode_v1";
+let tvMode = localStorage.getItem(TV_MODE_KEY) === "1";
+
+function applyTvMode(on){
+  tvMode = on;
+  document.body.classList.toggle("tv-mode", on);
+  const toggle = document.getElementById("tvModeToggle");
+  if(toggle) toggle.checked = on;
+  localStorage.setItem(TV_MODE_KEY, on ? "1" : "0");
+  syncTvScrollArrows();
+}
+
+function syncTvScrollArrows(){
+  document.querySelectorAll(".tv-scroll-btn").forEach(b => b.remove());
+  if(!tvMode) return;
+  document.querySelectorAll(".episode-grid").forEach(grid => {
+    if(!grid.children.length) return;
+    if(grid.scrollHeight <= grid.clientHeight + 10) return;
+    const up = document.createElement("button");
+    up.className = "tv-scroll-btn";
+    up.textContent = "▲";
+    up.onclick = () => { grid.scrollTop -= 110; };
+    const down = document.createElement("button");
+    down.className = "tv-scroll-btn";
+    down.textContent = "▼";
+    down.onclick = () => { grid.scrollTop += 110; };
+    grid.before(up);
+    grid.after(down);
+  });
+}
+
+/* Apply saved TV mode on startup */
+applyTvMode(tvMode);
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
    const MODEL = {
@@ -4272,6 +4404,7 @@ function renderAllCartoonLastChips(){
   syncB10EpisodePanel();
   syncSdEpisodePanel();
   syncSdMoviePanel();
+  syncTvScrollArrows();
 }
 function syncShMoviePanel(){
   const panel = document.getElementById("sh-movies");
@@ -9743,7 +9876,12 @@ document.addEventListener("visibilitychange", async () => {
   await resumeProgressAndWishlistWithRetry();
 });
     }
-
+const tvModeToggle = document.getElementById("tvModeToggle");
+if(tvModeToggle){
+  tvModeToggle.addEventListener("change", (e) => {
+    applyTvMode(e.target.checked);
+  });
+}
 
 
 
