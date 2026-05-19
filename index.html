@@ -1522,6 +1522,7 @@ body.tv-mode .material-select-native{
 /* TV mode — episode grid scroll arrows */
 .tv-scroll-btn{
   display: none;
+  -webkit-tap-highlight-color: transparent;
   width: 100%;
   padding: 10px;
   background: rgba(208,188,255,0.08);
@@ -2425,15 +2426,17 @@ body.tv-mode .tv-scroll-btn{ display: block; }
     </div>
 </div>
 
+ </div>
+
+<div class="card">
   <div class="tv-mode-row">
-    <span class="tv-mode-label">📺 TV Mode</span>
+    <span class="tv-mode-label">Accessibility</span>
     <label class="toggle-switch">
       <input type="checkbox" id="tvModeToggle">
       <span class="toggle-slider"></span>
     </label>
   </div>
 </div>
-
     <div class="card">
       <h2 class="section-title">Recent Activity</h2>
 <div class="seg" id="modeSeg">
@@ -3193,8 +3196,13 @@ function applyTvMode(on){
   document.body.classList.toggle("tv-mode", on);
   const toggle = document.getElementById("tvModeToggle");
   if(toggle) toggle.checked = on;
-  localStorage.setItem(TV_MODE_KEY, on ? "1" : "0");
+localStorage.setItem(TV_MODE_KEY, on ? "1" : "0");
   syncTvScrollArrows();
+  if(on){
+    document.querySelectorAll(".material-select-native").forEach(sel => {
+      sel.addEventListener("change", () => haptic());
+    });
+  }
 }
 
 function syncTvScrollArrows(){
@@ -3206,11 +3214,11 @@ function syncTvScrollArrows(){
     const up = document.createElement("button");
     up.className = "tv-scroll-btn";
     up.textContent = "▲";
-    up.onclick = () => { grid.scrollTop -= 110; };
+    up.onclick = () => { haptic(); grid.scrollTop -= 110; };
     const down = document.createElement("button");
     down.className = "tv-scroll-btn";
     down.textContent = "▼";
-    down.onclick = () => { grid.scrollTop += 110; };
+    down.onclick = () => { haptic(); grid.scrollTop += 110; };
     grid.before(up);
     grid.after(down);
   });
