@@ -3192,6 +3192,18 @@ window.addEventListener("resize", () => {
 
     const SYNC_POLL_MS = 10000;
 
+/* ── Store mutex ──
+   Serializes every load-mutate-save cycle on the progress store so
+   concurrent async tasks (cloud poll, player progress, save buttons)
+   can never interleave reads/writes and clobber each other. */
+let __storeLock = Promise.resolve();
+const __lastPollTsMap = {};   /* "room|profile" -> newest ts seen, for incremental polling */
+function withStoreLock(fn){
+  const run = __storeLock.then(fn, fn);
+  __storeLock = run.then(() => {}, () => {});
+  return run;
+}
+
 const WISHLIST_TABLE_NAME = "toonie_wishlist_state";
 let awaitingNativeWishlistSync = false;
 
@@ -4596,14 +4608,21 @@ function upsertEntry(store, profile, entry){
       return { ok: true };
     }
 
-    async function sbFetchProgress(room, profile, limit = 250){
+    async function sbFetchProgress(room, profile, limit = 250, sinceTs = ""){
       if(!room) return { ok: false, skipped: true, rows: [] };
 
-      const { data, error } = await supabaseClient
+      let query = supabaseClient
         .from(TABLE_NAME)
         .select("room_code,profile,cartoon_label,series_label,type,season_or_movie,num,ts")
         .eq("room_code", room)
-        .eq("profile", profile)
+        .eq("profile", profile);
+
+      /* Incremental: only rows at/after the newest ts we've already seen.
+         gte (not gt) so a shared-timestamp row is never skipped; the
+         re-processed row is harmless because merges are idempotent. */
+      if(sinceTs) query = query.gte("ts", sinceTs);
+
+      const { data, error } = await query
         .order("ts", { ascending: false })
         .limit(limit);
 
@@ -4665,6 +4684,11 @@ async function sbFetchWishlistSnapshot(room, profile){
 
   return {
     ok: true,
+    found: !!data,
+    items: Array.isArray(data?.items_json) ? data.items_json : [],
+    updatedAt: data?.updated_at || ""
+  };
+}
 
 /* ============================================================
    SECTION 20 · PLAYBACK UTILITIES
@@ -4673,11 +4697,6 @@ async function sbFetchWishlistSnapshot(room, profile){
    normalizePlaybackEntry(), buildPlaybackQueue(),
    getPlaybackStartIndex(), openMediaFromEntry(), playEntryFromGrid()
    ============================================================ */
-    found: !!data,
-    items: Array.isArray(data?.items_json) ? data.items_json : [],
-    updatedAt: data?.updated_at || ""
-  };
-}
 
 
 
@@ -5036,9 +5055,11 @@ async function resumeProgressAndWishlistWithRetry(tries = 6, waitMs = 300){
   let applied = false;
 
   for(let i = 0; i < tries; i++){
-const changed = await handleNativeProgressResume();
+    const changed = await handleNativeProgressResume();
     await consumePendingWebProgress();
-    await handleWishlistResumeSync();
+    if(typeof window.handleWishlistResumeSync === "function"){
+      await window.handleWishlistResumeSync();
+    }
 
     if(changed){
       applied = true;
@@ -5050,10 +5071,12 @@ const changed = await handleNativeProgressResume();
     }
   }
 
-  refreshProgressEditorAllUI();
+  if(typeof window.refreshProgressEditorAllUI === "function"){
+    window.refreshProgressEditorAllUI();
+  }
 
-  if(activeMode === "wishlist"){
-    await renderWishlist();
+  if(window.getActiveMode?.() === "wishlist" && typeof window.renderWishlist === "function"){
+    await window.renderWishlist();
   }
 
   return applied;
@@ -8649,7 +8672,11 @@ function setProgressEditorModeUI(mode = "edit"){
   progressEditPanel.classList.remove("hidden");
 }
 
-async function applyProgressEditAction(kind){
+function applyProgressEditAction(kind){
+  return withStoreLock(() => applyProgressEditActionUnlocked(kind));
+}
+
+async function applyProgressEditActionUnlocked(kind){
   const entry = getProgressEditEntry();
   if(!entry) return;
 
@@ -8861,7 +8888,11 @@ function startProgressResetCountdown(){
 
 
     /* ── 28g · applyProgressResetAction() ── */
-async function applyProgressResetAction(){
+function applyProgressResetAction(){
+  return withStoreLock(applyProgressResetActionUnlocked);
+}
+
+async function applyProgressResetActionUnlocked(){
   const cfg = getCartoonCfg(progressResetCartoonSelect.value);
   if(!cfg) return;
 
@@ -8954,8 +8985,18 @@ function normalizeWishlistEntry(entry){
     type: String(entry.type || "season"),
     seasonOrMovie: String(entry.seasonOrMovie || ""),
     num: Number(entry.num) || 0,
-    ts: entry.ts || nowISO()
+    ts: entry.ts || nowISO(),
+    deleted: !!entry.deleted   /* tombstone flag — removed items keep a
+                                  {deleted:true} record so the deletion
+                                  syncs to other devices instead of the
+                                  item resurrecting on merge */
   };
+}
+
+const WISHLIST_TOMBSTONE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; /* 30 days */
+
+function isLiveWishlistEntry(item){
+  return item && !item.deleted;
 }
 
 function wishlistKeyOf(entry){
@@ -8982,7 +9023,7 @@ function isWishlisted(entry, profile = activeProfile){
 
   const store = loadWishlistStore();
   const list = ensureWishlistProfile(store, profile);
-  return list.some(item => wishlistKeyOf(item) === key);
+  return list.some(item => isLiveWishlistEntry(item) && wishlistKeyOf(item) === key);
 }
 
 function addToWishlist(entry, profile = activeProfile){
@@ -8993,12 +9034,17 @@ function addToWishlist(entry, profile = activeProfile){
   const list = ensureWishlistProfile(store, profile);
   const key = wishlistKeyOf(item);
 
-  if(list.some(x => wishlistKeyOf(x) === key)){
-    saveWishlistStore(store);
-    return false;
+  const existingIdx = list.findIndex(x => wishlistKeyOf(x) === key);
+  if(existingIdx >= 0){
+    if(isLiveWishlistEntry(list[existingIdx])){
+      saveWishlistStore(store);
+      return false;
+    }
+    /* Tombstoned before — revive it with a fresh timestamp */
+    list.splice(existingIdx, 1);
   }
 
-  list.unshift(item);
+  list.unshift({ ...item, deleted: false, ts: nowISO() });
   saveWishlistStore(store);
   pushWishlistToCloud(profile).catch(() => {});
   return true;
@@ -9010,9 +9056,12 @@ function removeFromWishlist(entry, profile = activeProfile){
 
   const store = loadWishlistStore();
   const list = ensureWishlistProfile(store, profile);
-  const next = list.filter(item => wishlistKeyOf(item) !== key);
 
-  store[profile] = next;
+  store[profile] = list.map(item =>
+    wishlistKeyOf(item) === key
+      ? { ...normalizeWishlistEntry(item), deleted: true, ts: nowISO() }
+      : item
+  );
   saveWishlistStore(store);
   pushWishlistToCloud(profile).catch(() => {});
   return true;
@@ -9035,21 +9084,26 @@ function formatWishlistLine(entry){
     /* ── 28i · pushWishlistToCloud() ── */
 async function pushWishlistToCloud(profile = activeProfile){
   const room = getRoomCode();
-  console.log("[WL PUSH] called, room=", room, "profile=", profile);
-  if(!room || !supabaseEnabled()){
-    console.log("[WL PUSH] skipped - no room or supabase");
-    return;
-  }
+  if(!room || !supabaseEnabled()) return;
 
-    /* ── 28j · Save Hint & Recent History Renderer ── */
+  /* Push the full list including tombstones so deletions propagate */
   const items = getWishlistItems(profile);
-  console.log("[WL PUSH] pushing items:", items);
-  const result = await sbUpsertWishlistSnapshot(profile, items).catch(err => {
-    console.error("[WL PUSH] ERROR:", err);
+  await sbUpsertWishlistSnapshot(profile, items).catch(err => {
+    console.error("Wishlist cloud push failed:", err);
   });
-  console.log("[WL PUSH] result:", result);
 }
 window.pushWishlistToCloud = pushWishlistToCloud;
+
+/* Expose initTracker-scoped functions/state that top-level code
+   (resumeProgressAndWishlistWithRetry, toggletoolsSection) calls.
+   Function declarations hoist within initTracker, so these are all
+   defined by the time this line runs. */
+window.handleWishlistResumeSync = handleWishlistResumeSync;
+window.renderWishlist = renderWishlist;
+window.refreshProgressEditorAllUI = refreshProgressEditorAllUI;
+window.getActiveMode = () => activeMode;
+
+    /* ── 28j · Save Hint & Recent History Renderer ── */
       
       function updateSaveHintForCartoon(){
         store = loadStore();
@@ -9092,11 +9146,20 @@ window.pushWishlistToCloud = pushWishlistToCloud;
 
 
     /* ── 28k · pollFromCloud() — Progress Sync Poller ── */
-      async function pollFromCloud(){
+      function pollFromCloud(){
+        return withStoreLock(() => pollFromCloudUnlocked());
+      }
+
+      async function pollFromCloudUnlocked(){
         const room = getRoomCode();
         if(!room || !supabaseEnabled()) return;
 
-        const res = await sbFetchProgress(room, activeProfile, 250);
+        /* Incremental fetch: only rows newer than the last poll for
+           this room+profile. First poll (or after switching) is full. */
+        const pollKey = room + "|" + activeProfile;
+        const sinceTs = __lastPollTsMap[pollKey] || "";
+
+        const res = await sbFetchProgress(room, activeProfile, 250, sinceTs);
         if(!res.ok){
           if(lastCloudOk){
             updateRoomStatus(`Room: ${room} → Sync ON, but fetch failed. (Will keep trying)`);
@@ -9106,6 +9169,14 @@ window.pushWishlistToCloud = pushWishlistToCloud;
         }
 
         lastCloudOk = true;
+
+        /* Nothing new since last poll → skip all merge/render work */
+        if(sinceTs && !res.rows.length) return;
+
+        if(res.rows.length){
+          /* rows are ordered ts desc, so [0] is the newest */
+          __lastPollTsMap[pollKey] = String(res.rows[0].ts || sinceTs || "");
+        }
 
         store = loadStore();
 
@@ -9189,7 +9260,11 @@ function startPolling(){
 
     /* ── 28m · applyProgress() — Web Progress Save ── */
       }
-window.applyProgress = async function(cartoonLabel, partial){
+window.applyProgress = function(cartoonLabel, partial){
+  return withStoreLock(() => __applyProgressUnlocked(cartoonLabel, partial));
+};
+
+async function __applyProgressUnlocked(cartoonLabel, partial){
   if(String(partial.source || "") === "wishlist") return;
   store = loadStore();
 
@@ -9228,8 +9303,6 @@ window.applyProgress = async function(cartoonLabel, partial){
     profile: activeProfile,
     cartoon_label: entry.cartoonLabel,
     series_label: entry.seriesLabel || "-",
-
-    /* ── 28n · doSave() — Manual Save (Save Panel) ── */
     type: entry.type,
     season_or_movie: entry.seasonOrMovie,
     num: entry.num,
@@ -9241,9 +9314,14 @@ window.applyProgress = async function(cartoonLabel, partial){
   } else {
     saveHint.textContent = `Saved locally. (Cloud failed: ${push.error || "blocked"})`;
   }
-};
+}
 
-      async function doSave(){
+    /* ── 28n · doSave() — Manual Save (Save Panel) ── */
+      function doSave(){
+        return withStoreLock(doSaveUnlocked);
+      }
+
+      async function doSaveUnlocked(){
         vib();
         store = loadStore();
 const cur = currentKeyLabels();
@@ -9297,7 +9375,11 @@ if(push.ok){
 
 
     /* ── 28o · stepFromLast() — Stepper +/- buttons ── */
-async function stepFromLast(cartoonLabel, delta){
+function stepFromLast(cartoonLabel, delta){
+  return withStoreLock(() => stepFromLastUnlocked(cartoonLabel, delta));
+}
+
+async function stepFromLastUnlocked(cartoonLabel, delta){
   vib();
   store = loadStore();
 
@@ -9404,13 +9486,20 @@ function normalizeWishlistItemsList(items){
     }
   }
 
+  const cutoff = Date.now() - WISHLIST_TOMBSTONE_MAX_AGE_MS;
+
   return [...map.values()]
+    .filter(item => !item.deleted || (new Date(item.ts).getTime() || 0) > cutoff)
     .sort((a, b) => String(b.ts || "").localeCompare(String(a.ts || "")));
 }
 
 function saveWishlistItemsForProfile(profile, items){
   const store = loadWishlistStore();
-  store[profile] = normalizeWishlistItemsList(items);
+  /* Merge incoming snapshot with what we already have (newest ts wins
+     per item) so a cloud/native snapshot that predates a local delete
+     can't wipe the tombstone and resurrect the item. */
+  const existing = Array.isArray(store[profile]) ? store[profile] : [];
+  store[profile] = normalizeWishlistItemsList([...existing, ...items]);
   saveWishlistStore(store);
   return store[profile];
 }
@@ -9551,14 +9640,15 @@ async function renderWishlist(){
   if(!wishlistCartoonSelect || !wishlistInfo || !wishlistList) return;
 
   const all = await getWishlistItemsShared(activeProfile);
+  const live = all.filter(isLiveWishlistEntry);   /* hide tombstones */
 
   const selectedCartoonName = wishlistCartoonSelect.value || cartoonSelect.value || "";
   const selectedCfg = selectedCartoonName ? getCartoonCfg(selectedCartoonName) : null;
   const selectedCartoonLabel = selectedCfg?.label || "";
 
   const filtered = selectedCartoonLabel
-    ? all.filter(item => item.cartoonLabel === selectedCartoonLabel)
-    : all;
+    ? live.filter(item => item.cartoonLabel === selectedCartoonLabel)
+    : live;
 
   wishlistInfo.textContent = filtered.length
     ? `${filtered.length} item(s) in wishlist`
@@ -9896,6 +9986,28 @@ document.addEventListener("visibilitychange", async () => {
   if(document.hidden) return;
   await resumeProgressAndWishlistWithRetry();
 });
+
+/* Instant cross-tab handoff: the "storage" event fires here the moment
+   the player tab writes pending progress or toggles the wishlist — no
+   need to wait for this tab to regain focus. */
+window.addEventListener("storage", (e) => {
+  if(e.key === "toonie_pending_progress_v1" && e.newValue){
+    consumePendingWebProgress()
+      .then((changed) => {
+        if(!changed) return;
+        refreshProgressEditorAllUI();
+        if(activeMode === "recent") renderRecent();
+        renderAllCartoonLastChips();
+        refreshRoomUI();
+      })
+      .catch(() => {});
+  }
+  if(e.key === WISHLIST_STORAGE_KEY){
+    if(activeMode === "wishlist"){
+      renderWishlist().catch(() => {});
+    }
+  }
+});
     }
 const tvModeToggle = document.getElementById("tvModeToggle");
 if(tvModeToggle){
@@ -10009,7 +10121,7 @@ function playerWishKey(item){
       const store = JSON.parse(localStorage.getItem("toonie_wishlist_v1")||"{}");
       const list = store[playerGetProfile()]||[];
       const key = playerWishKey(item);
-      return list.some(x=>playerWishKey(x)===key);
+      return list.some(x=>!x.deleted&&playerWishKey(x)===key);
     }catch(e){ return false; }
   }
   function playerToggleWishlist(item){
@@ -10020,12 +10132,14 @@ function playerWishKey(item){
       const list = store[profile];
       const key = playerWishKey(item);
       const idx = list.findIndex(x=>playerWishKey(x)===key);
-      if(idx>=0){
-        list.splice(idx,1);
+      if(idx>=0 && !list[idx].deleted){
+        /* tombstone instead of splice so the removal syncs */
+        list[idx] = { ...list[idx], deleted:true, ts:new Date().toISOString() };
         localStorage.setItem("toonie_wishlist_v1",JSON.stringify(store));
         return false;
       } else {
-        list.unshift({cartoonLabel:item.cartoonLabel||"",seriesLabel:String(item.seriesLabel||"").trim(),type:item.type||"season",seasonOrMovie:item.seasonOrMovie||"",num:Number(item.num)||0,ts:new Date().toISOString()});
+        if(idx>=0) list.splice(idx,1);   /* drop old tombstone, re-add fresh */
+        list.unshift({cartoonLabel:item.cartoonLabel||"",seriesLabel:String(item.seriesLabel||"").trim(),type:item.type||"season",seasonOrMovie:item.seasonOrMovie||"",num:Number(item.num)||0,ts:new Date().toISOString(),deleted:false});
         localStorage.setItem("toonie_wishlist_v1",JSON.stringify(store));
         return true;
       }
@@ -10091,6 +10205,7 @@ function playerWishKey(item){
     const item = currentItem();
     video.src = item.url;
     video.load();
+    video.playbackRate = SPEEDS[speedIdx];   /* load() resets rate to 1 */
     video.play().catch(()=>{});
     refreshTitle();
     refreshStar();
@@ -10140,7 +10255,13 @@ function playerWishKey(item){
   });
 
   back5.addEventListener("click", ()=>{ video.currentTime=Math.max(0,video.currentTime-5); showUI(); });
-  fwd15.addEventListener("click", ()=>{ video.currentTime=Math.min(video.duration||0,video.currentTime+15); showUI(); });
+  fwd15.addEventListener("click", ()=>{
+    /* only clamp when duration is actually known — Math.min(0, t+15)
+       would otherwise teleport back to the start */
+    const d = video.duration;
+    video.currentTime = Number.isFinite(d) ? Math.min(d, video.currentTime+15) : video.currentTime+15;
+    showUI();
+  });
 
 starBtn.addEventListener("click", ()=>{
     const item = currentItem();
@@ -10168,12 +10289,21 @@ starBtn.addEventListener("click", ()=>{
     showUI();
   });
 
+  let bpScrubbing = false;
+  seekBar.addEventListener("pointerdown", ()=>{ bpScrubbing = true; });
   seekBar.addEventListener("input", ()=>{
+    /* preview only while dragging — commit happens on release */
+    timeEl.textContent = fmt(parseFloat(seekBar.value))+" · "+fmt(video.duration||0);
+    showUI();
+  });
+  seekBar.addEventListener("change", ()=>{
     video.currentTime = parseFloat(seekBar.value);
+    bpScrubbing = false;
     showUI();
   });
 
   video.addEventListener("timeupdate", ()=>{
+    if(bpScrubbing) return;   /* never yank the thumb out of the user's hand */
     const cur = video.currentTime||0, dur = video.duration||0;
     seekBar.max = dur;
     seekBar.value = cur;
