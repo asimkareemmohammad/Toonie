@@ -530,9 +530,17 @@
   let watchedMs = 0, maxPositionSec = 0, lastTickTime = null, qualified = false;
   let tickInterval = null;
 
-  function resetWatchState(){
-    watchedMs = 0; maxPositionSec = 0;
-    lastTickTime = null; qualified = false;
+  function resetWatchState(item){
+    /* Resume any watch-time/position already accumulated for this exact
+       episode on this device, so closing partway through and reopening
+       doesn't restart the 30%/70% qualification clock from zero. This
+       is per-device only (stored alongside resume position below), same
+       as resume position already is — it doesn't sync across devices. */
+    const saved = item ? loadResumeStore()[resumeKeyOf(item)] : null;
+    watchedMs = Number(saved?.watchedMs) || 0;
+    maxPositionSec = Number(saved?.maxPositionSec) || 0;
+    lastTickTime = null;
+    qualified = false;
   }
 
   function tickWatch(){
@@ -547,6 +555,7 @@
       if(watchedMs >= dur * 1000 * 0.30 && maxPositionSec >= dur * 0.70){
         qualified = true;
         saveProgress(queue[currentIndex]);
+        clearWatchStats(queue[currentIndex]);   /* stop re-firing on future reopens */
       }
     }
     maybeSaveResume();
@@ -615,16 +624,37 @@
     lastResumeSave = now;
     const item = queue[currentIndex];
     const dur = safeDuration();
-    if(!item || dur <= 0) return;
+    if(!item) return;
     const store = loadResumeStore();
     const key = resumeKeyOf(item);
-    if(video.currentTime >= dur * 0.95 || video.ended){
+
+    if(dur > 0 && (video.currentTime >= dur * 0.95 || video.ended)){
+      /* fully watched — nothing left worth resuming or re-accumulating */
       delete store[key];
-    } else if(video.currentTime > 10){
-      store[key] = { t: Math.floor(video.currentTime), ts: new Date().toISOString() };
-    } else {
       saveResumeStore(store);
       return;
+    }
+
+    const rec = { ...(store[key] || {}) };
+
+    /* position resume only kicks in past 10s, same threshold as before */
+    if(video.currentTime > 10){
+      rec.t = Math.floor(video.currentTime);
+      rec.ts = new Date().toISOString();
+    }
+
+    /* watch-time/position-reached counters persist across sessions so a
+       string of short viewings of the same episode still adds up toward
+       the 30%/70% qualification bar instead of resetting on every reopen */
+    if(!qualified){
+      rec.watchedMs = Math.round(watchedMs);
+      rec.maxPositionSec = Math.round(maxPositionSec * 10) / 10;
+    }
+
+    if(Object.keys(rec).length === 0){
+      delete store[key];
+    } else {
+      store[key] = rec;
     }
     saveResumeStore(store);
   }
@@ -638,6 +668,23 @@
   function clearResume(item){
     const store = loadResumeStore();
     delete store[resumeKeyOf(item)];
+    saveResumeStore(store);
+  }
+
+  function clearWatchStats(item){
+    /* Called once an episode qualifies as watched, so simply reopening a
+       finished episode later doesn't immediately re-fire saveProgress
+       every single time. Position resume (t/ts) is left intact — being
+       "qualified" doesn't mean you watched to the end. */
+    if(!item) return;
+    const store = loadResumeStore();
+    const key = resumeKeyOf(item);
+    if(!store[key]) return;
+    delete store[key].watchedMs;
+    delete store[key].maxPositionSec;
+    if(Object.keys(store[key]).length === 0){
+      delete store[key];
+    }
     saveResumeStore(store);
   }
 
@@ -826,10 +873,10 @@
   function loadAndPlay(idx, resumeAt){
     if(idx < 0 || idx >= queue.length) return;
     currentIndex = idx;
-    resetWatchState();
+    const item = queue[idx];
+    resetWatchState(item);
     hideError();
 
-    const item = queue[idx];
     const t = splitTitle(item.title);
     titleEl.textContent    = t.main;
     subtitleEl.textContent = t.sub;
