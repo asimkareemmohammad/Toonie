@@ -9179,6 +9179,7 @@ window.getActiveMode = () => activeMode;
         }
 
         store = loadStore();
+        const touchedNodes = new Set();
 
 for(const r of res.rows){
           const entry = {
@@ -9192,6 +9193,7 @@ for(const r of res.rows){
           upsertEntry(store, activeProfile, entry);
 
           const node = ensurePath(store, activeProfile, entry.cartoonLabel);
+          touchedNodes.add(node);
 
           if(entry.type === "movie"){
             addMovieNum(node, entry, entry.num);
@@ -9203,6 +9205,15 @@ for(const r of res.rows){
               setSeasonBoundary(node, entry, entry.num, entry.ts);
             }
           }
+        }
+
+        /* A remote reset/mark/unmark only updates boundary/nums above —
+           without this, the header pill (which reads lastDirect first)
+           keeps showing a stale episode number after syncing a reset
+           from another device, even though the episode grid and
+           Progress Editor (which read boundary directly) are correct. */
+        for(const node of touchedNodes){
+          recomputeEditorDisplayPointers(node);
         }
 
 store = normalizeAndDedupeStore(store);
