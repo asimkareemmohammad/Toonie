@@ -2,358 +2,366 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>Toonie Player</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
   /* ============================================================
-     SECTION 01 · BASE STYLES
-     Reset, body, player wrap, video element
+     SECTION 01 · BASE
      ============================================================ */
-
     *{ box-sizing: border-box; margin: 0; padding: 0; }
-
+    :root{
+      --accent: #D0BCFF;
+      --accent-soft: rgba(208,188,255,0.18);
+      --accent-line: rgba(208,188,255,0.45);
+      --txt-dim: rgba(255,255,255,0.65);
+    }
+    html, body{ height: 100%; }
     body{
       background: #000;
       color: #fff;
       font-family: "Roboto", system-ui, sans-serif;
-      height: 100vh;
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
-
-    #player-wrap{
-      position: fixed;
-      inset: 0;
-      background: #000;
-    }
-
+    #stage{ position: fixed; inset: 0; background: #000; }
+    #stage.hide-cursor{ cursor: none; }
     #main-video{
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
       background: #000;
     }
+    button{ font-family: inherit; }
 
   /* ============================================================
-     SECTION 02 · PLAYER UI OVERLAY
-     Top bar, middle controls, bottom bar
+     SECTION 02 · UI OVERLAY (scrims, top bar, center, bottom)
      ============================================================ */
-
     #ui{
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: opacity 0.3s ease;
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: space-between;
+      opacity: 1;
+      transition: opacity 0.25s ease;
     }
     #ui.hidden{ opacity: 0; pointer-events: none; }
 
+    #ui::before, #ui::after{
+      content: ""; position: absolute; left: 0; right: 0;
+      height: 30%; pointer-events: none;
+    }
+    #ui::before{ top: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent); }
+    #ui::after{ bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); }
+
     #top{
-      display: flex;
-      align-items: center;
-      padding: 14px 16px 24px;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.80) 0%, transparent 100%);
-      gap: 12px;
+      position: relative; z-index: 2;
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: max(14px, env(safe-area-inset-top)) 18px 0 18px;
     }
-
+    #title-block{ flex: 1; min-width: 0; }
     #title{
-      flex: 1;
-      font-size: 15px;
-      font-weight: 700;
-      color: #fff;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-      line-height: 1.3;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 16px; font-weight: 700; line-height: 1.35;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.7);
     }
-
+    #subtitle{
+      font-size: 12.5px; font-weight: 500; color: var(--txt-dim);
+      margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #queue-pos{
+      font-size: 11px; color: rgba(255,255,255,0.45);
+      margin-top: 3px; letter-spacing: 0.4px;
+    }
     #star-btn{
-      font-size: 24px;
-      color: #fff;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px 6px;
-      line-height: 1;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-      flex-shrink: 0;
+      font-size: 24px; color: #fff; background: none; border: none;
+      cursor: pointer; padding: 2px 4px; line-height: 1; flex-shrink: 0;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+      transition: transform 0.15s ease, color 0.15s ease;
     }
+    #star-btn.on{ color: var(--accent); }
+    #star-btn:active{ transform: scale(1.25); }
 
     #mid{
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 28px;
+      position: relative; z-index: 2;
+      display: flex; align-items: center; justify-content: center; gap: 22px;
     }
-
     .ctrl{
-      background: none;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      padding: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.9;
+      background: rgba(20,20,25,0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: none; color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      width: 48px; height: 48px;
+      transition: background 0.15s ease, transform 0.1s ease;
     }
-    .ctrl:active{ opacity: 0.6; }
+    .ctrl:active{ transform: scale(0.92); background: rgba(255,255,255,0.15); }
+    .ctrl svg{ width: 24px; height: 24px; fill: #fff; }
+    .ctrl.disabled{ opacity: 0.3; pointer-events: none; }
 
     #playpause{
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.95);
-      color: #000;
-      font-size: 26px;
+      width: 72px; height: 72px;
+      background: rgba(255,255,255,0.96);
     }
-
-    .ep-btn{ font-size: 30px; }
-    .seek-btn{ font-size: 22px; position: relative; }
+    #playpause svg{ width: 34px; height: 34px; fill: #000; }
 
     #bottom{
-      padding: 8px 16px 24px;
-      background: linear-gradient(to top, rgba(0,0,0,0.80) 0%, transparent 100%);
-    }
-
-    #seek{
-      width: 100%;
-      height: 4px;
-      accent-color: #fff;
-      cursor: pointer;
-      margin-bottom: 10px;
-      display: block;
-    }
-
-    #bottom-row{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    #time{
-      font-size: 13px;
-      color: #fff;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-    }
-
-    #right-btns{
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    #sleep-btn, #speed-btn, #fs-btn{
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 6px 8px;
-      opacity: 0.9;
-      white-space: nowrap;
-    }
-    #fs-btn{ font-size: 20px; }
-
-    #sleep-btn.active{
-      color: #D0BCFF;
-      opacity: 1;
+      position: relative; z-index: 2;
+      padding: 0 18px calc(14px + env(safe-area-inset-bottom)) 18px;
     }
 
   /* ============================================================
-     SECTION 03 · SLEEP TIMER OVERLAY
-     Shown when episode limit is reached
+     SECTION 03 · PROGRESS BAR (custom, with buffered track)
      ============================================================ */
-
-    #sleep-overlay{
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.82);
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 18px;
-      z-index: 100;
-    }
-    #sleep-overlay.show{ display: flex; }
-
-    #sleep-overlay .sleep-icon{
-      font-size: 48px;
-      line-height: 1;
-    }
-
-    #sleep-overlay .sleep-title{
-      font-size: 20px;
-      font-weight: 700;
-      color: #fff;
-      text-align: center;
-    }
-
-    #sleep-overlay .sleep-sub{
-      font-size: 14px;
-      color: rgba(255,255,255,0.65);
-      text-align: center;
-    }
-
-    #sleep-overlay .sleep-btns{
-      display: flex;
-      gap: 12px;
-      margin-top: 6px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    #sleep-overlay button{
-      padding: 10px 24px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 600;
+    #progress-hit{
+      position: relative;
+      padding: 12px 0;             /* generous touch target */
       cursor: pointer;
-      border: none;
+      touch-action: none;
     }
-
-    #sleep-continue-btn{
-      background: rgba(208,188,255,0.18);
-      border: 1px solid rgba(208,188,255,0.45) !important;
-      color: #D0BCFF;
+    #progress{
+      position: relative;
+      height: 4px; border-radius: 999px;
+      background: rgba(255,255,255,0.22);
+      transition: height 0.12s ease;
+      overflow: visible;
     }
+    #progress-hit:hover #progress,
+    #progress-hit.scrubbing #progress{ height: 7px; }
+    #prog-buffered, #prog-played{
+      position: absolute; top: 0; bottom: 0; left: 0;
+      border-radius: 999px; width: 0%;
+    }
+    #prog-buffered{ background: rgba(255,255,255,0.30); }
+    #prog-played{ background: var(--accent); }
+    #prog-thumb{
+      position: absolute; top: 50%; left: 0%;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--accent);
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform 0.12s ease;
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+      pointer-events: none;
+    }
+    #progress-hit:hover #prog-thumb,
+    #progress-hit.scrubbing #prog-thumb{ transform: translate(-50%, -50%) scale(1); }
+    #scrub-bubble{
+      position: absolute; bottom: 26px; left: 0;
+      transform: translateX(-50%);
+      background: rgba(15,15,20,0.9);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; font-size: 12px; font-weight: 600;
+      padding: 4px 10px; border-radius: 8px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.12s ease;
+      white-space: nowrap;
+    }
+    #progress-hit.scrubbing #scrub-bubble{ opacity: 1; }
 
-    #sleep-close-btn{
+    #bottom-row{
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 2px;
+    }
+    #time{
+      font-size: 13px; font-weight: 500; letter-spacing: 0.3px;
+      color: rgba(255,255,255,0.9);
+      font-variant-numeric: tabular-nums;
+    }
+    #right-btns{ display: flex; align-items: center; gap: 2px; }
+    .pill-btn{
+      background: none; border: none; color: #fff;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      padding: 8px 10px; opacity: 0.9; white-space: nowrap;
+      border-radius: 8px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .pill-btn:active{ background: rgba(255,255,255,0.12); }
+    .pill-btn svg{ width: 20px; height: 20px; fill: #fff; }
+    #sleep-btn.active{ color: var(--accent); opacity: 1; }
+    #sleep-btn.active svg{ fill: var(--accent); }
+
+  /* ============================================================
+     SECTION 04 · SPINNER, DOUBLE-TAP FLASH, TOAST
+     ============================================================ */
+    #spinner{
+      position: absolute; top: 50%; left: 50%;
+      width: 54px; height: 54px; margin: -27px 0 0 -27px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none; z-index: 5; pointer-events: none;
+    }
+    #spinner.show{ display: block; }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+
+    .tap-flash{
+      position: absolute; top: 0; bottom: 0; width: 34%;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 6px;
+      color: #fff; font-size: 15px; font-weight: 700;
+      opacity: 0; pointer-events: none; z-index: 4;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    }
+    .tap-flash svg{ width: 36px; height: 36px; fill: #fff; }
+    #tap-left{ left: 0; background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.12), transparent 70%); border-radius: 0 50% 50% 0; }
+    #tap-right{ right: 0; background: radial-gradient(circle at 70% 50%, rgba(255,255,255,0.12), transparent 70%); border-radius: 50% 0 0 50%; }
+    .tap-flash.flash{ animation: tapfade 0.5s ease; }
+    @keyframes tapfade{ 0%{opacity:0;} 25%{opacity:1;} 100%{opacity:0;} }
+
+    #toast{
+      position: fixed; bottom: 96px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-line);
+      color: var(--accent);
+      padding: 8px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 500;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.3s ease;
+      white-space: nowrap; z-index: 200;
+    }
+    #toast.show{ opacity: 1; }
+
+  /* ============================================================
+     SECTION 05 · SLEEP OVERLAY & ERROR CARD
+     ============================================================ */
+    .panel-overlay{
+      display: none; position: absolute; inset: 0;
+      background: rgba(0,0,0,0.85);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+      z-index: 100; padding: 24px; text-align: center;
+    }
+    .panel-overlay.show{ display: flex; }
+    .panel-overlay .icon{ font-size: 46px; line-height: 1; }
+    .panel-overlay .p-title{ font-size: 20px; font-weight: 700; }
+    .panel-overlay .p-sub{ font-size: 14px; color: var(--txt-dim); max-width: 420px; }
+    .panel-overlay .p-btns{ display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+    .panel-overlay button{
+      padding: 11px 26px; border-radius: 999px;
+      font-size: 14px; font-weight: 600; cursor: pointer; border: none;
+    }
+    .btn-primary{
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-line) !important;
+      color: var(--accent);
+    }
+    .btn-plain{
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.18) !important;
       color: rgba(255,255,255,0.75);
     }
-
-  /* ============================================================
-     SECTION 04 · MISC UI
-     Error state, wishlist toast
-     ============================================================ */
-
-    #error-msg{
-      display: none;
-      position: absolute;
-      inset: 0;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-      background: #111;
-      color: #fff;
-      font-size: 16px;
-      text-align: center;
-      padding: 24px;
-    }
-    #error-msg.show{ display: flex; }
-
-    #error-msg button{
-      background: rgba(208,188,255,0.2);
-      border: 1px solid rgba(208,188,255,0.4);
-      color: #D0BCFF;
-      padding: 10px 24px;
-      border-radius: 999px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    #wl-toast{
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(208,188,255,0.18);
-      border: 1px solid rgba(208,188,255,0.4);
-      color: #D0BCFF;
-      padding: 8px 20px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 500;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      white-space: nowrap;
-      z-index: 200;
-    }
-    #wl-toast.show{ opacity: 1; }
   </style>
 </head>
 <body>
 
 <!-- ============================================================
-     SECTION 05 · HTML STRUCTURE
-     Player wrap, video, UI overlay, sleep overlay, error, toast
+     SECTION 06 · HTML STRUCTURE
      ============================================================ -->
+<div id="stage">
+  <video id="main-video" playsinline preload="auto"></video>
 
-<div id="player-wrap">
-  <video id="main-video" playsinline></video>
+  <div id="spinner"></div>
+
+  <div id="tap-left" class="tap-flash">
+    <svg viewBox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+    <span>-5s</span>
+  </div>
+  <div id="tap-right" class="tap-flash">
+    <svg viewBox="0 0 24 24"><path d="M12 5V2l4 4-4 4V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/></svg>
+    <span>+15s</span>
+  </div>
 
   <div id="ui">
     <div id="top">
-      <div id="title">Now Playing</div>
-      <button id="star-btn">☆</button>
+      <div id="title-block">
+        <div id="title">Now Playing</div>
+        <div id="subtitle"></div>
+        <div id="queue-pos"></div>
+      </div>
+      <button id="star-btn" aria-label="Wishlist">☆</button>
     </div>
 
     <div id="mid">
-      <button class="ctrl ep-btn" id="prev-btn">⏮</button>
-      <button class="ctrl seek-btn" id="back5-btn">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
-          <path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-          <text x="12" y="15" text-anchor="middle" font-size="6" fill="white" font-weight="bold">5</text>
-        </svg>
+      <button class="ctrl" id="prev-btn" aria-label="Previous episode">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
       </button>
-      <button class="ctrl" id="playpause">▶</button>
-      <button class="ctrl seek-btn" id="fwd15-btn">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
-          <path d="M12 5V2l4 4-4 4V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
-          <text x="12" y="15" text-anchor="middle" font-size="6" fill="white" font-weight="bold">15</text>
-        </svg>
+      <button class="ctrl" id="back5-btn" aria-label="Back 5 seconds">
+        <svg viewBox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="12" y="15.5" text-anchor="middle" font-size="6.5" fill="#fff" font-weight="bold">5</text></svg>
       </button>
-      <button class="ctrl ep-btn" id="next-btn">⏭</button>
+      <button class="ctrl" id="playpause" aria-label="Play/Pause">
+        <svg id="pp-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="ctrl" id="fwd15-btn" aria-label="Forward 15 seconds">
+        <svg viewBox="0 0 24 24"><path d="M12 5V2l4 4-4 4V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/><text x="12" y="15.5" text-anchor="middle" font-size="6.5" fill="#fff" font-weight="bold">15</text></svg>
+      </button>
+      <button class="ctrl" id="next-btn" aria-label="Next episode">
+        <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg>
+      </button>
     </div>
 
     <div id="bottom">
-      <input type="range" id="seek" value="0" min="0" step="0.1">
+      <div id="progress-hit">
+        <div id="progress">
+          <div id="prog-buffered"></div>
+          <div id="prog-played"></div>
+          <div id="prog-thumb"></div>
+        </div>
+        <div id="scrub-bubble">0:00</div>
+      </div>
       <div id="bottom-row">
-        <div id="time">0:00 · 0:00</div>
+        <div id="time">0:00 / 0:00</div>
         <div id="right-btns">
-          <button id="sleep-btn">⏾</button>
-          <button id="speed-btn">1×</button>
-          <button id="fs-btn">⛶</button>
+          <button class="pill-btn" id="sleep-btn" aria-label="Sleep timer">
+            <svg viewBox="0 0 24 24"><path d="M12.34 2.02c-5.52-.19-10.06 4.2-10.06 9.67 0 5.35 4.34 9.69 9.69 9.69 3.97 0 7.38-2.39 8.88-5.81.25-.58-.36-1.17-.95-.94a7.7 7.7 0 0 1-2.85.54c-4.28 0-7.75-3.47-7.75-7.75 0-1.61.49-3.11 1.33-4.35.36-.53-.03-1.24-.66-1.22a9.4 9.4 0 0 0 2.37.17z" transform="scale(0.9) translate(1.2,1.2)"/></svg>
+            <span id="sleep-label"></span>
+          </button>
+          <button class="pill-btn" id="speed-btn">1×</button>
+          <button class="pill-btn" id="fs-btn" aria-label="Fullscreen">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="sleep-overlay">
-    <div class="sleep-icon">⏾</div>
-    <div class="sleep-title">Sleep limit reached</div>
-    <div class="sleep-sub" id="sleep-sub-text"></div>
-    <div class="sleep-btns">
-      <button id="sleep-continue-btn">Continue Watching</button>
-      <button id="sleep-close-btn">Close Tab</button>
+  <div id="sleep-overlay" class="panel-overlay">
+    <div class="icon">⏾</div>
+    <div class="p-title">Sleep limit reached</div>
+    <div class="p-sub" id="sleep-sub-text"></div>
+    <div class="p-btns">
+      <button id="sleep-continue-btn" class="btn-primary">Continue Watching</button>
+      <button id="sleep-close-btn" class="btn-plain">Close Tab</button>
     </div>
   </div>
 
-  <div id="error-msg">
-    <div>No video session found.</div>
-    <button onclick="window.close()">Close Tab</button>
+  <div id="error-card" class="panel-overlay">
+    <div class="icon">⚠️</div>
+    <div class="p-title">Playback problem</div>
+    <div class="p-sub" id="error-sub-text">This episode failed to load. The source might be slow or unavailable.</div>
+    <div class="p-btns">
+      <button id="error-retry-btn" class="btn-primary">Retry</button>
+      <button id="error-next-btn" class="btn-primary">Next Episode</button>
+      <button id="error-close-btn" class="btn-plain">Close Tab</button>
+    </div>
+  </div>
+
+  <div id="no-session" class="panel-overlay">
+    <div class="p-title">No video session found.</div>
+    <div class="p-btns">
+      <button class="btn-plain" onclick="window.close()">Close Tab</button>
+    </div>
   </div>
 </div>
 
-<div id="wl-toast"></div>
+<div id="toast"></div>
 
 <script>
 /* ============================================================
-   SECTION 06 · CONFIG & SESSION LOAD
-   Supabase credentials, storage keys, session parsing
+   SECTION 07 · CONFIG & SESSION LOAD
    ============================================================ */
 (function(){
 
@@ -364,8 +372,11 @@
   const ROOM_KEY          = "toonie_room_code_v1";
   const PENDING_KEY       = "toonie_pending_progress_v1";
   const SESSION_KEY       = "toonie_player_session_v1";
+  const RESUME_KEY        = "toonie_resume_v1";
+  const SPEED_KEY         = "toonie_player_speed_v1";
   const SPEEDS            = [0.5, 0.75, 1, 1.25, 1.5, 2];
   const SLEEP_OPTIONS     = [0, 1, 2, 3, 4, 5];
+  const TOMBSTONE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; /* 30 days */
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -373,7 +384,7 @@
   try{ session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); }catch(e){}
 
   if(!session || !Array.isArray(session.queue) || !session.queue.length){
-    document.getElementById("error-msg").classList.add("show");
+    document.getElementById("no-session").classList.add("show");
     return;
   }
 
@@ -381,39 +392,83 @@
   let currentIndex = Number(session.startIndex) || 0;
 
 /* ============================================================
-   SECTION 07 · DOM REFERENCES
+   SECTION 08 · DOM REFERENCES
    ============================================================ */
+  const $ = id => document.getElementById(id);
+  const stage        = $("stage");
+  const video        = $("main-video");
+  const ui           = $("ui");
+  const titleEl      = $("title");
+  const subtitleEl   = $("subtitle");
+  const queuePosEl   = $("queue-pos");
+  const starBtn      = $("star-btn");
+  const prevBtn      = $("prev-btn");
+  const nextBtn      = $("next-btn");
+  const back5        = $("back5-btn");
+  const fwd15        = $("fwd15-btn");
+  const ppBtn        = $("playpause");
+  const ppIcon       = $("pp-icon");
+  const progHit      = $("progress-hit");
+  const progBuffered = $("prog-buffered");
+  const progPlayed   = $("prog-played");
+  const progThumb    = $("prog-thumb");
+  const scrubBubble  = $("scrub-bubble");
+  const timeEl       = $("time");
+  const sleepBtn     = $("sleep-btn");
+  const sleepLabel   = $("sleep-label");
+  const speedBtn     = $("speed-btn");
+  const fsBtn        = $("fs-btn");
+  const spinner      = $("spinner");
+  const toast        = $("toast");
+  const tapLeft      = $("tap-left");
+  const tapRight     = $("tap-right");
+  const sleepOverlay = $("sleep-overlay");
+  const sleepSubText = $("sleep-sub-text");
+  const errorCard    = $("error-card");
+  const errorSubText = $("error-sub-text");
 
-  const video            = document.getElementById("main-video");
-  const ui               = document.getElementById("ui");
-  const titleEl          = document.getElementById("title");
-  const starBtn          = document.getElementById("star-btn");
-  const prevBtn          = document.getElementById("prev-btn");
-  const nextBtn          = document.getElementById("next-btn");
-  const back5            = document.getElementById("back5-btn");
-  const fwd15            = document.getElementById("fwd15-btn");
-  const ppBtn            = document.getElementById("playpause");
-  const seekBar          = document.getElementById("seek");
-  const timeEl           = document.getElementById("time");
-  const sleepBtn         = document.getElementById("sleep-btn");
-  const speedBtn         = document.getElementById("speed-btn");
-  const fsBtn            = document.getElementById("fs-btn");
-  const sleepOverlay     = document.getElementById("sleep-overlay");
-  const sleepSubText     = document.getElementById("sleep-sub-text");
-  const sleepContinueBtn = document.getElementById("sleep-continue-btn");
-  const sleepCloseBtn    = document.getElementById("sleep-close-btn");
-  const wlToast          = document.getElementById("wl-toast");
+  const ICON_PLAY  = "M8 5v14l11-7z";
+  const ICON_PAUSE = "M6 5h4v14H6zM14 5h4v14h-4z";
 
   let hideTimer = null;
   let speedIdx  = 2;
+  try{
+    const saved = SPEEDS.indexOf(parseFloat(localStorage.getItem(SPEED_KEY)));
+    if(saved >= 0) speedIdx = saved;
+  }catch(e){}
 
 /* ============================================================
-   SECTION 08 · SLEEP TIMER
-   State: sleepLimitIdx (cycles 0-5), sleepRemaining (countdown).
-   Only natural episode end (video ended event) counts.
-   Manual Next button does NOT count toward the limit.
+   SECTION 09 · SMALL UTILITIES
    ============================================================ */
+  function fmt(s){
+    s = Math.floor(Number.isFinite(s) ? s : 0);
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    if(h > 0) return h + ":" + String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+    return m + ":" + (sec < 10 ? "0" : "") + sec;
+  }
 
+  function safeDuration(){
+    return Number.isFinite(video.duration) ? video.duration : 0;
+  }
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  /* Split "Doraemon • Season 2 • Episode 14" into title / subtitle */
+  function splitTitle(full){
+    const parts = String(full || "").split("•").map(x => x.trim()).filter(Boolean);
+    if(parts.length <= 1) return { main: full || "Now Playing", sub: "" };
+    return { main: parts[0], sub: parts.slice(1).join("  ·  ") };
+  }
+
+/* ============================================================
+   SECTION 10 · SLEEP TIMER (unchanged behavior)
+   Natural episode ends count; manual Next does not.
+   ============================================================ */
   let sleepLimitIdx  = 0;
   let sleepRemaining = 0;
 
@@ -421,10 +476,10 @@
 
   function refreshSleepBtn(){
     if(sleepLimit() === 0){
-      sleepBtn.textContent = "⏾";
+      sleepLabel.textContent = "";
       sleepBtn.classList.remove("active");
     } else {
-      sleepBtn.textContent = "⏾ " + sleepRemaining;
+      sleepLabel.textContent = String(sleepRemaining);
       sleepBtn.classList.add("active");
     }
   }
@@ -433,6 +488,7 @@
     sleepLimitIdx  = (sleepLimitIdx + 1) % SLEEP_OPTIONS.length;
     sleepRemaining = sleepLimit();
     refreshSleepBtn();
+    showToast(sleepLimit() === 0 ? "Sleep timer off" : `Sleep after ${sleepLimit()} episode${sleepLimit() !== 1 ? "s" : ""}`);
     showUI();
   }
 
@@ -442,8 +498,7 @@
     refreshSleepBtn();
     if(sleepRemaining === 0){
       const n = sleepLimit();
-      sleepSubText.textContent =
-        `You watched ${n} episode${n !== 1 ? "s" : ""}. Time to rest!`;
+      sleepSubText.textContent = `You watched ${n} episode${n !== 1 ? "s" : ""}. Time to rest!`;
       sleepOverlay.classList.add("show");
       ui.classList.add("hidden");
       return true;
@@ -459,21 +514,19 @@
   }
 
   sleepBtn.addEventListener("click", cycleSleepLimit);
-
-  sleepContinueBtn.addEventListener("click", () => {
+  $("sleep-continue-btn").addEventListener("click", () => {
     dismissSleepOverlay();
     if(currentIndex < queue.length - 1) loadAndPlay(currentIndex + 1);
     showUI();
   });
-
-  sleepCloseBtn.addEventListener("click", () => window.close());
+  $("sleep-close-btn").addEventListener("click", () => window.close());
 
 /* ============================================================
-   SECTION 09 · WATCH TRACKING
-   30% watch time + 70% position reached = qualified
-   On qualify: save to pending progress in localStorage
+   SECTION 11 · WATCH TRACKING & PENDING PROGRESS
+   30% watch time + 70% position reached = qualified.
+   Writes to toonie_pending_progress_v1; index.html consumes it
+   instantly via its "storage" event listener.
    ============================================================ */
-
   let watchedMs = 0, maxPositionSec = 0, lastTickTime = null, qualified = false;
   let tickInterval = null;
 
@@ -487,7 +540,7 @@
       watchedMs += (Date.now() - lastTickTime);
     }
     lastTickTime = Date.now();
-    const dur = video.duration || 0;
+    const dur = safeDuration();
     const pos = video.currentTime || 0;
     if(pos > maxPositionSec) maxPositionSec = pos;
     if(!qualified && dur > 0){
@@ -496,16 +549,11 @@
         saveProgress(queue[currentIndex]);
       }
     }
+    maybeSaveResume();
   }
 
-  function startTick(){ tickInterval = setInterval(tickWatch, 250); }
+  function startTick(){ if(!tickInterval) tickInterval = setInterval(tickWatch, 250); }
   function stopTick(){ clearInterval(tickInterval); tickInterval = null; lastTickTime = null; }
-
-/* ============================================================
-   SECTION 10 · PROGRESS SAVING
-   Writes entry to toonie_pending_progress_v1.
-   Main tab reads this on focus and applies via applyProgress()
-   ============================================================ */
 
   function saveProgress(item){
     if(!item || !item.cartoonLabel) return;
@@ -523,17 +571,87 @@
       const existing = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
       existing.push(entry);
       localStorage.setItem(PENDING_KEY, JSON.stringify(existing));
-    }catch(e){}
+    }catch(e){ console.warn("saveProgress failed:", e); }
   }
 
 /* ============================================================
-   SECTION 11 · WISHLIST
-   Read/write toonie_wishlist_v1, push snapshot to Supabase
+   SECTION 12 · RESUME POSITIONS
+   Saves currentTime every ~5s; restores on load if the saved
+   spot is >10s in and <95% through.
    ============================================================ */
+  let lastResumeSave = 0;
 
+  function resumeKeyOf(item){
+    return [
+      item.cartoonLabel || "",
+      String(item.seriesLabel || "").trim() || "-",
+      item.type || "season",
+      item.seasonOrMovie || "",
+      Number(item.num) || 0
+    ].join("|");
+  }
+
+  function loadResumeStore(){
+    try{
+      const s = JSON.parse(localStorage.getItem(RESUME_KEY) || "{}");
+      return (s && typeof s === "object") ? s : {};
+    }catch(e){ return {}; }
+  }
+
+  function saveResumeStore(store){
+    try{
+      const keys = Object.keys(store);
+      if(keys.length > 200){
+        keys.sort((a, b) => String(store[a].ts || "").localeCompare(String(store[b].ts || "")));
+        for(const k of keys.slice(0, keys.length - 200)) delete store[k];
+      }
+      localStorage.setItem(RESUME_KEY, JSON.stringify(store));
+    }catch(e){}
+  }
+
+  function maybeSaveResume(force){
+    const now = Date.now();
+    if(!force && now - lastResumeSave < 5000) return;
+    lastResumeSave = now;
+    const item = queue[currentIndex];
+    const dur = safeDuration();
+    if(!item || dur <= 0) return;
+    const store = loadResumeStore();
+    const key = resumeKeyOf(item);
+    if(video.currentTime >= dur * 0.95 || video.ended){
+      delete store[key];
+    } else if(video.currentTime > 10){
+      store[key] = { t: Math.floor(video.currentTime), ts: new Date().toISOString() };
+    } else {
+      saveResumeStore(store);
+      return;
+    }
+    saveResumeStore(store);
+  }
+
+  function getResumePoint(item){
+    const store = loadResumeStore();
+    const rec = store[resumeKeyOf(item)];
+    return rec && Number(rec.t) > 10 ? Number(rec.t) : 0;
+  }
+
+  function clearResume(item){
+    const store = loadResumeStore();
+    delete store[resumeKeyOf(item)];
+    saveResumeStore(store);
+  }
+
+  window.addEventListener("pagehide", () => maybeSaveResume(true));
+
+/* ============================================================
+   SECTION 13 · WISHLIST (with tombstones)
+   Removing marks {deleted:true, ts:now} instead of splicing,
+   so deletions sync correctly across devices instead of
+   resurrecting. Matches index.html's tombstone logic.
+   ============================================================ */
   function normSeries(s){
     const v = s == null ? null : String(s).trim();
-    if(!v || v === "-" || v.toLowerCase() === "null" || v.toLowerCase() === "none") return null;
+    if(!v || v === "-" || v.toLowerCase() === "null" || v.toLowerCase() === "none" || v.toLowerCase() === "undefined") return null;
     return v;
   }
 
@@ -547,37 +665,52 @@
     ].join("|");
   }
 
-  function isWishlisted(item){
+  function loadWlList(){
     try{
       const store = JSON.parse(localStorage.getItem(WISHLIST_KEY) || "{}");
-      return (store[profile] || []).some(x => wlKey(x) === wlKey(item));
-    }catch(e){ return false; }
+      if(!store[profile] || !Array.isArray(store[profile])) store[profile] = [];
+      return { store, list: store[profile] };
+    }catch(e){ return { store: {}, list: [] }; }
+  }
+
+  function isWishlisted(item){
+    const { list } = loadWlList();
+    const key = wlKey(item);
+    return list.some(x => !x.deleted && wlKey(x) === key);
   }
 
   function toggleWishlist(item){
     try{
-      const store = JSON.parse(localStorage.getItem(WISHLIST_KEY) || "{}");
-      if(!store[profile]) store[profile] = [];
-      const list = store[profile];
-      const idx  = list.findIndex(x => wlKey(x) === wlKey(item));
-      let added  = false;
-      if(idx >= 0){
-        list.splice(idx, 1);
+      const { store, list } = loadWlList();
+      const key = wlKey(item);
+      const idx = list.findIndex(x => wlKey(x) === key);
+      let added = false;
+
+      if(idx >= 0 && !list[idx].deleted){
+        list[idx] = { ...list[idx], deleted: true, ts: new Date().toISOString() };
       } else {
-        list.unshift({
+        const fresh = {
           cartoonLabel: item.cartoonLabel || "",
           seriesLabel:  String(item.seriesLabel || "").trim(),
           type:         item.type || "season",
           seasonOrMovie:item.seasonOrMovie || "",
           num:          Number(item.num) || 0,
-          ts:           new Date().toISOString()
-        });
+          ts:           new Date().toISOString(),
+          deleted:      false
+        };
+        if(idx >= 0) list.splice(idx, 1);
+        list.unshift(fresh);
         added = true;
       }
+
+      /* GC old tombstones */
+      const cutoff = Date.now() - TOMBSTONE_MAX_AGE_MS;
+      store[profile] = list.filter(x => !x.deleted || (new Date(x.ts).getTime() || 0) > cutoff);
+
       localStorage.setItem(WISHLIST_KEY, JSON.stringify(store));
       pushWishlistToCloud(store[profile]);
       return added;
-    }catch(e){ return false; }
+    }catch(e){ console.warn("toggleWishlist failed:", e); return false; }
   }
 
   async function pushWishlistToCloud(items){
@@ -589,68 +722,285 @@
         items_json: Array.isArray(items) ? items : [],
         updated_at: new Date().toISOString()
       }, { onConflict: "room_code,profile" });
-    }catch(e){}
+    }catch(e){ console.warn("wishlist cloud push failed:", e); }
   }
 
   function refreshStar(){
-    starBtn.textContent = isWishlisted(queue[currentIndex]) ? "★" : "☆";
-  }
-
-  function showToast(msg){
-    wlToast.textContent = msg;
-    wlToast.classList.add("show");
-    clearTimeout(wlToast._timer);
-    wlToast._timer = setTimeout(() => wlToast.classList.remove("show"), 2000);
+    const on = isWishlisted(queue[currentIndex]);
+    starBtn.textContent = on ? "★" : "☆";
+    starBtn.classList.toggle("on", on);
   }
 
 /* ============================================================
-   SECTION 12 · PLAYBACK
-   loadAndPlay(), showUI(), fmt(), refreshPrevNext()
+   SECTION 14 · BUFFERING SPINNER & ERROR HANDLING
    ============================================================ */
+  let spinnerDelay = null;
 
-  function fmt(s){
-    s = Math.floor(s || 0);
-    return Math.floor(s/60) + ":" + (s%60 < 10 ? "0" : "") + (s%60);
+  function setBuffering(on){
+    clearTimeout(spinnerDelay);
+    if(on){
+      /* small delay so quick seeks don't flicker the spinner */
+      spinnerDelay = setTimeout(() => spinner.classList.add("show"), 180);
+    } else {
+      spinner.classList.remove("show");
+    }
+  }
+
+  video.addEventListener("loadstart", () => setBuffering(true));
+  video.addEventListener("waiting",   () => setBuffering(true));
+  video.addEventListener("stalled",   () => setBuffering(true));
+  video.addEventListener("seeking",   () => setBuffering(true));
+  video.addEventListener("playing",   () => { setBuffering(false); hideError(); });
+  video.addEventListener("canplay",   () => setBuffering(false));
+  video.addEventListener("seeked",    () => { if(video.readyState >= 3) setBuffering(false); });
+
+  function showError(){
+    setBuffering(false);
+    errorCard.classList.add("show");
+    ui.classList.add("hidden");
+    $("error-next-btn").style.display = currentIndex < queue.length - 1 ? "" : "none";
+  }
+  function hideError(){ errorCard.classList.remove("show"); }
+
+  video.addEventListener("error", () => {
+    if(!video.currentSrc) return;
+    console.warn("Video error:", video.error);
+    showError();
+  });
+
+  $("error-retry-btn").addEventListener("click", () => {
+    hideError();
+    const pos = video.currentTime || getResumePoint(queue[currentIndex]);
+    loadAndPlay(currentIndex, pos);
+  });
+  $("error-next-btn").addEventListener("click", () => {
+    hideError();
+    if(currentIndex < queue.length - 1) loadAndPlay(currentIndex + 1);
+  });
+  $("error-close-btn").addEventListener("click", () => window.close());
+
+/* ============================================================
+   SECTION 15 · MEDIA SESSION (lock screen / hardware keys)
+   ============================================================ */
+  function updateMediaSession(item){
+    if(!("mediaSession" in navigator)) return;
+    try{
+      const t = splitTitle(item.title);
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: t.sub || t.main,
+        artist: t.sub ? t.main : "Toonie",
+        album: "Toonie"
+      });
+      navigator.mediaSession.setActionHandler("play",  () => video.play().catch(() => {}));
+      navigator.mediaSession.setActionHandler("pause", () => video.pause());
+      navigator.mediaSession.setActionHandler("previoustrack", currentIndex > 0 ? () => loadAndPlay(currentIndex - 1) : null);
+      navigator.mediaSession.setActionHandler("nexttrack", currentIndex < queue.length - 1 ? () => loadAndPlay(currentIndex + 1) : null);
+      navigator.mediaSession.setActionHandler("seekbackward", () => seekBy(-5));
+      navigator.mediaSession.setActionHandler("seekforward",  () => seekBy(15));
+      navigator.mediaSession.setActionHandler("seekto", (d) => {
+        if(Number.isFinite(d.seekTime)) video.currentTime = d.seekTime;
+      });
+    }catch(e){}
+  }
+
+/* ============================================================
+   SECTION 16 · PLAYBACK CORE
+   ============================================================ */
+  function setPpIcon(playing){
+    ppIcon.innerHTML = `<path d="${playing ? ICON_PAUSE : ICON_PLAY}"/>`;
   }
 
   function refreshPrevNext(){
-    prevBtn.style.opacity = currentIndex > 0 ? "1" : "0.3";
-    nextBtn.style.opacity = currentIndex < queue.length - 1 ? "1" : "0.3";
+    prevBtn.classList.toggle("disabled", currentIndex <= 0);
+    nextBtn.classList.toggle("disabled", currentIndex >= queue.length - 1);
   }
 
-  function loadAndPlay(idx){
+  function seekBy(delta){
+    const dur = safeDuration();
+    let t = (video.currentTime || 0) + delta;
+    if(t < 0) t = 0;
+    if(dur > 0 && t > dur) t = dur;   /* only clamp when duration is known */
+    video.currentTime = t;
+  }
+
+  function loadAndPlay(idx, resumeAt){
     if(idx < 0 || idx >= queue.length) return;
     currentIndex = idx;
     resetWatchState();
+    hideError();
+
     const item = queue[idx];
+    const t = splitTitle(item.title);
+    titleEl.textContent    = t.main;
+    subtitleEl.textContent = t.sub;
+    queuePosEl.textContent = queue.length > 1 ? `${idx + 1} of ${queue.length} in queue` : "";
+    document.title = item.title || "Toonie Player";
+
+    const startAt = Number.isFinite(resumeAt) ? resumeAt : getResumePoint(item);
+
     video.src = item.url;
     video.load();
-    video.play().catch(() => {});
-    titleEl.textContent = item.title || "Now Playing";
-    document.title      = item.title || "Toonie Player";
+    video.playbackRate = SPEEDS[speedIdx];   /* load() resets rate — reapply */
+
+    if(startAt > 0){
+      video.addEventListener("loadedmetadata", function once(){
+        video.removeEventListener("loadedmetadata", once);
+        const dur = safeDuration();
+        if(dur > 0 && startAt < dur * 0.95){
+          video.currentTime = startAt;
+          if(!Number.isFinite(resumeAt)) showToast("Resumed from " + fmt(startAt));
+        }
+      });
+    }
+
+    video.play().catch(() => { setPpIcon(false); });
+
     refreshStar();
     refreshPrevNext();
-    ppBtn.textContent = "⏸";
-  }
-
-  function showUI(){
-    ui.classList.remove("hidden");
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      if(!video.paused) ui.classList.add("hidden");
-    }, 3000);
+    updateMediaSession(item);
+    updateProgressUI();
+    showUI();
   }
 
 /* ============================================================
-   SECTION 13 · EVENT LISTENERS
-   Button clicks, video events, keyboard shortcuts
+   SECTION 17 · PROGRESS BAR (scrub-safe, buffered track)
    ============================================================ */
+  let scrubbing = false;
 
-  ppBtn.addEventListener("click", () => {
-    if(video.paused){ video.play(); ppBtn.textContent = "⏸"; }
-    else { video.pause(); ppBtn.textContent = "▶"; }
+  function pctFromEvent(e){
+    const rect = progHit.getBoundingClientRect();
+    let p = (e.clientX - rect.left) / rect.width;
+    return Math.min(1, Math.max(0, p));
+  }
+
+  function renderBar(pct){
+    progPlayed.style.width = (pct * 100) + "%";
+    progThumb.style.left   = (pct * 100) + "%";
+  }
+
+  function updateBuffered(){
+    const dur = safeDuration();
+    if(dur <= 0){ progBuffered.style.width = "0%"; return; }
+    const cur = video.currentTime || 0;
+    let end = 0;
+    for(let i = 0; i < video.buffered.length; i++){
+      if(video.buffered.start(i) <= cur && video.buffered.end(i) >= cur){
+        end = video.buffered.end(i);
+        break;
+      }
+      if(video.buffered.end(i) > end) end = video.buffered.end(i);
+    }
+    progBuffered.style.width = Math.min(100, (end / dur) * 100) + "%";
+  }
+
+  function updateProgressUI(){
+    if(scrubbing) return;                    /* never fight the user's drag */
+    const dur = safeDuration();
+    const cur = video.currentTime || 0;
+    renderBar(dur > 0 ? cur / dur : 0);
+    timeEl.textContent = fmt(cur) + " / " + fmt(dur);
+    updateBuffered();
+  }
+
+  progHit.addEventListener("pointerdown", (e) => {
+    if(safeDuration() <= 0) return;
+    scrubbing = true;
+    progHit.classList.add("scrubbing");
+    progHit.setPointerCapture(e.pointerId);
+    previewScrub(e);
     showUI();
   });
+
+  progHit.addEventListener("pointermove", (e) => {
+    if(scrubbing) previewScrub(e);
+  });
+
+  function previewScrub(e){
+    const pct = pctFromEvent(e);
+    renderBar(pct);
+    const t = pct * safeDuration();
+    scrubBubble.textContent = fmt(t);
+    scrubBubble.style.left = (pct * 100) + "%";
+    timeEl.textContent = fmt(t) + " / " + fmt(safeDuration());
+  }
+
+  progHit.addEventListener("pointerup", (e) => {
+    if(!scrubbing) return;
+    const pct = pctFromEvent(e);
+    video.currentTime = pct * safeDuration();   /* one seek, on release */
+    scrubbing = false;
+    progHit.classList.remove("scrubbing");
+    maybeSaveResume(true);
+    showUI();
+  });
+
+  progHit.addEventListener("pointercancel", () => {
+    scrubbing = false;
+    progHit.classList.remove("scrubbing");
+    updateProgressUI();
+  });
+
+/* ============================================================
+   SECTION 18 · UI VISIBILITY, TAP & DOUBLE-TAP
+   Single tap: toggle UI. Double tap left/right: −5s / +15s.
+   ============================================================ */
+  function showUI(){
+    ui.classList.remove("hidden");
+    stage.classList.remove("hide-cursor");
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if(!video.paused && !scrubbing){
+        ui.classList.add("hidden");
+        stage.classList.add("hide-cursor");
+      }
+    }, 3000);
+  }
+
+  let lastTap = { time: 0, zone: "" };
+
+  stage.addEventListener("pointerup", (e) => {
+    if(e.target.closest("button") || e.target.closest("#bottom") || e.target.closest(".panel-overlay")) return;
+
+    const w = stage.getBoundingClientRect().width;
+    const x = e.clientX;
+    const zone = x < w * 0.34 ? "left" : (x > w * 0.66 ? "right" : "center");
+    const now = Date.now();
+
+    if(now - lastTap.time < 300 && lastTap.zone === zone && zone !== "center"){
+      /* double tap */
+      if(zone === "left"){ seekBy(-5); flashTap(tapLeft); }
+      else { seekBy(15); flashTap(tapRight); }
+      lastTap = { time: 0, zone: "" };
+      showUI();
+      return;
+    }
+    lastTap = { time: now, zone };
+
+    if(ui.classList.contains("hidden")) showUI();
+    else if(zone === "center" || e.pointerType === "mouse") showUI();
+    else { ui.classList.add("hidden"); }
+  });
+
+  stage.addEventListener("pointermove", (e) => {
+    if(e.pointerType === "mouse") showUI();
+  });
+
+  function flashTap(el){
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+  }
+
+/* ============================================================
+   SECTION 19 · CONTROL EVENTS
+   ============================================================ */
+  function togglePlay(){
+    if(video.paused) video.play().catch(() => {});
+    else video.pause();
+    showUI();
+  }
+
+  ppBtn.addEventListener("click", togglePlay);
 
   prevBtn.addEventListener("click", () => {
     if(currentIndex > 0) loadAndPlay(currentIndex - 1);
@@ -663,8 +1013,8 @@
     showUI();
   });
 
-  back5.addEventListener("click",  () => { video.currentTime = Math.max(0, video.currentTime - 5); showUI(); });
-  fwd15.addEventListener("click",  () => { video.currentTime = Math.min(video.duration||0, video.currentTime + 15); showUI(); });
+  back5.addEventListener("click", () => { seekBy(-5);  showUI(); });
+  fwd15.addEventListener("click", () => { seekBy(15);  showUI(); });
 
   starBtn.addEventListener("click", () => {
     const item = queue[currentIndex];
@@ -677,57 +1027,66 @@
 
   speedBtn.addEventListener("click", () => {
     speedIdx = (speedIdx + 1) % SPEEDS.length;
-    video.playbackRate   = SPEEDS[speedIdx];
+    video.playbackRate = SPEEDS[speedIdx];
     speedBtn.textContent = SPEEDS[speedIdx] + "×";
+    try{ localStorage.setItem(SPEED_KEY, String(SPEEDS[speedIdx])); }catch(e){}
     showUI();
   });
 
   fsBtn.addEventListener("click", () => {
-    if(!document.fullscreenElement) document.getElementById("player-wrap").requestFullscreen?.();
+    if(!document.fullscreenElement) stage.requestFullscreen?.();
     else document.exitFullscreen?.();
     showUI();
   });
 
-  seekBar.addEventListener("input", () => {
-    video.currentTime = parseFloat(seekBar.value);
+  video.addEventListener("timeupdate", updateProgressUI);
+  video.addEventListener("progress", updateBuffered);
+  video.addEventListener("durationchange", updateProgressUI);
+
+  video.addEventListener("play",  () => { setPpIcon(true);  startTick(); showUI(); });
+  video.addEventListener("pause", () => {
+    setPpIcon(false);
+    stopTick();
+    maybeSaveResume(true);
     showUI();
   });
-
-  video.addEventListener("timeupdate", () => {
-    const cur = video.currentTime||0, dur = video.duration||0;
-    seekBar.max = dur; seekBar.value = cur;
-    timeEl.textContent = fmt(cur) + " · " + fmt(dur);
-  });
-
-  video.addEventListener("play",  () => { ppBtn.textContent = "⏸"; startTick(); });
-  video.addEventListener("pause", () => { ppBtn.textContent = "▶";  stopTick();  });
 
   video.addEventListener("ended", () => {
     stopTick();
     tickWatch();
+    clearResume(queue[currentIndex]);
     const blocked = onEpisodeNaturalEnd();
     if(!blocked && currentIndex < queue.length - 1){
       loadAndPlay(currentIndex + 1);
+    } else if(!blocked){
+      setPpIcon(false);
+      showUI();
     }
   });
 
-  document.getElementById("player-wrap").addEventListener("click", (e) => {
-    if(e.target === document.getElementById("player-wrap") || e.target === video) showUI();
-  });
-
+/* ============================================================
+   SECTION 20 · KEYBOARD SHORTCUTS
+   ============================================================ */
   document.addEventListener("keydown", (e) => {
-    if(sleepOverlay.classList.contains("show")) return;
-    if(e.code === "Space")      { e.preventDefault(); ppBtn.click(); }
-    if(e.code === "ArrowRight") { video.currentTime += 15; showUI(); }
-    if(e.code === "ArrowLeft")  { video.currentTime -= 5;  showUI(); }
-    if(e.code === "KeyF")       { fsBtn.click(); }
+    if(sleepOverlay.classList.contains("show") || errorCard.classList.contains("show")) return;
+    const tag = document.activeElement?.tagName;
+    if(tag === "INPUT" || tag === "TEXTAREA") return;
+
+    switch(e.code){
+      case "Space":      e.preventDefault(); togglePlay(); break;
+      case "ArrowRight": e.preventDefault(); seekBy(15); showUI(); break;
+      case "ArrowLeft":  e.preventDefault(); seekBy(-5); showUI(); break;
+      case "KeyF":       fsBtn.click(); break;
+      case "KeyN":       nextBtn.click(); break;
+      case "KeyP":       prevBtn.click(); break;
+      case "KeyM":       video.muted = !video.muted; showToast(video.muted ? "Muted" : "Unmuted"); showUI(); break;
+    }
   });
 
 /* ============================================================
-   SECTION 14 · INIT
-   Start playback from session index, init sleep button
+   SECTION 21 · INIT
    ============================================================ */
-
+  speedBtn.textContent = SPEEDS[speedIdx] + "×";
   loadAndPlay(currentIndex);
   refreshSleepBtn();
 
