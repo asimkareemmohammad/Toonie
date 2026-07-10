@@ -179,6 +179,90 @@
 .card .section-title{
   margin-bottom: 14px;
 }
+
+.sync-profile-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.sync-profile-header .sync-profile-title{
+  margin-bottom: 0;
+}
+
+.sync-lock-btn{
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--md-surface-2);
+  border: 1px solid var(--md-outline-strong);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--t-fast) ease, border-color var(--t-fast) ease;
+}
+.sync-lock-btn.locked{
+  background: rgba(208,188,255,0.16);
+  border-color: rgba(208,188,255,0.35);
+}
+.sync-lock-btn:active{ background: var(--md-surface-3); }
+
+.sync-lock-btn .lock-icon{
+  width: 18px;
+  height: 18px;
+  position: relative;
+  z-index: 2;
+}
+.sync-lock-btn .lock-icon path{
+  fill: var(--md-text-soft);
+  transition: fill var(--t-fast) ease;
+}
+.sync-lock-btn.locked .lock-icon path{
+  fill: var(--md-primary);
+}
+
+/* Hold-to-unlock progress ring — hidden until a hold is in progress */
+.sync-lock-btn .lock-ring{
+  position: absolute;
+  inset: -1px;
+  width: 40px;
+  height: 40px;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+.lock-ring-track{
+  fill: none;
+  stroke: transparent;
+}
+.lock-ring-progress{
+  fill: none;
+  stroke: var(--md-primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 106.8; /* 2 * PI * r(17) */
+  stroke-dashoffset: 106.8;
+  opacity: 0;
+  transition: opacity var(--t-fast) ease;
+}
+.sync-lock-btn.holding .lock-ring-progress{
+  opacity: 1;
+  transition: stroke-dashoffset linear, opacity var(--t-fast) ease;
+}
+
+/* Locked state: controls stay visible but become inert and dimmed.
+   pointer-events:none on the wrapped controls would also block the
+   lock button itself if it shared the same container, which is why
+   the lock button lives in its own header row instead. */
+.lockable.is-locked{
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(0.3);
+  transition: opacity var(--t-fast) ease, filter var(--t-fast) ease;
+}
     
 
     .section-hint{
@@ -2418,14 +2502,23 @@ body.tv-mode .episode-panel.open{
   <section class="section">
 
 <div class="card sync-profile-card">
-  <h2 class="section-title sync-profile-title">Profile & Sync</h2>
+  <div class="sync-profile-header">
+    <h2 class="section-title sync-profile-title">Profile & Sync</h2>
+    <button type="button" id="syncLockBtn" class="sync-lock-btn" aria-label="Lock profile and sync controls">
+      <svg class="lock-ring" viewBox="0 0 40 40" aria-hidden="true">
+        <circle class="lock-ring-track" cx="20" cy="20" r="17"></circle>
+        <circle class="lock-ring-progress" id="lockRingProgress" cx="20" cy="20" r="17"></circle>
+      </svg>
+      <svg class="lock-icon" viewBox="0 0 24 24" aria-hidden="true"><path id="lockIconPath" d=""/></svg>
+    </button>
+  </div>
 
-  <div class="seg" id="profileSeg">
+  <div class="seg lockable" id="profileSeg">
     <button class="md-btn md-outlined" type="button" data-profile="Asim">Asim</button>
     <button class="md-btn md-outlined" type="button" data-profile="Marwa">Marwa</button>
   </div>
 
-  <div class="sync-room-row">
+  <div class="sync-room-row lockable" id="syncRoomRow">
     <div class="field">
       <input id="roomInput" class="input" type="text" placeholder="Example: Asim123">
     </div>
@@ -8120,6 +8213,10 @@ function syncSdMoviePanel(){
     function initTracker(){
       const profileSeg = document.getElementById("profileSeg");
       const modeSeg = document.getElementById("modeSeg");
+      const syncLockBtn = document.getElementById("syncLockBtn");
+      const lockIconPath = document.getElementById("lockIconPath");
+      const lockRingProgress = document.getElementById("lockRingProgress");
+      const syncRoomRow = document.getElementById("syncRoomRow");
 
 const savePanel = document.getElementById("savePanel");
 const recentPanel = document.getElementById("recentPanel");
@@ -8208,6 +8305,86 @@ let progressResetTimer = null;
       const roomInput = document.getElementById("roomInput");
       const roomSaveBtn = document.getElementById("roomSaveBtn");
       const roomStatus = document.getElementById("roomStatus");
+
+/* ============================================================
+   SECTION 28b · SYNC LOCK — UI-only safeguard against accidental
+   profile switches / room code edits. Not authentication — just a
+   hold-to-unlock guard on top of controls that are otherwise a
+   single misplaced tap away from silently changing where progress
+   gets saved. Persists across restarts via localStorage.
+   ============================================================ */
+const SYNC_LOCK_KEY = "toonie_sync_lock_v1";
+const LOCK_ICON_PATH_LOCKED = "M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z";
+const LOCK_ICON_PATH_OPEN   = "M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z";
+const LOCK_HOLD_MS = 2500;
+
+function isSyncLocked(){
+  try{ return localStorage.getItem(SYNC_LOCK_KEY) === "1"; }
+  catch(e){ return false; }
+}
+
+function applyLockUI(locked){
+  if(!syncLockBtn) return;
+  syncLockBtn.classList.toggle("locked", locked);
+  if(lockIconPath) lockIconPath.setAttribute("d", locked ? LOCK_ICON_PATH_LOCKED : LOCK_ICON_PATH_OPEN);
+  syncLockBtn.setAttribute("aria-label", locked
+    ? "Profile and sync locked — hold to unlock"
+    : "Lock profile and sync controls");
+  if(profileSeg) profileSeg.classList.toggle("is-locked", locked);
+  if(syncRoomRow) syncRoomRow.classList.toggle("is-locked", locked);
+}
+
+function setSyncLockedState(locked){
+  try{ localStorage.setItem(SYNC_LOCK_KEY, locked ? "1" : "0"); }catch(e){}
+  applyLockUI(locked);
+}
+
+if(syncLockBtn){
+  let lockHoldTimer = null;
+
+  function cancelLockHold(){
+    clearTimeout(lockHoldTimer);
+    lockHoldTimer = null;
+    syncLockBtn.classList.remove("holding");
+    if(lockRingProgress){
+      lockRingProgress.style.transitionDuration = "0s";
+      lockRingProgress.style.strokeDashoffset = "106.8";
+    }
+  }
+
+  function startLockHold(){
+    if(!isSyncLocked()) return;   /* hold gesture only applies while locked */
+    syncLockBtn.classList.add("holding");
+    if(lockRingProgress){
+      lockRingProgress.style.transitionDuration = "0s";
+      lockRingProgress.style.strokeDashoffset = "106.8";
+      void lockRingProgress.offsetWidth;   /* force reflow so the fill animates from full */
+      lockRingProgress.style.transitionDuration = LOCK_HOLD_MS + "ms";
+      lockRingProgress.style.strokeDashoffset = "0";
+    }
+    lockHoldTimer = setTimeout(() => {
+      vib();
+      setSyncLockedState(false);
+      cancelLockHold();
+    }, LOCK_HOLD_MS);
+  }
+
+  syncLockBtn.addEventListener("pointerdown", startLockHold);
+  syncLockBtn.addEventListener("pointerup", cancelLockHold);
+  syncLockBtn.addEventListener("pointerleave", cancelLockHold);
+  syncLockBtn.addEventListener("pointercancel", cancelLockHold);
+
+  /* click (fires after pointerup) only handles the instant "lock" action;
+     unlocking is entirely gated behind the hold gesture above */
+  syncLockBtn.addEventListener("click", () => {
+    if(!isSyncLocked()){
+      vib();
+      setSyncLockedState(true);
+    }
+  });
+}
+
+applyLockUI(isSyncLocked());   /* restore persisted state on load */
       
 let armedSeasonHref = null;
 let armedSeasonEl = null;
@@ -9924,6 +10101,7 @@ syncWishlistForCurrentRoom(activeProfile)
       profileSeg.addEventListener("click", (e) => {
         const btn = e.target.closest("button");
         if(!btn) return;
+        if(isSyncLocked()){ vib(); return; }
         vib();
 
         activeProfile = btn.dataset.profile;
@@ -10089,6 +10267,7 @@ progressResetBtn.addEventListener("click", () => {
 
       if(roomSaveBtn && roomInput){
         roomSaveBtn.addEventListener("click", () => {
+          if(isSyncLocked()){ vib(); return; }
           vib();
           const code = (roomInput.value || "").trim();
 
