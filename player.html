@@ -103,9 +103,11 @@
 
     #playpause{
       width: 72px; height: 72px;
-      background: rgba(255,255,255,0.96);
+      background: rgba(20,20,25,0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
-    #playpause svg{ width: 34px; height: 34px; fill: #000; }
+    #playpause svg{ width: 34px; height: 34px; fill: #fff; }
 
     #bottom{
       position: relative; z-index: 2;
@@ -213,17 +215,19 @@
 
     #toast{
       position: fixed; bottom: 96px; left: 50%;
-      transform: translateX(-50%);
-      background: var(--accent-soft);
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(20,20,25,0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: 1px solid var(--accent-line);
       color: var(--accent);
-      padding: 8px 20px; border-radius: 999px;
-      font-size: 13px; font-weight: 500;
+      padding: 10px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 600;
       pointer-events: none; opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.25s ease, transform 0.25s ease;
       white-space: nowrap; z-index: 200;
     }
-    #toast.show{ opacity: 1; }
+    #toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ============================================================
      SECTION 04b · START OVER PILL (mirrors Netflix's skip-intro,
@@ -908,14 +912,16 @@
   }
 
   let startOverTimer = null;
+  let startOverDelayTimer = null;
 
   function showStartOverPill(){
     clearTimeout(startOverTimer);
     startOverBtn.classList.add("show");
-    startOverTimer = setTimeout(() => startOverBtn.classList.remove("show"), 8000);
+    startOverTimer = setTimeout(() => startOverBtn.classList.remove("show"), 3000);
   }
 
   function hideStartOverPill(){
+    clearTimeout(startOverDelayTimer);
     clearTimeout(startOverTimer);
     startOverBtn.classList.remove("show");
   }
@@ -958,7 +964,10 @@
           video.currentTime = startAt;
           if(!Number.isFinite(resumeAt)){
             showToast("Resumed from " + fmt(startAt));
-            showStartOverPill();   /* only for a genuine saved-position resume, not Next/Prev nav */
+            /* sequenced, not simultaneous — let the toast finish its own
+               ~2.2s window before Start Over appears, so the two never
+               compete for the same space or clash in style */
+            startOverDelayTimer = setTimeout(showStartOverPill, 2200);
           }
         }
       });
