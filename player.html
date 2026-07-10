@@ -226,6 +226,37 @@
     #toast.show{ opacity: 1; }
 
   /* ============================================================
+     SECTION 04b · START OVER PILL (mirrors Netflix's skip-intro,
+     placed on the left, fades in on resumed episodes then fades out)
+     ============================================================ */
+    #start-over-btn{
+      position: absolute;
+      left: 18px;
+      bottom: 126px;
+      z-index: 6;
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(20,20,25,0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid var(--accent-line);
+      color: var(--accent);
+      font-size: 13px; font-weight: 600;
+      padding: 10px 18px 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    #start-over-btn.show{
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #start-over-btn svg{ width: 17px; height: 17px; fill: var(--accent); }
+
+  /* ============================================================
      SECTION 05 · SLEEP OVERLAY & ERROR CARD
      ============================================================ */
     .panel-overlay{
@@ -274,6 +305,11 @@
     <svg viewBox="0 0 24 24"><path d="M12 5V2l4 4-4 4V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/></svg>
     <span>+15s</span>
   </div>
+
+  <button id="start-over-btn" aria-label="Start over">
+    <svg viewBox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+    <span>Start Over</span>
+  </button>
 
   <div id="ui">
     <div id="top">
@@ -422,6 +458,7 @@
   const toast        = $("toast");
   const tapLeft      = $("tap-left");
   const tapRight     = $("tap-right");
+  const startOverBtn = $("start-over-btn");
   const sleepOverlay = $("sleep-overlay");
   const sleepSubText = $("sleep-sub-text");
   const errorCard    = $("error-card");
@@ -628,7 +665,7 @@
     const store = loadResumeStore();
     const key = resumeKeyOf(item);
 
-    if(dur > 0 && (video.currentTime >= dur * 0.95 || video.ended)){
+    if(dur > 0 && (video.currentTime >= dur * 0.90 || video.ended)){
       /* fully watched — nothing left worth resuming or re-accumulating */
       delete store[key];
       saveResumeStore(store);
@@ -870,12 +907,36 @@
     video.currentTime = t;
   }
 
+  let startOverTimer = null;
+
+  function showStartOverPill(){
+    clearTimeout(startOverTimer);
+    startOverBtn.classList.add("show");
+    startOverTimer = setTimeout(() => startOverBtn.classList.remove("show"), 8000);
+  }
+
+  function hideStartOverPill(){
+    clearTimeout(startOverTimer);
+    startOverBtn.classList.remove("show");
+  }
+
+  startOverBtn.addEventListener("click", () => {
+    hideStartOverPill();
+    const item = queue[currentIndex];
+    clearResume(item);          /* wipes saved position + watch-time counters */
+    resetWatchState(item);      /* mirror that in the live in-memory counters too */
+    video.currentTime = 0;
+    showToast("Starting over");
+    showUI();
+  });
+
   function loadAndPlay(idx, resumeAt){
     if(idx < 0 || idx >= queue.length) return;
     currentIndex = idx;
     const item = queue[idx];
     resetWatchState(item);
     hideError();
+    hideStartOverPill();
 
     const t = splitTitle(item.title);
     titleEl.textContent    = t.main;
@@ -893,9 +954,12 @@
       video.addEventListener("loadedmetadata", function once(){
         video.removeEventListener("loadedmetadata", once);
         const dur = safeDuration();
-        if(dur > 0 && startAt < dur * 0.95){
+        if(dur > 0 && startAt < dur * 0.90){
           video.currentTime = startAt;
-          if(!Number.isFinite(resumeAt)) showToast("Resumed from " + fmt(startAt));
+          if(!Number.isFinite(resumeAt)){
+            showToast("Resumed from " + fmt(startAt));
+            showStartOverPill();   /* only for a genuine saved-position resume, not Next/Prev nav */
+          }
         }
       });
     }
