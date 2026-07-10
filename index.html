@@ -3759,6 +3759,108 @@ function getWatchedBucket(node, entry){
    markWatchedByEditor(), unmarkWatchedByEditor(),
    resetSeasonByEditor(), resetMoviesByEditor(), resetAllProgressByEditor()
    ============================================================ */
+/* ============================================================
+   SECTION 12b · PLAYER RESUME-POSITION BRIDGE
+   player.html keeps its own per-episode resume/watch-time record in
+   localStorage (toonie_resume_v1), keyed identically to how it derives
+   keys itself: cartoonLabel|series|type|seasonOrMovie|num. These
+   helpers reach into that same key so Unmark/Reset here can clear the
+   matching resume position — otherwise reopening an unmarked/reset
+   episode still drops you back where you left off, which is confusing
+   since the app just told you it wasn't watched. Deliberately NOT
+   wired into markWatchedByEditor — marking something watched has no
+   reason to touch where you'd resume it. */
+const PLAYER_RESUME_KEY = "toonie_resume_v1";
+
+function loadPlayerResumeStore(){
+  try{
+    const s = JSON.parse(localStorage.getItem(PLAYER_RESUME_KEY) || "{}");
+    return (s && typeof s === "object") ? s : {};
+  }catch(e){ return {}; }
+}
+
+function savePlayerResumeStore(store){
+  try{ localStorage.setItem(PLAYER_RESUME_KEY, JSON.stringify(store)); }catch(e){}
+}
+
+function playerResumeSeriesPart(seriesLabel){
+  return String(seriesLabel || "").trim() || "-";
+}
+
+/* Must stay in sync with resumeKeyOf() in player.html — these two
+   independently derive the same key rather than sharing code. */
+function playerResumeKeyOf(entry){
+  return [
+    entry?.cartoonLabel || "",
+    playerResumeSeriesPart(entry?.seriesLabel),
+    entry?.type || "season",
+    entry?.seasonOrMovie || "",
+    Number(entry?.num) || 0
+  ].join("|");
+}
+
+/* Unmark: clear resume position for exactly this one episode. */
+function clearPlayerResumeForEntry(entry){
+  if(!entry) return;
+  const store = loadPlayerResumeStore();
+  const key = playerResumeKeyOf(entry);
+  if(store[key]){
+    delete store[key];
+    savePlayerResumeStore(store);
+  }
+}
+
+/* Season reset: clear resume for every episode number under that exact
+   season, not just up to the old boundary — a partially-watched
+   episode past the boundary can still have a saved position. */
+function clearPlayerResumeForGroup(cartoonLabel, seriesLabel, type, seasonOrMovie){
+  const store = loadPlayerResumeStore();
+  const prefix = [
+    cartoonLabel || "",
+    playerResumeSeriesPart(seriesLabel),
+    type || "season",
+    seasonOrMovie || ""
+  ].join("|") + "|";
+  let changed = false;
+  for(const key of Object.keys(store)){
+    if(key.startsWith(prefix)){
+      delete store[key];
+      changed = true;
+    }
+  }
+  if(changed) savePlayerResumeStore(store);
+}
+
+/* Movies reset: clear resume for every movie under this cartoon,
+   regardless of which title. */
+function clearPlayerResumeForMovies(cartoonLabel){
+  const store = loadPlayerResumeStore();
+  let changed = false;
+  for(const key of Object.keys(store)){
+    const parts = key.split("|");
+    if(parts[0] === (cartoonLabel || "") && parts[2] === "movie"){
+      delete store[key];
+      changed = true;
+    }
+  }
+  if(changed) savePlayerResumeStore(store);
+}
+
+/* Full cartoon reset: clear every resume record for this cartoon,
+   any series/type/season/episode. */
+function clearPlayerResumeForCartoon(cartoonLabel){
+  const store = loadPlayerResumeStore();
+  const prefix = (cartoonLabel || "") + "|";
+  let changed = false;
+  for(const key of Object.keys(store)){
+    if(key.startsWith(prefix)){
+      delete store[key];
+      changed = true;
+    }
+  }
+  if(changed) savePlayerResumeStore(store);
+}
+
 function markWatchedByEditor(store, profile, entry){
   const clean = cloneEntry({...entry, source: "editor", ts: nowISO()});
   if(!clean) return false;
@@ -3796,6 +3898,7 @@ function unmarkWatchedByEditor(store, profile, entry){
   }
 
   recomputeEditorDisplayPointers(node);
+  clearPlayerResumeForEntry(clean);
   return true;
 }
 
@@ -3814,6 +3917,7 @@ function resetSeasonByEditor(store, profile, entry){
 
   recomputeEditorDisplayPointers(node);
   node.schemaVersion = 2;
+  clearPlayerResumeForGroup(clean.cartoonLabel, clean.seriesLabel, clean.type, clean.seasonOrMovie);
   return true;
 }
 
@@ -3830,6 +3934,7 @@ function resetMoviesByEditor(store, profile, cartoonLabel){
 
   recomputeEditorDisplayPointers(node);
   node.schemaVersion = 2;
+  clearPlayerResumeForMovies(cartoonLabel);
   return true;
 }
 
@@ -3840,6 +3945,7 @@ function resetAllProgressByEditor(store, profile, cartoonLabel){
   node.watched = {};
   node.lastDirectQualified = null;
   node.schemaVersion = 2;
+  clearPlayerResumeForCartoon(cartoonLabel);
   return true;
 }
 
