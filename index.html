@@ -3700,16 +3700,33 @@ function recomputeEditorDisplayPointers(node){
     bucket.seasonOrMovie = String(bucket.seasonOrMovie || "");
     bucket.seriesLabel = normalizeSeriesLocal(bucket.seriesLabel);
 
-    bucket.nums = Array.isArray(bucket.nums)
-      ? Array.from(new Set(bucket.nums.map(n => Number(n) || 0).filter(n => n >= 1))).sort((a,b) => a - b)
-      : [];
+    let topNum, topTs;
 
-    if(!bucket.nums.length){
+    if(bucket.type === "movie"){
+      /* movie buckets track individually-marked numbers */
+      bucket.nums = Array.isArray(bucket.nums)
+        ? Array.from(new Set(bucket.nums.map(n => Number(n) || 0).filter(n => n >= 1))).sort((a,b) => a - b)
+        : [];
+      topNum = bucket.nums.length ? bucket.nums[bucket.nums.length - 1] : 0;
+      topTs = bucket.lastDirect?.ts || nowISO();
+    } else {
+      /* season buckets never populate nums — boundary is the actual
+         source of truth, so it (not nums) must drive lastDirect here.
+         Using nums for season type — as this used to — meant lastDirect
+         was always nulled regardless of real progress, leaving stale
+         pointer data behind whenever boundary changed through anything
+         other than a fresh player-qualified watch (stepper, Save panel,
+         cloud sync merges). */
+      bucket.nums = [];
+      topNum = Math.max(0, Number(bucket.boundary || 0));
+      topTs = String(bucket.boundary_ts || nowISO());
+    }
+
+    if(topNum < 1){
       bucket.lastDirect = null;
       continue;
     }
 
-    const topNum = bucket.nums[bucket.nums.length - 1];
     const existing = bucket.lastDirect ? cloneEntry(bucket.lastDirect) : null;
 
     bucket.lastDirect = {
@@ -3718,13 +3735,11 @@ function recomputeEditorDisplayPointers(node){
       type: String(existing?.type || bucket.type || "season"),
       seasonOrMovie: String(existing?.seasonOrMovie ?? bucket.seasonOrMovie ?? ""),
       num: topNum,
-      ts: existing?.ts || nowISO(),
+      ts: topTs,
       source: "editor"
     };
 
-    if((Number(bucket.lastDirect.num) || 0) >= 1){
-      valid.push(cloneEntry(bucket.lastDirect));
-    }
+    valid.push(cloneEntry(bucket.lastDirect));
   }
 
   valid.sort((a,b) => String(b.ts || "").localeCompare(String(a.ts || "")));
@@ -3974,12 +3989,13 @@ if(node.last){
         node.schemaVersion = 2;
       }
 
-      if(node.lastDirectQualified){
-        const bucket = ensureWatchedBucket(node, node.lastDirectQualified);
-        if(!bucket.lastDirect || String(node.lastDirectQualified.ts) >= String(bucket.lastDirect.ts || "")){
-          bucket.lastDirect = cloneEntry(node.lastDirectQualified);
-        }
-      }
+      /* Self-healing on every load: derive lastDirect/lastDirectQualified
+         fresh from boundary/nums (the real ground truth) rather than the
+         old approach of re-seeding bucket.lastDirect FROM the possibly-
+         stale node.lastDirectQualified — which could perpetuate a frozen
+         pointer forever, since it never looked at boundary to check
+         whether that pointer was still accurate. */
+      recomputeEditorDisplayPointers(node);
     }
   }
 
@@ -4564,6 +4580,14 @@ function upsertEntry(store, profile, entry){
       setLastDirectQualified(node, cleanEntry);
     }
   }
+
+  /* Self-healing: whatever just changed boundary/nums above, re-derive
+     the display pointer (used by the pill/chip) from that ground truth
+     right here — rather than requiring every caller (stepper, Save
+     panel, editor actions, cloud sync) to separately remember to do it.
+     Missing this on even one call site is exactly what let the pill
+     and the episode grid disagree after the +/- stepper was used. */
+  recomputeEditorDisplayPointers(node);
 }
 
 
