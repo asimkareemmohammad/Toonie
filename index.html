@@ -1041,6 +1041,12 @@ body::-webkit-scrollbar {
   color: #f4efff;
 }
 
+.otc-season-btn.season-open{
+  background: rgba(168,130,255,.22);
+  border-color: rgba(196,176,255,.42);
+  color: #f4efff;
+}
+
 .tm-season-btn.season-open{
   background: rgba(168,130,255,.22);
   border-color: rgba(196,176,255,.42);
@@ -1966,6 +1972,42 @@ body.tv-mode .episode-panel.open{
 </div>
 </section>
 
+<section class="section">
+  <div class="card">
+
+    <div class="title-row">
+      <h2 class="section-title">Oggy</h2>
+
+      <span class="last-stepper" id="stepperOTC">
+        <button class="stepper-btn" type="button" id="otcMinus" aria-label="Oggy minus" disabled>−</button>
+        <span class="stepper-div"></span>
+        <span class="last-chip" id="lastChipOTC"></span>
+        <span class="stepper-div"></span>
+        <button class="stepper-btn" type="button" id="otcPlus" aria-label="Oggy plus" disabled>+</button>
+      </span>
+    </div>
+
+    <div class="menu-row">
+      <a class="md-btn md-tonal" href="#" onclick="toggleOTC(event,'otc-seasons')">Seasons</a>
+    </div>
+
+    <div id="otc-seasons" class="panel otc-panel">
+  <div>
+    <div class="grid">
+      <a id="otcSeasonBtnS1" class="md-btn md-outlined otc-season-btn" href="#" onclick="event.preventDefault(); ripple(event); setActiveContext('OTC','season:S1'); renderAllCartoonLastChips(); toggleOtcEpisodePanel('S1')">OTC-S1</a>
+      <a id="otcSeasonBtnS2" class="md-btn md-outlined otc-season-btn" href="#" onclick="event.preventDefault(); ripple(event); setActiveContext('OTC','season:S2'); renderAllCartoonLastChips(); toggleOtcEpisodePanel('S2')">OTC-S2</a>
+      <a id="otcSeasonBtnS3" class="md-btn md-outlined otc-season-btn" href="#" onclick="event.preventDefault(); ripple(event); setActiveContext('OTC','season:S3'); renderAllCartoonLastChips(); toggleOtcEpisodePanel('S3')">OTC-S3</a>
+      <a id="otcSeasonBtnS4" class="md-btn md-outlined otc-season-btn" href="#" onclick="event.preventDefault(); ripple(event); setActiveContext('OTC','season:S4'); renderAllCartoonLastChips(); toggleOtcEpisodePanel('S4')">OTC-S4</a>
+    </div>
+
+    <div id="otcEpisodePanel" class="episode-panel">
+      <div class="episode-panel-title">Episodes</div>
+      <div id="otcEpisodeGrid" class="episode-grid"></div>
+    </div>
+  </div>
+</div>
+</section>
+
 
 
 <!-- TMNT Section -->
@@ -2855,6 +2897,7 @@ const CARTOON_NAME_MAP = {
   NH: "Ninja Hattori",
   SH: "Shinchan",
   SM: "Spider-Man",
+  OTC: "Oggy",
   TM: "TMNT",
   TJ: "Tom and Jerry",
   SD: "Scooby-Doo",
@@ -3029,6 +3072,15 @@ function toggleSM(e, targetId){
   const ctx = ctxFromTargetId("SM", targetId);
   if(ctx) setActiveContext("SM", ctx);
   toggleGroup(e, targetId, '.sm-panel');
+queueRenderAllCartoonLastChips();}
+
+function toggleOTC(e, targetId){
+  if(targetId === "otc-seasons"){
+  forceCloseOtcEpisodePanel();
+}
+  const ctx = ctxFromTargetId("OTC", targetId);
+  if(ctx) setActiveContext("OTC", ctx);
+  toggleGroup(e, targetId, '.otc-panel');
 queueRenderAllCartoonLastChips();}
 
 function toggleTM(e, targetId){
@@ -3386,6 +3438,12 @@ applyTvMode(tvMode);
 },
      "Spiderman": {
   label: "SM",
+  hasSeries: false,
+  seasons: ["S1","S2","S3","S4"],
+  hasMovies: false
+},
+   "Oggy": {
+  label: "OTC",
   hasSeries: false,
   seasons: ["S1","S2","S3","S4"],
   hasMovies: false
@@ -4324,6 +4382,7 @@ function ctxFromTargetId(cartoonLabel, targetId){
     DM:  { "dm-movies":"movie", "dm-seasons":"season" },
     SH:  { "sh-movies":"movie", "sh-seasons":"season" },
     SM:  { "sm-seasons":"season" },
+    OTC: { "otc-seasons":"season" },
     TM:  { "tm-seasons":"season" },
     STS: { "sts-seasons":"season" },
     SS: { "ss-seasons":"season" },
@@ -4345,6 +4404,7 @@ function getCartoonLabelFromPanel(panel){
     nh: "NH",
     sh: "SH",
     sm: "SM",
+    otc: "OTC",
     tm: "TM",
     tj: "TJ",
     sd: "SD",
@@ -4505,6 +4565,7 @@ const STEPPER_MAP = {
   NH: { minus:"nhMinus", plus:"nhPlus" },
   SH: { minus:"shMinus", plus:"shPlus" },
   SM: { minus:"smMinus", plus:"smPlus" },
+  OTC: { minus:"otcMinus", plus:"otcPlus" },
   TM: { minus:"tmMinus", plus:"tmPlus" },
   TJ: { minus:"tjMinus", plus:"tjPlus" },
   SD: { minus:"sdMinus", plus:"sdPlus" },
@@ -4520,6 +4581,7 @@ const LAST_CHIP_ID = {
   NH: "lastChipNH",
   SH: "lastChipSH",
   SM: "lastChipSM",
+  OTC: "lastChipOTC",
   TM: "lastChipTM",
   TJ: "lastChipTJ",
   SD: "lastChipSD",
@@ -4590,6 +4652,7 @@ function renderAllCartoonLastChips(){
   const nh = getDisplayEntryForCartoon("NH", st, p);
   const sh = getDisplayEntryForCartoon("SH", st, p);
   const sm = getDisplayEntryForCartoon("SM", st, p);
+  const otc = getDisplayEntryForCartoon("OTC", st, p);
   const tm = getDisplayEntryForCartoon("TM", st, p);
   const tj = getDisplayEntryForCartoon("TJ", st, p);
   const sd = getDisplayEntryForCartoon("SD", st, p);
@@ -4606,6 +4669,7 @@ function renderAllCartoonLastChips(){
   setChip("lastChipNH", nh);
   setChip("lastChipSH", sh);
   setChip("lastChipSM", sm);
+  setChip("lastChipOTC", otc);
   setChip("lastChipTM", tm);
   setChip("lastChipTJ", tj);
   setChip("lastChipSD", sd);
@@ -4618,6 +4682,7 @@ function renderAllCartoonLastChips(){
   setStepperState("NH", nh);
   setStepperState("SH", sh);
   setStepperState("SM", sm);
+  setStepperState("OTC", otc);
   setStepperState("TM", tm);
   setStepperState("TJ", tj);
   setStepperState("SD", sd);
@@ -4631,6 +4696,7 @@ function renderAllCartoonLastChips(){
   if(pendingChipAnim.NH){ animateChip("lastChipNH", pendingChipAnim.NH); delete pendingChipAnim.NH; }
   if(pendingChipAnim.SH){ animateChip("lastChipSH", pendingChipAnim.SH); delete pendingChipAnim.SH; }
   if(pendingChipAnim.SM){ animateChip("lastChipSM", pendingChipAnim.SM); delete pendingChipAnim.SM; }
+  if(pendingChipAnim.OTC){ animateChip("lastChipOTC", pendingChipAnim.OTC); delete pendingChipAnim.OTC; }
   if(pendingChipAnim.TM){ animateChip("lastChipTM", pendingChipAnim.TM); delete pendingChipAnim.TM; }
   if(pendingChipAnim.TJ){ animateChip("lastChipTJ", pendingChipAnim.TJ); delete pendingChipAnim.TJ; }
   if(pendingChipAnim.SD){ animateChip("lastChipSD", pendingChipAnim.SD); delete pendingChipAnim.SD; }
@@ -4928,6 +4994,7 @@ const PLAYER_CARTOON_NAME_MAP = {
   SS: "Supa Strikas",
   STS: "Shaun the Sheep",
   SM: "Spider-Man",
+  OTC: "Oggy",
   TM: "TMNT",
   SH: "Shinchan",
   TJ: "Tom and Jerry",
@@ -5410,6 +5477,12 @@ const EPISODE_COUNT_MAP = {
     S2: 26,
     S3: 26,
     S4: 26
+  },
+  OTC: {
+    S1: 78,
+    S2: 74,
+    S3: 39,
+    S4: 74
   },
   TM: {
     S1: 26,
@@ -6119,6 +6192,37 @@ const SM_MEDIA_INDEX = {
   movie: {}
 };
 
+const OTC_MEDIA_INDEX = {
+  season: {
+    S1: buildManualSeasonWithSuffix(
+      "https://archive.org/download/otc-s01-mak/OTC-S1OTC-S1/S01E",
+      EPISODE_COUNT_MAP.OTC.S1 || 0,
+      2,
+      ".mp4"
+    ),
+    S2: buildManualSeasonWithSuffix(
+      "https://archive.org/download/otc-s02-mak/OTC-S2OTC-S2/S02E",
+      EPISODE_COUNT_MAP.OTC.S2 || 0,
+      2,
+      ".mp4"
+    ),
+    S3: buildManualSeasonWithSuffix(
+      "https://archive.org/download/otc-s03-mak/OTC-S3OTC-S3/S03E",
+      EPISODE_COUNT_MAP.OTC.S3 || 0,
+      2,
+      ".mp4"
+    ),
+    S4: buildManualSeasonWithSuffix(
+      "https://archive.org/download/otc-s04-mak/OTC-S4OTC-S4/S04E",
+      EPISODE_COUNT_MAP.OTC.S4 || 0,
+      2,
+      ".mp4"
+    )
+  },
+
+  movie: {}
+};
+
 
 const TM_MEDIA_INDEX = {
   season: {
@@ -6754,6 +6858,7 @@ const MEDIA_INDEX = {
     NH: NH_MEDIA_INDEX,
     SH: SH_MEDIA_INDEX,
     SM: SM_MEDIA_INDEX,
+    OTC: OTC_MEDIA_INDEX,
     TM: TM_MEDIA_INDEX,
     TJ: TJ_MEDIA_INDEX,
     SD: SD_MEDIA_INDEX,
@@ -7186,6 +7291,105 @@ function syncSmSeasonActiveState(){
     document.getElementById(`smSeasonBtn${key}`)?.classList.toggle(
       "season-open",
       isOpen && smOpenSeason === key
+    );
+  });
+}
+
+function renderOtcEpisodeGrid(seasonKey = "S1", animate = false){
+  const panel = document.getElementById("otcEpisodePanel");
+  const grid = document.getElementById("otcEpisodeGrid");
+  const title = document.querySelector("#otcEpisodePanel .episode-panel-title");
+  const wasOpen = panel.classList.contains("open");
+
+  if(!panel || !grid) return;
+
+  const total = EPISODE_COUNT_MAP.OTC?.[seasonKey] || 0;
+  const watchedNums = getWatchedEpisodeSet("OTC", seasonKey, "");
+
+  if(title){
+    title.textContent = `Episodes • ${seasonKey}`;
+  }
+
+  grid.innerHTML = "";
+
+  if(wasOpen && animate){
+    grid.classList.remove("grid-switching");
+    void grid.offsetWidth;
+    grid.classList.add("grid-switching");
+  }
+
+  grid.addEventListener("animationend", () => {
+    grid.classList.remove("grid-switching");
+  }, { once: true });
+
+  for(let i = 1; i <= total; i++){
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `ep-btn${watchedNums.has(i) ? " filled" : ""}`;
+    btn.textContent = String(i);
+    btn.dataset.ep = String(i);
+
+    btn.addEventListener("click", (e) => {
+      playEntryFromGrid(e, {
+        cartoonLabel: "OTC",
+        seriesLabel: "",
+        type: "season",
+        seasonOrMovie: seasonKey,
+        num: i
+      });
+    });
+
+    grid.appendChild(btn);
+  }
+
+  panel.classList.add("open");
+  syncOtcSeasonActiveState();
+}
+
+let otcOpenSeason = "";
+
+function toggleOtcEpisodePanel(seasonKey = "S1"){
+  const panel = document.getElementById("otcEpisodePanel");
+  if(!panel) return;
+
+  if(otcOpenSeason === seasonKey && panel.classList.contains("open")){
+    panel.classList.remove("open");
+    otcOpenSeason = "";
+    syncOtcSeasonActiveState();
+    return;
+  }
+
+  otcOpenSeason = seasonKey;
+  renderOtcEpisodeGrid(seasonKey, true);
+}
+
+function syncOtcEpisodePanel(){
+  const panel = document.getElementById("otcEpisodePanel");
+  if(!panel) return;
+  if(!panel.classList.contains("open")) return;
+  if(!otcOpenSeason) return;
+
+  renderOtcEpisodeGrid(otcOpenSeason);
+}
+
+function forceCloseOtcEpisodePanel(){
+  const panel = document.getElementById("otcEpisodePanel");
+  if(!panel) return;
+
+  panel.classList.remove("open");
+  otcOpenSeason = "";
+  syncOtcSeasonActiveState();
+}
+
+function syncOtcSeasonActiveState(){
+  const keys = ["S1","S2","S3","S4"];
+  const panel = document.getElementById("otcEpisodePanel");
+  const isOpen = !!panel && panel.classList.contains("open") && !!otcOpenSeason;
+
+  keys.forEach(key => {
+    document.getElementById(`otcSeasonBtn${key}`)?.classList.toggle(
+      "season-open",
+      isOpen && otcOpenSeason === key
     );
   });
 }
