@@ -9755,6 +9755,30 @@ store = normalizeAndDedupeStore(store);
         if(activeMode === "recent") renderRecent();
         refreshRoomUI();
         renderAllCartoonLastChips();
+
+        /* Keep whichever episode grid is currently open in sync with the
+           pill above — previously only the pill refreshed on incoming
+           sync, leaving an open grid showing stale filled/unfilled boxes
+           until it was manually closed and reopened. Each of these is a
+           safe no-op unless that exact panel happens to be open right
+           now, so calling all of them unconditionally is cheap and
+           harmless. */
+        syncSsEpisodePanel();
+        syncStsEpisodePanel();
+        syncSmEpisodePanel();
+        syncOtcEpisodePanel();
+        syncTmEpisodePanel();
+        syncShEpisodePanel();
+        syncShMoviePanel();
+        syncDmEpisodePanel();
+        syncDmMoviePanel();
+        syncTjEpisodePanel();
+        syncTjMoviePanel();
+        syncNhEpisodePanel();
+        syncNhMoviePanel();
+        syncB10EpisodePanel();
+        syncSdEpisodePanel();
+        syncSdMoviePanel();
       }
 
 
