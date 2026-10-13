@@ -1,3 +1,4 @@
+
 <!-- ============================================================
      SECTION 01 · HEAD — Meta, Fonts, External Scripts
      ============================================================ -->
@@ -10911,5 +10912,128 @@ starBtn.addEventListener("click", ()=>{
   });
 })();
 </script>
+
+<!-- ============================================================
+     TV REMOTE NAVIGATION (Android TV app only)
+     Active only inside the WebView app (html.tv-webview). Replaces the
+     browser's guess-y arrow-key behaviour with one predictable rule:
+     move to the nearest visible button in the pressed direction, and
+     scroll just enough to keep it on screen. Does nothing elsewhere.
+     ============================================================ -->
+<script>
+(function(){
+  if(!document.documentElement.classList.contains("tv-webview")) return;
+
+  const SEL = 'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+  function fixedLayer(el){
+    for(let p = el; p && p !== document.body; p = p.parentElement){
+      if(getComputedStyle(p).position === "fixed") return p;
+    }
+    return null;
+  }
+
+  function isVisible(el, r){
+    if(r.width < 2 || r.height < 2) return false;
+    if(getComputedStyle(el).visibility === "hidden") return false;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const inView = cx >= 0 && cy >= 0 && cx <= innerWidth && cy <= innerHeight;
+    if(inView){
+      const top = document.elementFromPoint(cx, cy);
+      return !!top && (top === el || el.contains(top));
+    }
+    /* off-screen: make sure no collapsed / clipping ancestor hides it */
+    for(let p = el.parentElement; p && p !== document.body; p = p.parentElement){
+      const cs = getComputedStyle(p);
+      if(cs.display === "none") return false;
+      const clipY = cs.overflowY === "hidden" || cs.overflowY === "clip";
+      const clipX = cs.overflowX === "hidden" || cs.overflowX === "clip";
+      if(clipY || clipX){
+        const pr = p.getBoundingClientRect();
+        if(pr.height < 2) return false;
+        if(clipY && (r.bottom <= pr.top || r.top >= pr.bottom)) return false;
+        if(clipX && (r.right <= pr.left || r.left >= pr.right)) return false;
+      }
+    }
+    return true;
+  }
+
+  function gap(a1, a2, b1, b2){            /* distance between two intervals (0 if they overlap) */
+    return Math.max(0, Math.max(a1, b1) - Math.min(a2, b2));
+  }
+
+  function pick(cur, dir){
+    const cr = cur.getBoundingClientRect();
+    const ccx = cr.left + cr.width / 2, ccy = cr.top + cr.height / 2;
+    const layer = fixedLayer(cur);
+    const list = [];
+    document.querySelectorAll(SEL).forEach(el => {
+      if(el === cur || el.offsetParent === null && getComputedStyle(el).position !== "fixed") return;
+      const r = el.getBoundingClientRect();
+      if(r.width < 2 || r.height < 2) return;
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      let primary, cross, step = Math.min(cr.height, r.height) * 0.35;
+      if(dir === "down"){ primary = cy - ccy;  cross = gap(r.left, r.right, cr.left, cr.right) + Math.abs(cx - ccx) * 0.3; }
+      else if(dir === "up"){ primary = ccy - cy; cross = gap(r.left, r.right, cr.left, cr.right) + Math.abs(cx - ccx) * 0.3; }
+      else if(dir === "right"){ step = Math.min(cr.width, r.width) * 0.35; primary = cx - ccx; cross = gap(r.top, r.bottom, cr.top, cr.bottom) * 3 + Math.abs(cy - ccy) * 0.5; }
+      else { step = Math.min(cr.width, r.width) * 0.35; primary = ccx - cx; cross = gap(r.top, r.bottom, cr.top, cr.bottom) * 3 + Math.abs(cy - ccy) * 0.5; }
+      if(primary <= step) return;
+      list.push({ el, r, score: primary + cross * 2 });
+    });
+    list.sort((a, b) => a.score - b.score);
+    for(let i = 0; i < Math.min(list.length, 25); i++){
+      const c = list[i];
+      if(fixedLayer(c.el) !== layer) continue;
+      if(isVisible(c.el, c.r)) return c.el;
+    }
+    return null;
+  }
+
+  function scrollParent(el){
+    for(let p = el.parentElement; p; p = p.parentElement){
+      const oy = getComputedStyle(p).overflowY;
+      if((oy === "auto" || oy === "scroll") && p.scrollHeight > p.clientHeight + 2) return p;
+    }
+    return null;
+  }
+
+  function reveal(el){
+    const header = document.querySelector(".appbar");
+    const topLimit = (header ? header.getBoundingClientRect().bottom : 0) + 20;
+    const bottomLimit = innerHeight - 20;
+    const r = el.getBoundingClientRect();
+    let delta = 0;
+    if(r.top < topLimit) delta = r.top - topLimit;
+    else if(r.bottom > bottomLimit) delta = r.bottom - bottomLimit;
+    if(!delta) return;
+    const sp = scrollParent(el);
+    if(sp) sp.scrollTop += delta; else window.scrollBy(0, delta);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    const dir = ({ ArrowDown: "down", ArrowUp: "up", ArrowLeft: "left", ArrowRight: "right" })[e.key];
+    if(!dir || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const cur = document.activeElement;
+    if(cur && /^(INPUT|TEXTAREA|SELECT)$/.test(cur.tagName)) return;     /* leave form fields alone */
+
+    if(!cur || cur === document.body || cur === document.documentElement){
+      /* nothing focused yet: start from the first visible button on screen */
+      const first = Array.from(document.querySelectorAll(SEL)).find(el => {
+        const r = el.getBoundingClientRect();
+        return r.width > 2 && r.height > 2 && r.top >= 0 && r.bottom <= innerHeight && isVisible(el, r);
+      });
+      if(first){ e.preventDefault(); first.focus({ preventScroll: true }); }
+      return;
+    }
+
+    const target = pick(cur, dir);
+    if(!target) return;                 /* nothing there: let the page scroll normally */
+    e.preventDefault();
+    target.focus({ preventScroll: true });
+    reveal(target);
+  }, true);
+})();
+</script>
 </body>
 </html>
+
