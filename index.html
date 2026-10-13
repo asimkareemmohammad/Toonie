@@ -1,10 +1,10 @@
-
 <!-- ============================================================
      SECTION 01 · HEAD — Meta, Fonts, External Scripts
      ============================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>try{ if(/; wv\)/.test(navigator.userAgent)) document.documentElement.classList.add("tv-webview"); }catch(e){}</script>
   <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
      <title>Toonie</title>
@@ -1635,6 +1635,33 @@ body.tv-mode .episode-panel.open{
   overflow: visible;
 }
        
+  
+  /* ============================================================
+     REMOTE / KEYBOARD FOCUS HIGHLIGHT (additive)
+     Uses box-shadow (not outline) so the ring follows each button's
+     own rounded shape on every WebView version. Only appears for
+     keyboard / TV-remote navigation; touch and mouse look unchanged.
+     ============================================================ */
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible,
+  [tabindex]:focus-visible, .ep-btn:focus-visible, .md-btn:focus-visible,
+  .material-select-trigger:focus-visible{
+    outline: none !important;
+    box-shadow: 0 0 0 2px #D0BCFF, 0 0 0 5px rgba(208,188,255,0.35) !important;
+    transition: none !important;
+    position: relative;
+    z-index: 5;
+  }
+
+  /* Android TV app (WebView) only: lighter rendering so D-pad movement is smooth */
+  html.tv-webview .appbar,
+  html.tv-webview .material-picker-backdrop{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  html.tv-webview .ep-btn,
+  html.tv-webview .md-btn{
+    transition: none !important;
+  }
   </style>
 
 <!-- ============================================================
@@ -5625,7 +5652,7 @@ const DM_MOVIE_INDEX = {
   },
   M2: {
     title: "Doraemon • Nobitas Great Adventure in the South Seas",
-    url: "https://dn711308.ca.archive.org/0/items/DM_MOVIES_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON_ALL_MOVIES/M02%20-Nobitas%20Great%20Adventure%20in%20the%20South%20Seas.mp4"
+    url: "https://archive.org/download/DM_MOVIES_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON_ALL_MOVIES/M02%20-Nobitas%20Great%20Adventure%20in%20the%20South%20Seas.mp4"
   },
   M3: {
     title: "Doraemon • Nobitas Steel Troops",
@@ -5653,15 +5680,15 @@ const DM_MOVIE_INDEX = {
   },
   M10: {
     title: "Doraemon • Nobitas the Underworld",
-    url: "https://ia600709.us.archive.org/11/items/DM_MOVIES_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON_ALL_MOVIES/M10-%20Nobitas%20the%20Underworld.mp4"
+    url: "https://archive.org/download/DM_MOVIES_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON_ALL_MOVIES/M10-%20Nobitas%20the%20Underworld.mp4"
   },
   M11: {
     title: "Doraemon • Nobitas Great Demon",
-    url: "https://dn711308.ca.archive.org/0/items/DM_MOVIES_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON_ALL_MOVIES/M11-%20Nobitas%20Great%20Demon.mp4"
+    url: "https://archive.org/download/DM_MOVIES_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON_ALL_MOVIES/M11-%20Nobitas%20Great%20Demon.mp4"
   },
   M12: {
     title: "Doraemon • Nobitas Spaceblazer",
-    url: "https://dn711308.ca.archive.org/0/items/DM_MOVIES_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON_ALL_MOVIES/M12-%20Nobitas%20Spaceblazer.mp4"
+    url: "https://archive.org/download/DM_MOVIES_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON_ALL_MOVIES/M12-%20Nobitas%20Spaceblazer.mp4"
   },
   M13: {
     title: "Doraemon • Nobita and the Galaxy Super-Express",
@@ -5787,25 +5814,25 @@ const B10_MEDIA_INDEX = {
   season: {
     CL: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia802907.us.archive.org/13/items/B10-CL-S01-MAK_/BenTen_Classic_S-1BenTen_Classic_S-1/B10_CL_S01_EP",
+        "https://archive.org/download/B10-CL-S01-MAK_/BenTen_Classic_S-1BenTen_Classic_S-1/B10_CL_S01_EP",
         EPISODE_COUNT_MAP.B10.CL.S1 || 0,
         2,
         "%20.ia.mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia801701.us.archive.org/6/items/B10-CL-S02-MAK/BenTen_Classic_S-2BenTen_Classic_S-2/%20B10_CL_S02_EP",
+        "https://archive.org/download/B10-CL-S02-MAK/BenTen_Classic_S-2BenTen_Classic_S-2/%20B10_CL_S02_EP",
         EPISODE_COUNT_MAP.B10.CL.S2 || 0,
         2,
         "%20.ia.mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia803203.us.archive.org/20/items/B10-CL-S03-MAK/BenTen_Classic_S-3BenTen_Classic_S-3/%20B10_CL_S03_EP",
+        "https://archive.org/download/B10-CL-S03-MAK/BenTen_Classic_S-3BenTen_Classic_S-3/%20B10_CL_S03_EP",
         EPISODE_COUNT_MAP.B10.CL.S3 || 0,
         2,
         "%20.ia.mp4"
       ),
       S4: buildManualSeasonWithSuffix(
-        "https://ia801704.us.archive.org/10/items/B10-CL-S04-MAK/BenTen_Classic_S-4BenTen_Classic_S-4/%20B10_CL_S04_EP",
+        "https://archive.org/download/B10-CL-S04-MAK/BenTen_Classic_S-4BenTen_Classic_S-4/%20B10_CL_S04_EP",
         EPISODE_COUNT_MAP.B10.CL.S4 || 0,
         2,
         "%20.ia.mp4"
@@ -5814,19 +5841,19 @@ const B10_MEDIA_INDEX = {
 
     AF: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia601703.us.archive.org/29/items/B10-AF-S01-MAK/BenTen_AlienForce_S-1BenTen_AlienForce_S-1/B10_AF_S01_EP",
+        "https://archive.org/download/B10-AF-S01-MAK/BenTen_AlienForce_S-1BenTen_AlienForce_S-1/B10_AF_S01_EP",
         EPISODE_COUNT_MAP.B10.AF.S1 || 0,
         2,
         "%20.ia.mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia601704.us.archive.org/33/items/B10-AF-S02-MAK/BenTen_AlienForce_S-2BenTen_AlienForce_S-2/B10_AF_S02_EP",
+        "https://archive.org/download/B10-AF-S02-MAK/BenTen_AlienForce_S-2BenTen_AlienForce_S-2/B10_AF_S02_EP",
         EPISODE_COUNT_MAP.B10.AF.S2 || 0,
         2,
         "%20.ia.mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia801707.us.archive.org/30/items/B10-AF-S03-MAK/BenTen_AlienForce_S-3BenTen_AlienForce_S-3/B10_AF_S03_EP",
+        "https://archive.org/download/B10-AF-S03-MAK/BenTen_AlienForce_S-3BenTen_AlienForce_S-3/B10_AF_S03_EP",
         EPISODE_COUNT_MAP.B10.AF.S3 || 0,
         2,
         "%20.ia.mp4"
@@ -5835,19 +5862,19 @@ const B10_MEDIA_INDEX = {
 
     UA: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia600109.us.archive.org/5/items/B10-UA-S01-MAK/BenTen_UltimateAlien_S-1BenTen_UltimateAlien_S-1/B10_UA_S01_EP",
+        "https://archive.org/download/B10-UA-S01-MAK/BenTen_UltimateAlien_S-1BenTen_UltimateAlien_S-1/B10_UA_S01_EP",
         EPISODE_COUNT_MAP.B10.UA.S1 || 0,
         2,
         "%20.ia.mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia803105.us.archive.org/8/items/B10-UA-S02-MAK/BenTen_UltimateAlien_S-2BenTen_UltimateAlien_S-2/B10_UA_S02_EP",
+        "https://archive.org/download/B10-UA-S02-MAK/BenTen_UltimateAlien_S-2BenTen_UltimateAlien_S-2/B10_UA_S02_EP",
         EPISODE_COUNT_MAP.B10.UA.S2 || 0,
         2,
         "%20.ia.mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia801608.us.archive.org/30/items/B10-UA-S03-MAK/BenTen_UltimateAlien_S-3BenTen_UltimateAlien_S-3/B10_UA_S03_EP",
+        "https://archive.org/download/B10-UA-S03-MAK/BenTen_UltimateAlien_S-3BenTen_UltimateAlien_S-3/B10_UA_S03_EP",
         EPISODE_COUNT_MAP.B10.UA.S3 || 0,
         2,
         "%20.ia.mp4"
@@ -5856,49 +5883,49 @@ const B10_MEDIA_INDEX = {
 
     OV: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia601608.us.archive.org/4/items/B10-OV-S01-MAK/BenTen_Omniverse_S-1BenTen_Omniverse_S-1/B10_OV_S01_EP",
+        "https://archive.org/download/B10-OV-S01-MAK/BenTen_Omniverse_S-1BenTen_Omniverse_S-1/B10_OV_S01_EP",
         EPISODE_COUNT_MAP.B10.OV.S1 || 0,
         2,
         "%20.ia.mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800408.us.archive.org/10/items/B10-OV-S02-MAK/BenTen_Omniverse_S-2BenTen_Omniverse_S-2/B10_OV_S02_EP",
+        "https://archive.org/download/B10-OV-S02-MAK/BenTen_Omniverse_S-2BenTen_Omniverse_S-2/B10_OV_S02_EP",
         EPISODE_COUNT_MAP.B10.OV.S2 || 0,
         2,
         "%20.ia.mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia801701.us.archive.org/4/items/B10-OV-S03-MAK/BenTen_Omniverse_S-3BenTen_Omniverse_S-3/B10_OV_S03_EP",
+        "https://archive.org/download/B10-OV-S03-MAK/BenTen_Omniverse_S-3BenTen_Omniverse_S-3/B10_OV_S03_EP",
         EPISODE_COUNT_MAP.B10.OV.S3 || 0,
         2,
         "%20.ia.mp4"
       ),
       S4: buildManualSeasonWithSuffix(
-        "https://ia903108.us.archive.org/11/items/B10-OV-S04-MAK/BenTen_Omniverse_S-4BenTen_Omniverse_S-4/B10_OV_S04_EP",
+        "https://archive.org/download/B10-OV-S04-MAK/BenTen_Omniverse_S-4BenTen_Omniverse_S-4/B10_OV_S04_EP",
         EPISODE_COUNT_MAP.B10.OV.S4 || 0,
         2,
         "%20.ia.mp4"
       ),
       S5: buildManualSeasonWithSuffix(
-        "https://ia801608.us.archive.org/7/items/B10-OV-S05-MAK/BenTen_Omniverse_S-5BenTen_Omniverse_S-5/B10_OV_S05_EP",
+        "https://archive.org/download/B10-OV-S05-MAK/BenTen_Omniverse_S-5BenTen_Omniverse_S-5/B10_OV_S05_EP",
         EPISODE_COUNT_MAP.B10.OV.S5 || 0,
         2,
         "%20.ia.mp4"
       ),
       S6: buildManualSeasonWithSuffix(
-        "https://ia801704.us.archive.org/2/items/B10-OV-S06-MAK/BenTen_Omniverse_S-6BenTen_Omniverse_S-6/B10_OV_S06_EP",
+        "https://archive.org/download/B10-OV-S06-MAK/BenTen_Omniverse_S-6BenTen_Omniverse_S-6/B10_OV_S06_EP",
         EPISODE_COUNT_MAP.B10.OV.S6 || 0,
         2,
         "%20.ia.mp4"
       ),
       S7: buildManualSeasonWithSuffix(
-        "https://ia601703.us.archive.org/34/items/B10-OV-S07-MAK/BenTen_Omniverse_S-7BenTen_Omniverse_S-7/B10_OV_S07_EP",
+        "https://archive.org/download/B10-OV-S07-MAK/BenTen_Omniverse_S-7BenTen_Omniverse_S-7/B10_OV_S07_EP",
         EPISODE_COUNT_MAP.B10.OV.S7 || 0,
         2,
         "%20.ia.mp4"
       ),
       S8: buildManualSeasonWithSuffix(
-        "https://ia801703.us.archive.org/32/items/B10-OV-S08-MAK/BenTen_Omniverse_S-8BenTen_Omniverse_S-8/B10_OV_S08_EP",
+        "https://archive.org/download/B10-OV-S08-MAK/BenTen_Omniverse_S-8BenTen_Omniverse_S-8/B10_OV_S08_EP",
         EPISODE_COUNT_MAP.B10.OV.S8 || 0,
         2,
         "%20.ia.mp4"
@@ -5925,35 +5952,35 @@ const NH_MEDIA_INDEX = {
     NH: {
       S1: {
   ...buildManualSeasonWithSuffix(
-    "https://ia801706.us.archive.org/13/items/NH-S01-MAK/NH%20S1NH%20S1/NH%20S01%20EP",
+    "https://archive.org/download/NH-S01-MAK/NH%20S1NH%20S1/NH%20S01%20EP",
     EPISODE_COUNT_MAP.NH.NH.S1 || 0,
     2,
     "%20.ia.mp4"
   ),
   1: {
-    url: "https://ia801706.us.archive.org/13/items/NH-S01-MAK/NH%20S1NH%20S1/NH%20S01%20EP01.ia.mp4"
+    url: "https://archive.org/download/NH-S01-MAK/NH%20S1NH%20S1/NH%20S01%20EP01.ia.mp4"
   }
 },
       S2: buildManualSeasonWithSuffix(
-        "https://ia600905.us.archive.org/5/items/NH-S02-MAK/NH%20S2NH%20S2/NH%20S02%20EP",
+        "https://archive.org/download/NH-S02-MAK/NH%20S2NH%20S2/NH%20S02%20EP",
         EPISODE_COUNT_MAP.NH.NH.S2 || 0,
         2,
         "%20.ia.mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia601709.us.archive.org/13/items/NH-S03-MAK/NH%20S3NH%20S3/NH%20S03%20EP",
+        "https://archive.org/download/NH-S03-MAK/NH%20S3NH%20S3/NH%20S03%20EP",
         EPISODE_COUNT_MAP.NH.NH.S3 || 0,
         2,
         "%20.ia.mp4"
       ),
       S4: buildManualSeasonWithSuffix(
-        "https://ia802904.us.archive.org/2/items/NH-S04-MAK/NH%20S4NH%20S4/NH%20S04%20EP",
+        "https://archive.org/download/NH-S04-MAK/NH%20S4NH%20S4/NH%20S04%20EP",
         EPISODE_COUNT_MAP.NH.NH.S4 || 0,
         2,
         ".ia.mp4"
       ),
       S5: buildManualSeasonWithSuffix(
-        "https://ia801704.us.archive.org/9/items/NH-S05-MAK/NH%20S5NH%20S5/NH%20S05%20EP",
+        "https://archive.org/download/NH-S05-MAK/NH%20S5NH%20S5/NH%20S05%20EP",
         EPISODE_COUNT_MAP.NH.NH.S5 || 0,
         2,
         ".ia.mp4"
@@ -5962,13 +5989,13 @@ const NH_MEDIA_INDEX = {
 
     NHR: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia601709.us.archive.org/27/items/NHR-S01-MAK/NH%20R%20S1NH%20R%20S1/NHR%20S01%20E",
+        "https://archive.org/download/NHR-S01-MAK/NH%20R%20S1NH%20R%20S1/NHR%20S01%20E",
         EPISODE_COUNT_MAP.NH.NHR.S1 || 0,
         2,
         ".ia.mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800904.us.archive.org/26/items/NHR-S02-MAK/NH%20R%20S2NH%20R%20S2/NHR%20S02%20E",
+        "https://archive.org/download/NHR-S02-MAK/NH%20R%20S2NH%20R%20S2/NHR%20S02%20E",
         EPISODE_COUNT_MAP.NH.NHR.S2 || 0,
         2,
         ".ia.mp4"
@@ -5979,11 +6006,11 @@ const NH_MEDIA_INDEX = {
   movie: {
     M1: {
       title: "Ninja Hattori • Hometown",
-      url: "https://ia803109.us.archive.org/23/items/NH-MOVIES-MAK/MOVIES_NHMOVIES_NH/NH%20Hometown.ia.mp4"
+      url: "https://archive.org/download/NH-MOVIES-MAK/MOVIES_NHMOVIES_NH/NH%20Hometown.ia.mp4"
     },
     M2: {
       title: "Ninja Hattori • Picture Diary",
-      url: "https://ia903109.us.archive.org/23/items/NH-MOVIES-MAK/MOVIES_NHMOVIES_NH/NH%20Picture%20Diary.ia.mp4"
+      url: "https://archive.org/download/NH-MOVIES-MAK/MOVIES_NHMOVIES_NH/NH%20Picture%20Diary.ia.mp4"
     }
   }
 };
@@ -5992,85 +6019,85 @@ const NH_MEDIA_INDEX = {
 const SH_MEDIA_INDEX = {
   season: {
     S1: buildManualSeasonWithSuffix(
-      "https://ia802905.us.archive.org/8/items/SH-S01-MAK/Shinchan%20S01Shinchan%20S01/SH%20S01%20E",
+      "https://archive.org/download/SH-S01-MAK/Shinchan%20S01Shinchan%20S01/SH%20S01%20E",
       EPISODE_COUNT_MAP.SH.S1 || 0,
       2,
       ".ia.mp4"
     ),
     S2: buildManualSeasonWithSuffix(
-      "https://ia801701.us.archive.org/4/items/SH-S02-MAK/Shinchan%20S02Shinchan%20S02/SH%20S02%20E",
+      "https://archive.org/download/SH-S02-MAK/Shinchan%20S02Shinchan%20S02/SH%20S02%20E",
       EPISODE_COUNT_MAP.SH.S2 || 0,
       2,
       ".ia.mp4"
     ),
     S3: buildManualSeasonWithSuffix(
-      "https://ia600806.us.archive.org/25/items/SH-S03-MAK_/Shinchan%20S03Shinchan%20S03/SH%20S03%20E",
+      "https://archive.org/download/SH-S03-MAK_/Shinchan%20S03Shinchan%20S03/SH%20S03%20E",
       EPISODE_COUNT_MAP.SH.S3 || 0,
       2,
       ".ia.mp4"
     ),
     S4: buildManualSeasonWithSuffix(
-      "https://ia600806.us.archive.org/11/items/SH-S04-MAK/Shinchan%20S04Shinchan%20S04/SH%20S04%20E",
+      "https://archive.org/download/SH-S04-MAK/Shinchan%20S04Shinchan%20S04/SH%20S04%20E",
       EPISODE_COUNT_MAP.SH.S4 || 0,
       2,
       ".ia.mp4"
     ),
     S5: buildManualSeasonWithSuffix(
-      "https://ia801708.us.archive.org/35/items/SH-S05-MAK/Shinchan%20S05Shinchan%20S05/SH%20S05%20E",
+      "https://archive.org/download/SH-S05-MAK/Shinchan%20S05Shinchan%20S05/SH%20S05%20E",
       EPISODE_COUNT_MAP.SH.S5 || 0,
       2,
       ".ia.mp4"
     ),
     S6: buildManualSeasonWithSuffix(
-      "https://ia803104.us.archive.org/21/items/SH-S06-MAK/Shinchan%20S06Shinchan%20S06/SH%20S06%20E",
+      "https://archive.org/download/SH-S06-MAK/Shinchan%20S06Shinchan%20S06/SH%20S06%20E",
       EPISODE_COUNT_MAP.SH.S6 || 0,
       2,
       "%20.ia.mp4"
     ),
     S7: buildManualSeasonWithSuffix(
-      "https://ia601307.us.archive.org/27/items/SH-S07-MAK/Shinchan%20S07Shinchan%20S07/SH%20S07%20E",
+      "https://archive.org/download/SH-S07-MAK/Shinchan%20S07Shinchan%20S07/SH%20S07%20E",
       EPISODE_COUNT_MAP.SH.S7 || 0,
       2,
       ".ia.mp4"
     ),
     S8: buildManualSeasonWithSuffix(
-      "https://ia800806.us.archive.org/17/items/SH-S08-MAK/Shinchan%20S08Shinchan%20S08/SH%20S08%20E",
+      "https://archive.org/download/SH-S08-MAK/Shinchan%20S08Shinchan%20S08/SH%20S08%20E",
       EPISODE_COUNT_MAP.SH.S8 || 0,
       2,
       ".ia.mp4"
     ),
     S10: buildManualSeasonWithSuffix(
-      "https://ia800806.us.archive.org/23/items/SH-S10-MAK/Shinchan%20S10Shinchan%20S10/SH%20S10%20E",
+      "https://archive.org/download/SH-S10-MAK/Shinchan%20S10Shinchan%20S10/SH%20S10%20E",
       EPISODE_COUNT_MAP.SH.S10 || 0,
       2,
       ".ia.mp4"
     ),
     S12: buildManualSeasonWithSuffix(
-      "https://ia600204.us.archive.org/5/items/SH-S12-MAK/Shinchan%20S12Shinchan%20S12/SH%20S12%20E",
+      "https://archive.org/download/SH-S12-MAK/Shinchan%20S12Shinchan%20S12/SH%20S12%20E",
       EPISODE_COUNT_MAP.SH.S12 || 0,
       2,
       ".ia.mp4"
     ),
     S13: buildManualSeasonWithSuffix(
-      "https://ia601708.us.archive.org/30/items/SH-S13-MAK/Shinchan%20S13Shinchan%20S13/SH%20S13%20E",
+      "https://archive.org/download/SH-S13-MAK/Shinchan%20S13Shinchan%20S13/SH%20S13%20E",
       EPISODE_COUNT_MAP.SH.S13 || 0,
       2,
       ".ia.mp4"
     ),
     S14: buildManualSeasonWithSuffix(
-      "https://ia801703.us.archive.org/5/items/SH-S14-MAK/Shinchan%20S14Shinchan%20S14/SH%20S14%20E",
+      "https://archive.org/download/SH-S14-MAK/Shinchan%20S14Shinchan%20S14/SH%20S14%20E",
       EPISODE_COUNT_MAP.SH.S14 || 0,
       2,
       ".ia.mp4"
     ),
     S15: buildManualSeasonWithSuffix(
-      "https://ia801708.us.archive.org/17/items/SH-S15-MAK/Shinchan%20S15Shinchan%20S15/SH%20S15%20E",
+      "https://archive.org/download/SH-S15-MAK/Shinchan%20S15Shinchan%20S15/SH%20S15%20E",
       EPISODE_COUNT_MAP.SH.S15 || 0,
       2,
       ".ia.mp4"
     ),
     S17: buildManualSeasonWithSuffix(
-      "https://ia600505.us.archive.org/12/items/SH-S17-MAK/Shinchan%20S17Shinchan%20S17/SH%20S17%20E",
+      "https://archive.org/download/SH-S17-MAK/Shinchan%20S17Shinchan%20S17/SH%20S17%20E",
       EPISODE_COUNT_MAP.SH.S17 || 0,
       2,
       ".ia.mp4"
@@ -6080,83 +6107,83 @@ const SH_MEDIA_INDEX = {
   movie: {
     M1: {
       title: "Shinchan • The Dreaming World",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2001%20The%20Dreaming%20World.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2001%20The%20Dreaming%20World.ia.mp4"
     },
     M2: {
       title: "Shinchan • Bakumori! Kung Fu Boys",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2002%20Bakumori%21%20Kung%20Fu%20Boys.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2002%20Bakumori%21%20Kung%20Fu%20Boys.ia.mp4"
     },
     M3: {
       title: "Shinchan • Rakuga Kingdom",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2003%20Rakuga%20Kingdom.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2003%20Rakuga%20Kingdom.ia.mp4"
     },
     M4: {
       title: "Shinchan • Mystery of Tenkasu Academy",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2004%20Mystery%20of%20Tenkasu%20Academy.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2004%20Mystery%20of%20Tenkasu%20Academy.ia.mp4"
     },
     M5: {
       title: "Shinchan • The Legends of Ninja Mononoke",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2005%20The%20Legends%20of%20Ninja%20Mononoke.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2005%20The%20Legends%20of%20Ninja%20Mononoke.ia.mp4"
     },
     M6: {
       title: "Shinchan • Battle of Supernatural Powers",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2006%20Battle%20of%20Supernatural%20Powers.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2006%20Battle%20of%20Supernatural%20Powers.ia.mp4"
     },
     M7: {
       title: "Shinchan • Super Hot! The Spicy Kasukabe Dancers",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2007%20Super%20Hot%21%20The%20Spicy%20Kasukabe%20Dancers.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2007%20Super%20Hot%21%20The%20Spicy%20Kasukabe%20Dancers.ia.mp4"
     },
     M8: {
       title: "Shinchan • Treasures of the Buri Buri kingdom",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2008%20Treasures%20of%20the%20Buri%20Buri%20kingdom.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2008%20Treasures%20of%20the%20Buri%20Buri%20kingdom.ia.mp4"
     },
     M9: {
       title: "Shinchan • Action Kamen vs Higure Rakshas",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2009%20Action%20Kamen%20vs%20Higure%20Rakshas.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2009%20Action%20Kamen%20vs%20Higure%20Rakshas.ia.mp4"
     },
     M10: {
       title: "Shinchan • Bungle In The Jungle",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2010%20Bungle%20In%20The%20Jungle.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2010%20Bungle%20In%20The%20Jungle.ia.mp4"
     },
     M11: {
       title: "Shinchan • Adventures In Henderland",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2011%20Adventures%20In%20Henderland.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2011%20Adventures%20In%20Henderland.ia.mp4"
     },
     M12: {
       title: "Shinchan • Dark TamaTama Thrilling Chase",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2012%20Dark%20TamaTama%20Thrilling%20Chase.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2012%20Dark%20TamaTama%20Thrilling%20Chase.ia.mp4"
     },
     M13: {
       title: "Shinchan • The Golden Sword",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2013%20The%20Golden%20Sword.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2013%20The%20Golden%20Sword.ia.mp4"
     },
     M14: {
       title: "Shinchan • The Spy",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2014%20The%20Spy.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2014%20The%20Spy.ia.mp4"
     },
     M15: {
       title: "Shinchan • Villain Aur Dulhan",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2015%20Villain%20Aur%20Dulhan.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2015%20Villain%20Aur%20Dulhan.ia.mp4"
     },
     M16: {
       title: "Shinchan • Himawari Banegi Rajkumari",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2016%20Himawari%20Banegi%20Rajkumari.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2016%20Himawari%20Banegi%20Rajkumari.ia.mp4"
     },
     M17: {
       title: "Shinchan • Masala Story",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2017%20Masala%20Story.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2017%20Masala%20Story.ia.mp4"
     },
     M18: {
       title: "Shinchan • Very Very Tasty Tasty",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2018%20Very%20Very%20Tasty%20Tasty.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2018%20Very%20Very%20Tasty%20Tasty.ia.mp4"
     },
     M19: {
       title: "Shinchan • Robot Dad",
-      url: "https://ia600801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2019%20Robot%20Dad.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2019%20Robot%20Dad.ia.mp4"
     },
     M20: {
       title: "Shinchan • Kaanta Laga",
-      url: "https://ia800801.us.archive.org/26/items/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2020%20Kaanta%20Laga.ia.mp4"
+      url: "https://archive.org/download/SH-MOVIES-MAK_/MOVIES_SHMOVIES_SH/M%2020%20Kaanta%20Laga.ia.mp4"
     }
   }
 };
@@ -6164,25 +6191,25 @@ const SH_MEDIA_INDEX = {
 const SM_MEDIA_INDEX = {
   season: {
     S1: buildManualSeasonWithSuffix(
-      "https://ia800402.us.archive.org/23/items/SPIDER-MAN-S01-MAK/Spider-Man-S1Spider-Man-S1/SM%20S01%20E",
+      "https://archive.org/download/SPIDER-MAN-S01-MAK/Spider-Man-S1Spider-Man-S1/SM%20S01%20E",
       EPISODE_COUNT_MAP.SM.S1 || 0,
       2,
       ".ia.mp4"
     ),
     S2: buildManualSeasonWithSuffix(
-      "https://ia800103.us.archive.org/27/items/SPIDER-MAN-S02-MAK/Spider-Man-S2Spider-Man-S2/SM%20S02%20E",
+      "https://archive.org/download/SPIDER-MAN-S02-MAK/Spider-Man-S2Spider-Man-S2/SM%20S02%20E",
       EPISODE_COUNT_MAP.SM.S2 || 0,
       2,
       ".ia.mp4"
     ),
     S3: buildManualSeasonWithSuffix(
-      "https://ia801501.us.archive.org/11/items/SPIDER-MAN-S03-MAK/Spider-Man-S3Spider-Man-S3/SM%20S03%20E",
+      "https://archive.org/download/SPIDER-MAN-S03-MAK/Spider-Man-S3Spider-Man-S3/SM%20S03%20E",
       EPISODE_COUNT_MAP.SM.S3 || 0,
       2,
       ".ia.mp4"
     ),
     S4: buildManualSeasonWithSuffix(
-      "https://ia800800.us.archive.org/26/items/SPIDER-MAN-S04-MAK/Spider-Man-S4Spider-Man-S4/SM%20S04%20E",
+      "https://archive.org/download/SPIDER-MAN-S04-MAK/Spider-Man-S4Spider-Man-S4/SM%20S04%20E",
       EPISODE_COUNT_MAP.SM.S4 || 0,
       2,
       ".ia.mp4"
@@ -6227,25 +6254,25 @@ const OTC_MEDIA_INDEX = {
 const TM_MEDIA_INDEX = {
   season: {
     S1: buildManualSeasonWithSuffix(
-      "https://ia801704.us.archive.org/7/items/TM-S01-MAK/TMNT-S1TMNT-S1/TMNT%20S01%20E",
+      "https://archive.org/download/TM-S01-MAK/TMNT-S1TMNT-S1/TMNT%20S01%20E",
       EPISODE_COUNT_MAP.TM.S1 || 0,
       2,
       ".ia.mp4"
     ),
     S2: buildManualSeasonWithSuffix(
-      "https://ia800401.us.archive.org/28/items/TM-S02-MAK/TMNT-S2TMNT-S2/TMNT%20S02%20E",
+      "https://archive.org/download/TM-S02-MAK/TMNT-S2TMNT-S2/TMNT%20S02%20E",
       EPISODE_COUNT_MAP.TM.S2 || 0,
       2,
       ".ia.mp4"
     ),
     S3: buildManualSeasonWithSuffix(
-      "https://ia601707.us.archive.org/30/items/TM-S03-MAK/TMNT-S3TMNT-S3/TMNT%20S03%20E",
+      "https://archive.org/download/TM-S03-MAK/TMNT-S3TMNT-S3/TMNT%20S03%20E",
       EPISODE_COUNT_MAP.TM.S3 || 0,
       2,
       ".ia.mp4"
     ),
     S4: buildManualSeasonWithSuffix(
-      "https://ia601604.us.archive.org/23/items/TM-S04-MAK/TMNT-S4TMNT-S4/TMNT%20S04%20E",
+      "https://archive.org/download/TM-S04-MAK/TMNT-S4TMNT-S4/TMNT%20S04%20E",
       EPISODE_COUNT_MAP.TM.S4 || 0,
       2,
       ".ia.mp4"
@@ -6261,13 +6288,13 @@ const TJ_MEDIA_INDEX = {
   season: {
     CL: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia800101.us.archive.org/16/items/TJ-CLASSIC-S01-MAK/Classic-S1Classic-S1/TJ%20CL%20S01%20EP",
+        "https://archive.org/download/TJ-CLASSIC-S01-MAK/Classic-S1Classic-S1/TJ%20CL%20S01%20EP",
         EPISODE_COUNT_MAP.TJ.CL.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia601607.us.archive.org/0/items/TJ-CLASSIC-S02-MAK/Classic-S2Classic-S2/TJ%20CL%20S02%20EP",
+        "https://archive.org/download/TJ-CLASSIC-S02-MAK/Classic-S2Classic-S2/TJ%20CL%20S02%20EP",
         EPISODE_COUNT_MAP.TJ.CL.S2 || 0,
         2,
         ".mp4"
@@ -6276,13 +6303,13 @@ const TJ_MEDIA_INDEX = {
 
     TL: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia600402.us.archive.org/11/items/TJ-TALES-S01-MAK/Tales-S1Tales-S1/TJ%20TL%20S01%20EP",
+        "https://archive.org/download/TJ-TALES-S01-MAK/Tales-S1Tales-S1/TJ%20TL%20S01%20EP",
         EPISODE_COUNT_MAP.TJ.TL.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia801704.us.archive.org/18/items/TJ-TALES-S02-MAK/Tales-S2Tales-S2/TJ%20TL%20S02%20EP",
+        "https://archive.org/download/TJ-TALES-S02-MAK/Tales-S2Tales-S2/TJ%20TL%20S02%20EP",
         EPISODE_COUNT_MAP.TJ.TL.S2 || 0,
         2,
         ".mp4"
@@ -6291,13 +6318,13 @@ const TJ_MEDIA_INDEX = {
 
     KD: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia801609.us.archive.org/2/items/TJ-KIDS-S01-MAK/Kids-S1Kids-S1/TJ%20KD%20S01%20EP",
+        "https://archive.org/download/TJ-KIDS-S01-MAK/Kids-S1Kids-S1/TJ%20KD%20S01%20EP",
         EPISODE_COUNT_MAP.TJ.KD.S1 || 0,
         2,
         ".ia.mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia600401.us.archive.org/9/items/TJ-KIDS-S02-MAK/Kids-S2Kids-S2/TJ%20KD%20S02%20EP",
+        "https://archive.org/download/TJ-KIDS-S02-MAK/Kids-S2Kids-S2/TJ%20KD%20S02%20EP",
         EPISODE_COUNT_MAP.TJ.KD.S2 || 0,
         2,
         ".ia.mp4"
@@ -6306,13 +6333,13 @@ const TJ_MEDIA_INDEX = {
 
     CS: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia800802.us.archive.org/8/items/TJ-COMEDY-S01-MAK/Comedy-S1Comedy-S1/TJ%20CS%20S01%20EP",
+        "https://archive.org/download/TJ-COMEDY-S01-MAK/Comedy-S1Comedy-S1/TJ%20CS%20S01%20EP",
         EPISODE_COUNT_MAP.TJ.CS.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800306.us.archive.org/10/items/TJ-COMEDY-S02-MAK/Comedy-S2Comedy-S2/TJ%20CS%20S02%20EP",
+        "https://archive.org/download/TJ-COMEDY-S02-MAK/Comedy-S2Comedy-S2/TJ%20CS%20S02%20EP",
         EPISODE_COUNT_MAP.TJ.CS.S2 || 0,
         2,
         ".mp4"
@@ -6321,13 +6348,13 @@ const TJ_MEDIA_INDEX = {
 
     SH: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia801702.us.archive.org/29/items/TJ-SHOW-S01-MAK/Show-S1Show-S1/TJ%20SH%20S01%20EP",
+        "https://archive.org/download/TJ-SHOW-S01-MAK/Show-S1Show-S1/TJ%20SH%20S01%20EP",
         EPISODE_COUNT_MAP.TJ.SH.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800404.us.archive.org/35/items/TJ-SHOW-S02-MAK/Show-S2Show-S2/TJ%20SH%20S02%20EP",
+        "https://archive.org/download/TJ-SHOW-S02-MAK/Show-S2Show-S2/TJ%20SH%20S02%20EP",
         EPISODE_COUNT_MAP.TJ.SH.S2 || 0,
         2,
         ".mp4"
@@ -6336,13 +6363,13 @@ const TJ_MEDIA_INDEX = {
 
     NS: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia600306.us.archive.org/25/items/TJ-NEW-S01-MAK/New-S1New-S1/TJ%20NS%20S01%20EP",
+        "https://archive.org/download/TJ-NEW-S01-MAK/New-S1New-S1/TJ%20NS%20S01%20EP",
         EPISODE_COUNT_MAP.TJ.NS.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800400.us.archive.org/13/items/TJ-NEW-S02-MAK/New-S2New-S2/TJ%20NS%20S02%20EP",
+        "https://archive.org/download/TJ-NEW-S02-MAK/New-S2New-S2/TJ%20NS%20S02%20EP",
         EPISODE_COUNT_MAP.TJ.NS.S2 || 0,
         2,
         ".mp4"
@@ -6350,23 +6377,23 @@ const TJ_MEDIA_INDEX = {
     },
 NYC: {
   S1: {
-    1: { url: "https://ia800700.us.archive.org/13/items/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
-    2: { url: "https://ia800700.us.archive.org/13/items/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
-    3: { url: "https://ia800700.us.archive.org/13/items/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
-    4: { url: "https://ia800700.us.archive.org/13/items/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
-    5: { url: "https://ia800700.us.archive.org/13/items/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
-    6: { url: "https://ia800700.us.archive.org/13/items/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
-    7: { url: "https://ia800700.us.archive.org/13/items/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" }
+    1: { url: "https://archive.org/download/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
+    2: { url: "https://archive.org/download/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
+    3: { url: "https://archive.org/download/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
+    4: { url: "https://archive.org/download/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
+    5: { url: "https://archive.org/download/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
+    6: { url: "https://archive.org/download/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" },
+    7: { url: "https://archive.org/download/TJ-NYC-S01-MAK/NYC-S1NYC-S1/TJ%20NYC%20S01%20EP%2001-02-03.mp4" }
 
 
   },
   S2: {
-    1: { url: "https://ia800309.us.archive.org/29/items/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
-    2: { url: "https://ia800309.us.archive.org/29/items/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
-    3: { url: "https://ia800309.us.archive.org/29/items/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
-    4: { url: "https://ia800309.us.archive.org/29/items/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
-    5: { url: "https://ia800309.us.archive.org/29/items/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
-    6: { url: "https://ia800309.us.archive.org/29/items/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" }
+    1: { url: "https://archive.org/download/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
+    2: { url: "https://archive.org/download/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
+    3: { url: "https://archive.org/download/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
+    4: { url: "https://archive.org/download/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
+    5: { url: "https://archive.org/download/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" },
+    6: { url: "https://archive.org/download/TJ-NYC-S02-MAK/NYC-S2NYC-S2/TJ%20NYC%20S02%20EP%2001-02-03.mp4" }
   }
 }
   },
@@ -6374,59 +6401,59 @@ NYC: {
   movie: {
     M1: {
       title: "Tom and Jerry • Willy Wonka and the Chocolate Factory",
-      url: "https://ia800600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M01%20Willy%20Wonka%20and%20the%20Chocolate%20Factory.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M01%20Willy%20Wonka%20and%20the%20Chocolate%20Factory.ia.mp4"
     },
     M2: {
       title: "Tom and Jerry • The Movie",
-      url: "https://ia600600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M02%20The%20Movie.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M02%20The%20Movie.ia.mp4"
     },
     M3: {
       title: "Tom and Jerry • The Magic Ring",
-      url: "https://ia600600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M03%20The%20Magic%20Ring.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M03%20The%20Magic%20Ring.ia.mp4"
     },
     M4: {
       title: "Tom and Jerry • The Lost Dragon",
-      url: "https://ia600600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M04%20The%20Lost%20Dragon.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M04%20The%20Lost%20Dragon.ia.mp4"
     },
     M5: {
       title: "Tom and Jerry • The Fast And The Furry",
-      url: "https://ia600600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M05%20The%20Fast%20And%20The%20Furry.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M05%20The%20Fast%20And%20The%20Furry.ia.mp4"
     },
     M6: {
       title: "Tom and Jerry • Spy Quest",
-      url: "https://ia800600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M06%20Spy%20Quest.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M06%20Spy%20Quest.ia.mp4"
     },
     M7: {
       title: "Tom and Jerry • Shiver Me Whiskers",
-      url: "https://ia800600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M07%20Shiver%20Me%20Whiskers.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M07%20Shiver%20Me%20Whiskers.ia.mp4"
     },
     M8: {
       title: "Tom and Jerry • Robin Hood and His Merry Mouse",
-      url: "https://ia600600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M08%20Robin%20Hood%20and%20His%20Merry%20Mouse.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M08%20Robin%20Hood%20and%20His%20Merry%20Mouse.ia.mp4"
     },
     M9: {
       title: "Tom and Jerry • Meet Sherlock Holmes",
-      url: "https://ia600600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M09%20Meet%20Sherlock%20Holmes.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M09%20Meet%20Sherlock%20Holmes.ia.mp4"
     },
     M10: {
       title: "Tom and Jerry • Giant Adventure",
-      url: "https://ia800600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M10%20Giant%20Adventure.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M10%20Giant%20Adventure.ia.mp4"
     },
     M11: {
       title: "Tom and Jerry • Blast Off to Mars!",
-      url: "https://ia600600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M11%20Blast%20Off%20to%20Mars%21.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M11%20Blast%20Off%20to%20Mars%21.ia.mp4"
     },
     M12: {
       title: "Tom and Jerry • Back to Oz",
-      url: "https://ia800600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M12%20Back%20to%20Oz.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M12%20Back%20to%20Oz.ia.mp4"
     },
     M13: {
       title: "Tom and Jerry • and The Wizard of Oz",
-      url: "https://ia800600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M13%20and%20The%20Wizard%20of%20Oz.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M13%20and%20The%20Wizard%20of%20Oz.ia.mp4"
     },
     M14: {
       title: "Tom and Jerry • A Nutcracker Tale",
-      url: "https://ia800600.us.archive.org/11/items/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M14%20A%20Nutcracker%20Tale.ia.mp4"
+      url: "https://archive.org/download/tj-movies-mak/TJ%20MOVIESTJ%20MOVIES/M14%20A%20Nutcracker%20Tale.ia.mp4"
     }
   }
 };
@@ -6447,19 +6474,19 @@ const SD_MEDIA_INDEX = {
   season: {
     WRU: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia601702.us.archive.org/31/items/sd-wru-s01-mak/SD-WRU/S-1SD-WRU/S-1/SD%20WRU%20S01%20EP",
+        "https://archive.org/download/sd-wru-s01-mak/SD-WRU/S-1SD-WRU/S-1/SD%20WRU%20S01%20EP",
         EPISODE_COUNT_MAP.SD.WRU.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia801600.us.archive.org/8/items/sd-wru-s02-mak/SD-WRU/S-2SD-WRU/S-2/SD%20WRU%20S02%20EP",
+        "https://archive.org/download/sd-wru-s02-mak/SD-WRU/S-2SD-WRU/S-2/SD%20WRU%20S02%20EP",
         EPISODE_COUNT_MAP.SD.WRU.S2 || 0,
         2,
         ".mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia601704.us.archive.org/22/items/sd-wru-s03-mak/SD-WRU/S-3SD-WRU/S-3/SD%20WRU%20S03%20EP",
+        "https://archive.org/download/sd-wru-s03-mak/SD-WRU/S-3SD-WRU/S-3/SD%20WRU%20S03%20EP",
         EPISODE_COUNT_MAP.SD.WRU.S3 || 0,
         2,
         ".mp4"
@@ -6468,13 +6495,13 @@ const SD_MEDIA_INDEX = {
 
     MOV: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia600102.us.archive.org/27/items/sd-mov-s01-mak/SD-MOV/S-1SD-MOV/S-1/SD%20MOV%20S01%20EP",
+        "https://archive.org/download/sd-mov-s01-mak/SD-MOV/S-1SD-MOV/S-1/SD%20MOV%20S01%20EP",
         EPISODE_COUNT_MAP.SD.MOV.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800401.us.archive.org/24/items/sd-mov-s02-mak/SD-MOV/S-2SD-MOV/S-2/SD%20MOV%20S02%20EP",
+        "https://archive.org/download/sd-mov-s02-mak/SD-MOV/S-2SD-MOV/S-2/SD%20MOV%20S02%20EP",
         EPISODE_COUNT_MAP.SD.MOV.S2 || 0,
         2,
         ".mp4"
@@ -6483,13 +6510,13 @@ const SD_MEDIA_INDEX = {
 
     GSW: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia600602.us.archive.org/22/items/sd-Gs-who-s01-mak/SD-GS%20WHO/S-1SD-GS%20WHO/S-1/SD%20GSW%20S01%20EP",
+        "https://archive.org/download/sd-Gs-who-s01-mak/SD-GS%20WHO/S-1SD-GS%20WHO/S-1/SD%20GSW%20S01%20EP",
         EPISODE_COUNT_MAP.SD.GSW.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800800.us.archive.org/12/items/sd-Gs-who-s02-mak/SD-GS%20WHO/S-2SD-GS%20WHO/S-2/SD%20GSW%20S02%20EP",
+        "https://archive.org/download/sd-Gs-who-s02-mak/SD-GS%20WHO/S-2SD-GS%20WHO/S-2/SD%20GSW%20S02%20EP",
         EPISODE_COUNT_MAP.SD.GSW.S2 || 0,
         2,
         ".mp4"
@@ -6498,25 +6525,25 @@ const SD_MEDIA_INDEX = {
 
     PUP: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia800100.us.archive.org/24/items/sd-pup-s01-mak/SD-PUP/S-1SD-PUP/S-1/SD%20PUP%20S01%20EP",
+        "https://archive.org/download/sd-pup-s01-mak/SD-PUP/S-1SD-PUP/S-1/SD%20PUP%20S01%20EP",
         EPISODE_COUNT_MAP.SD.PUP.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800100.us.archive.org/24/items/sd-pup-s02-mak/SD-PUP/S-2SD-PUP/S-2/SD%20PUP%20S02%20EP",
+        "https://archive.org/download/sd-pup-s02-mak/SD-PUP/S-2SD-PUP/S-2/SD%20PUP%20S02%20EP",
         EPISODE_COUNT_MAP.SD.PUP.S2 || 0,
         2,
         ".mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia600601.us.archive.org/24/items/sd-pup-s03-mak/SD-PUP/S-3SD-PUP/S-3/SD%20PUP%20S03%20EP",
+        "https://archive.org/download/sd-pup-s03-mak/SD-PUP/S-3SD-PUP/S-3/SD%20PUP%20S03%20EP",
         EPISODE_COUNT_MAP.SD.PUP.S3 || 0,
         2,
         ".mp4"
       ),
       S4: buildManualSeasonWithSuffix(
-        "https://ia800801.us.archive.org/11/items/sd-pup-s04-mak/SD-PUP/S-4SD-PUP/S-4/SD%20PUP%20S04%20EP",
+        "https://archive.org/download/sd-pup-s04-mak/SD-PUP/S-4SD-PUP/S-4/SD%20PUP%20S04%20EP",
         EPISODE_COUNT_MAP.SD.PUP.S4 || 0,
         2,
         ".mp4"
@@ -6525,13 +6552,13 @@ const SD_MEDIA_INDEX = {
 
     WSN: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia600601.us.archive.org/20/items/sd-whts-new-s01-mak/SD-WHTS%20NEW/S-1SD-WHTS%20NEW/S-1/SD%20WN%20S01%20EP",
+        "https://archive.org/download/sd-whts-new-s01-mak/SD-WHTS%20NEW/S-1SD-WHTS%20NEW/S-1/SD%20WN%20S01%20EP",
         EPISODE_COUNT_MAP.SD.WSN.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800302.us.archive.org/7/items/sd-whts-new-s02-mak/SD-WHTS%20NEW/S-2SD-WHTS%20NEW/S-2/SD%20WN%20S02%20EP",
+        "https://archive.org/download/sd-whts-new-s02-mak/SD-WHTS%20NEW/S-2SD-WHTS%20NEW/S-2/SD%20WN%20S02%20EP",
         EPISODE_COUNT_MAP.SD.WSN.S2 || 0,
         2,
         ".mp4"
@@ -6540,19 +6567,19 @@ const SD_MEDIA_INDEX = {
 
     SH: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia600509.us.archive.org/13/items/sd-show-s01-mak/SD-SHOW/S-1SD-SHOW/S-1/SD%20SH%20S01%20EP",
+        "https://archive.org/download/sd-show-s01-mak/SD-SHOW/S-1SD-SHOW/S-1/SD%20SH%20S01%20EP",
         EPISODE_COUNT_MAP.SD.SH.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800509.us.archive.org/0/items/sd-show-s02-mak/SD-SHOW/S-2SD-SHOW/S-2/SD%20SH%20S02%20EP",
+        "https://archive.org/download/sd-show-s02-mak/SD-SHOW/S-2SD-SHOW/S-2/SD%20SH%20S02%20EP",
         EPISODE_COUNT_MAP.SD.SH.S2 || 0,
         2,
         ".mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia800505.us.archive.org/3/items/sd-show-s03-mak/SD-SHOW/S-3SD-SHOW/S-3/SD%20SH%20S03%20EP",
+        "https://archive.org/download/sd-show-s03-mak/SD-SHOW/S-3SD-SHOW/S-3/SD%20SH%20S03%20EP",
         EPISODE_COUNT_MAP.SD.SH.S3 || 0,
         2,
         ".mp4"
@@ -6561,19 +6588,19 @@ const SD_MEDIA_INDEX = {
 
     SCR: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia800102.us.archive.org/8/items/sd-scrappy-s01-mak/SD-SCRAPPY/S-1SD-SCRAPPY/S-1/SD%20SCR%20S01%20EP",
+        "https://archive.org/download/sd-scrappy-s01-mak/SD-SCRAPPY/S-1SD-SCRAPPY/S-1/SD%20SCR%20S01%20EP",
         EPISODE_COUNT_MAP.SD.SCR.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia800400.us.archive.org/34/items/sd-scrappy-s02-mak/SD-SCRAPPY/S-2SD-SCRAPPY/S-2/SD%20SCR%20S02%20EP",
+        "https://archive.org/download/sd-scrappy-s02-mak/SD-SCRAPPY/S-2SD-SCRAPPY/S-2/SD%20SCR%20S02%20EP",
         EPISODE_COUNT_MAP.SD.SCR.S2 || 0,
         2,
         ".mp4"
       ),
       S3: buildManualSeasonWithSuffix(
-        "https://ia600601.us.archive.org/5/items/sd-scrappy-s03-mak/SD-SCRAPPY/S-3SD-SCRAPPY/S-3/SD%20SCR%20S03%20EP",
+        "https://archive.org/download/sd-scrappy-s03-mak/SD-SCRAPPY/S-3SD-SCRAPPY/S-3/SD%20SCR%20S03%20EP",
         EPISODE_COUNT_MAP.SD.SCR.S3 || 0,
         2,
         ".mp4"
@@ -6582,7 +6609,7 @@ const SD_MEDIA_INDEX = {
 
     NSR: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia600103.us.archive.org/30/items/sd-new-scrappy-s01-mak/SD-NEW%20SCRAPPYSD-NEW%20SCRAPPY/SD%20NSR%20S01%20EP",
+        "https://archive.org/download/sd-new-scrappy-s01-mak/SD-NEW%20SCRAPPYSD-NEW%20SCRAPPY/SD%20NSR%20S01%20EP",
         EPISODE_COUNT_MAP.SD.NSR.S1 || 0,
         2,
         ".mp4"
@@ -6591,7 +6618,7 @@ const SD_MEDIA_INDEX = {
 
     NM: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia800801.us.archive.org/2/items/sd-mysteries-s01-mak/SD-MYSTERIESSD-MYSTERIES/SD%20NM%20S01%20EP",
+        "https://archive.org/download/sd-mysteries-s01-mak/SD-MYSTERIESSD-MYSTERIES/SD%20NM%20S01%20EP",
         EPISODE_COUNT_MAP.SD.NM.S1 || 0,
         2,
         ".mp4"
@@ -6600,13 +6627,13 @@ const SD_MEDIA_INDEX = {
 
     BC: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia800700.us.archive.org/31/items/sd-be-cool-s01-mak/SD-BE%20COOL/S-1SD-BE%20COOL/S-1/SD%20BC%20S01%20EP",
+        "https://archive.org/download/sd-be-cool-s01-mak/SD-BE%20COOL/S-1SD-BE%20COOL/S-1/SD%20BC%20S01%20EP",
         EPISODE_COUNT_MAP.SD.BC.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia801706.us.archive.org/27/items/sd-be-cool-s02-mak/SD-BE%20COOL/S-2SD-BE%20COOL/S-2/SD%20BC%20S02%20EP",
+        "https://archive.org/download/sd-be-cool-s02-mak/SD-BE%20COOL/S-2SD-BE%20COOL/S-2/SD%20BC%20S02%20EP",
         EPISODE_COUNT_MAP.SD.BC.S2 || 0,
         2,
         ".mp4"
@@ -6615,7 +6642,7 @@ const SD_MEDIA_INDEX = {
 
     GAC: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia800700.us.archive.org/24/items/sd-clue-s01-mak/SD-CLUESD-CLUE/SD%20GAC%20S01%20EP",
+        "https://archive.org/download/sd-clue-s01-mak/SD-CLUESD-CLUE/SD%20GAC%20S01%20EP",
         EPISODE_COUNT_MAP.SD.GAC.S1 || 0,
         2,
         ".mp4"
@@ -6624,13 +6651,13 @@ const SD_MEDIA_INDEX = {
 
     MI: {
       S1: buildManualSeasonWithSuffix(
-        "https://ia801706.us.archive.org/13/items/sd-mystery-inc-s01-mak/SD-MYSTERY%20INC/S-1SD-MYSTERY%20INC/S-1/SD%20MI%20S01%20EP",
+        "https://archive.org/download/sd-mystery-inc-s01-mak/SD-MYSTERY%20INC/S-1SD-MYSTERY%20INC/S-1/SD%20MI%20S01%20EP",
         EPISODE_COUNT_MAP.SD.MI.S1 || 0,
         2,
         ".mp4"
       ),
       S2: buildManualSeasonWithSuffix(
-        "https://ia600400.us.archive.org/2/items/sd-mystery-inc-s02-mak/SD-MYSTERY%20INC/S-2SD-MYSTERY%20INC/S-2/SD%20MI%20S02%20EP",
+        "https://archive.org/download/sd-mystery-inc-s02-mak/SD-MYSTERY%20INC/S-2SD-MYSTERY%20INC/S-2/SD%20MI%20S02%20EP",
         EPISODE_COUNT_MAP.SD.MI.S2 || 0,
         2,
         ".mp4"
@@ -6639,7 +6666,7 @@ const SD_MEDIA_INDEX = {
 
     "13G": {
       S1: buildManualSeasonWithSuffix(
-        "https://ia800801.us.archive.org/10/items/sd-13-ghst-s01-mak/SD-13%20GHSTSD-13%20GHST/SD%2013G%20S01%20EP",
+        "https://archive.org/download/sd-13-ghst-s01-mak/SD-13%20GHSTSD-13%20GHST/SD%2013G%20S01%20EP",
         EPISODE_COUNT_MAP.SD["13G"].S1 || 0,
         2,
         ".mp4"
@@ -6648,7 +6675,7 @@ const SD_MEDIA_INDEX = {
   },
 
   movie: buildManualMovieIndex(
-    "https://ia800401.us.archive.org/26/items/sd-all-movies-mak/SD-ALL%20MOVIESSD-ALL%20MOVIES/M",
+    "https://archive.org/download/sd-all-movies-mak/SD-ALL%20MOVIESSD-ALL%20MOVIES/M",
     MOVIE_COUNT_MAP.SD || 0,
     2,
     ".ia.mp4"
@@ -6658,43 +6685,43 @@ const SD_MEDIA_INDEX = {
 const STS_MEDIA_INDEX = {
   season: {
     S1: buildManualSeasonWithSuffix(
-      "https://ia601701.us.archive.org/14/items/sts-s01-mak/STS%20S1STS%20S1/STS%20S01%20E",
+      "https://archive.org/download/sts-s01-mak/STS%20S1STS%20S1/STS%20S01%20E",
       EPISODE_COUNT_MAP.STS.S1 || 0,
       2,
       ".ia.mp4"
     ),
     S2: buildManualSeasonWithSuffix(
-      "https://ia600600.us.archive.org/20/items/sts-s02-mak/STS%20S2STS%20S2/STS%20S02%20E",
+      "https://archive.org/download/sts-s02-mak/STS%20S2STS%20S2/STS%20S02%20E",
       EPISODE_COUNT_MAP.STS.S2 || 0,
       2,
       ".ia.mp4"
     ),
     S3: buildManualSeasonWithSuffix(
-      "https://ia802804.us.archive.org/33/items/sts-s03-mak/STS%20S3STS%20S3/STS%20S03%20E",
+      "https://archive.org/download/sts-s03-mak/STS%20S3STS%20S3/STS%20S03%20E",
       EPISODE_COUNT_MAP.STS.S3 || 0,
       2,
       ".ia.mp4"
     ),
     S4: buildManualSeasonWithSuffix(
-      "https://ia801600.us.archive.org/4/items/sts-s04-mak/STS%20S4STS%20S4/STS%20S04%20E",
+      "https://archive.org/download/sts-s04-mak/STS%20S4STS%20S4/STS%20S04%20E",
       EPISODE_COUNT_MAP.STS.S4 || 0,
       2,
       ".mp4"
     ),
     S5: buildManualSeasonWithSuffix(
-      "https://ia600102.us.archive.org/9/items/sts-s05-mak/STS%20S5STS%20S5/STS%20S05%20E",
+      "https://archive.org/download/sts-s05-mak/STS%20S5STS%20S5/STS%20S05%20E",
       EPISODE_COUNT_MAP.STS.S5 || 0,
       2,
       ".mp4"
     ),
     S6: buildManualSeasonWithSuffix(
-      "https://ia800600.us.archive.org/31/items/sts-s06-mak/STS%20S6STS%20S6/STS%20S06%20E",
+      "https://archive.org/download/sts-s06-mak/STS%20S6STS%20S6/STS%20S06%20E",
       EPISODE_COUNT_MAP.STS.S6 || 0,
       2,
       ".mp4"
     ),
     S7: buildManualSeasonWithSuffix(
-      "https://ia802808.us.archive.org/27/items/sts-s07-mak/STS%20S7STS%20S7/STS%20S07%20E",
+      "https://archive.org/download/sts-s07-mak/STS%20S7STS%20S7/STS%20S07%20E",
       EPISODE_COUNT_MAP.STS.S7 || 0,
       2,
       ".mp4"
@@ -6708,43 +6735,43 @@ const STS_MEDIA_INDEX = {
 const SS_MEDIA_INDEX = {
   season: {
     S1: buildManualSeasonWithSuffix(
-      "https://ia600105.us.archive.org/8/items/ss-s01-mak/SS-S1SS-S1/SS%20S01%20E",
+      "https://archive.org/download/ss-s01-mak/SS-S1SS-S1/SS%20S01%20E",
       EPISODE_COUNT_MAP.SS.S1 || 0,
       2,
       ".ia.mp4"
     ),
     S2: buildManualSeasonWithSuffix(
-      "https://ia902807.us.archive.org/11/items/ss-s02-mak/SS-S2SS-S2/SS%20S02%20E",
+      "https://archive.org/download/ss-s02-mak/SS-S2SS-S2/SS%20S02%20E",
       EPISODE_COUNT_MAP.SS.S2 || 0,
       2,
       ".ia.mp4"
     ),
     S3: buildManualSeasonWithSuffix(
-      "https://ia800605.us.archive.org/33/items/ss-s03-mak/SS-S3SS-S3/%20SS%20S03%20E",
+      "https://archive.org/download/ss-s03-mak/SS-S3SS-S3/%20SS%20S03%20E",
       EPISODE_COUNT_MAP.SS.S3 || 0,
       2,
       ".ia.mp4"
     ),
     S4: buildManualSeasonWithSuffix(
-      "https://ia600606.us.archive.org/3/items/ss-s04-mak/SS-S4SS-S4/SS%20S04%20E",
+      "https://archive.org/download/ss-s04-mak/SS-S4SS-S4/SS%20S04%20E",
       EPISODE_COUNT_MAP.SS.S4 || 0,
       2,
       ".ia.mp4"
     ),
     S5: buildManualSeasonWithSuffix(
-      "https://ia800406.us.archive.org/11/items/ss-s05-mak/SS-S5SS-S5/SS%20S05%20E",
+      "https://archive.org/download/ss-s05-mak/SS-S5SS-S5/SS%20S05%20E",
       EPISODE_COUNT_MAP.SS.S5 || 0,
       2,
       ".ia.mp4"
     ),
     S6: buildManualSeasonWithSuffix(
-      "https://ia802807.us.archive.org/3/items/ss-s06-mak/SS-S6SS-S6/SS%20S06%20E",
+      "https://archive.org/download/ss-s06-mak/SS-S6SS-S6/SS%20S06%20E",
       EPISODE_COUNT_MAP.SS.S6 || 0,
       2,
       ".ia.mp4"
     ),
     S7: buildManualSeasonWithSuffix(
-      "https://ia903100.us.archive.org/26/items/ss-s07-mak/SS-S7SS-S7/SS%20S07%20E",
+      "https://archive.org/download/ss-s07-mak/SS-S7SS-S7/SS%20S07%20E",
       EPISODE_COUNT_MAP.SS.S7 || 0,
       2,
       ".ia.mp4"
@@ -6772,82 +6799,82 @@ const MEDIA_INDEX = {
       ),
 
       S2: buildManualSeasonFromPrefix(
-        "https://dn711208.ca.archive.org/0/items/doraemon-s2-mak/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON2/DM_S2_EP-",
+        "https://archive.org/download/doraemon-s2-mak/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON2/DM_S2_EP-",
         EPISODE_COUNT_MAP.DM.S2 || 0
       ),
 
       S3: buildManualSeasonFromPrefix(
-        "https://dn711400.ca.archive.org/0/items/DM-S3-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON3/DM_S3_EP-",
+        "https://archive.org/download/DM-S3-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON3/DM_S3_EP-",
         EPISODE_COUNT_MAP.DM.S3 || 0
       ),
 
       S4: buildManualSeasonFromPrefix(
-        "https://dn711201.ca.archive.org/0/items/DM-S4-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON4/DM_S4_EP-",
+        "https://archive.org/download/DM-S4-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON4/DM_S4_EP-",
         EPISODE_COUNT_MAP.DM.S4 || 0
       ),
 
       S5: buildManualSeasonFromPrefix(
-        "https://ia800709.us.archive.org/23/items/DM-S5-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON5/DM_S5_EP-",
+        "https://archive.org/download/DM-S5-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON5/DM_S5_EP-",
         EPISODE_COUNT_MAP.DM.S5 || 0
       ),
 
       S6: buildManualSeasonFromPrefix(
-        "https://dn711200.ca.archive.org/0/items/DM-S6-MAK2/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON6/DM_S6_EP-",
+        "https://archive.org/download/DM-S6-MAK2/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON6/DM_S6_EP-",
         EPISODE_COUNT_MAP.DM.S6 || 0
       ),
 
       S7: buildManualSeasonFromPrefix(
-        "https://dn711209.ca.archive.org/0/items/DM-S7-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON7/DM_S7_EP-",
+        "https://archive.org/download/DM-S7-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON7/DM_S7_EP-",
         EPISODE_COUNT_MAP.DM.S7 || 0
       ),
 
       S8: buildManualSeasonFromPrefix(
-        "https://dn711208.ca.archive.org/0/items/DM-S8-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON8/DM_S8_EP-",
+        "https://archive.org/download/DM-S8-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON8/DM_S8_EP-",
         EPISODE_COUNT_MAP.DM.S8 || 0
       ),
 
       S12: buildManualSeasonFromPrefix(
-        "https://dn711209.ca.archive.org/0/items/DM-S12-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON12/DM_S12_EP-",
+        "https://archive.org/download/DM-S12-MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON12/DM_S12_EP-",
         EPISODE_COUNT_MAP.DM.S12 || 0
       ),
 
       S14: buildManualSeasonFromPrefix(
-        "https://dn711209.ca.archive.org/0/items/DM_S14_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON14/DM_S14_EP-",
+        "https://archive.org/download/DM_S14_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON14/DM_S14_EP-",
         EPISODE_COUNT_MAP.DM.S14 || 0
       ),
 
       S15: buildManualSeasonFromPrefix(
-        "https://dn711205.ca.archive.org/0/items/DM_S15_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON15/DM_S15_EP-",
+        "https://archive.org/download/DM_S15_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON15/DM_S15_EP-",
         EPISODE_COUNT_MAP.DM.S15 || 0
       ),
 
       S16: buildManualSeasonFromPrefix(
-        "https://dn711201.ca.archive.org/0/items/DM_S16_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON16/DM_S16_EP-",
+        "https://archive.org/download/DM_S16_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON16/DM_S16_EP-",
         EPISODE_COUNT_MAP.DM.S16 || 0
       ),
 
       S17: buildManualSeasonFromPrefix(
-        "https://dn711302.ca.archive.org/0/items/DM_S17_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON17/DM_S17_EP-",
+        "https://archive.org/download/DM_S17_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON17/DM_S17_EP-",
         EPISODE_COUNT_MAP.DM.S17 || 0
       ),
 
       S18: buildManualSeasonFromPrefix(
-        "https://dn711204.ca.archive.org/0/items/DM_S18_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON18/DM_S18_EP-",
+        "https://archive.org/download/DM_S18_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON18/DM_S18_EP-",
         EPISODE_COUNT_MAP.DM.S18 || 0
       ),
 
       S19: buildManualSeasonFromPrefix(
-        "https://dn711302.ca.archive.org/0/items/DM_S19_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON19/DM_S19_EP-",
+        "https://archive.org/download/DM_S19_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON19/DM_S19_EP-",
         EPISODE_COUNT_MAP.DM.S19 || 0
       ),
 
       S20: buildManualSeasonFromPrefix(
-        "https://dn711301.ca.archive.org/0/items/DM_S20_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON20/DM_S20_EP-",
+        "https://archive.org/download/DM_S20_MAK/C%3A/Users/Md%20Asim%20kareem/Downloads/DORAEMON_ALL_EPISODES_HINDI/DORAEMON-SEASON20/DM_S20_EP-",
         EPISODE_COUNT_MAP.DM.S20 || 0
       ),
 
       S21: buildManualSeasonFromPrefix(
-        "https://ia600601.us.archive.org/13/items/dm-sson21-mak/DORAEMON-SEASON21DORAEMON-SEASON21/DM%20S21%20E",
+        "https://archive.org/download/dm-sson21-mak/DORAEMON-SEASON21DORAEMON-SEASON21/DM%20S21%20E",
         EPISODE_COUNT_MAP.DM.S21 || 0
       )
     },
@@ -10886,4 +10913,3 @@ starBtn.addEventListener("click", ()=>{
 </script>
 </body>
 </html>
-
