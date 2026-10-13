@@ -1196,6 +1196,42 @@
 /* ============================================================
    SECTION 20 · KEYBOARD SHORTCUTS
    ============================================================ */
+  /* --- remote / keyboard navigation between the on-screen controls --- */
+  function focusables(){
+    const list = Array.from(ui.querySelectorAll("button, #progress-hit"))
+      .filter(el => !el.classList.contains("disabled"));
+    if(startOverBtn.classList.contains("show")) list.push(startOverBtn);
+    return list;
+  }
+
+  function gap(a1, a2, b1, b2){ return Math.max(0, Math.max(a1, b1) - Math.min(a2, b2)); }
+
+  function pickNext(cur, dir){
+    const cr = cur.getBoundingClientRect();
+    const ccx = cr.left + cr.width / 2, ccy = cr.top + cr.height / 2;
+    let best = null, bestScore = Infinity;
+    for(const el of focusables()){
+      if(el === cur) continue;
+      const r = el.getBoundingClientRect();
+      if(r.width < 2 || r.height < 2) continue;
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      let primary, cross, step;
+      if(dir === "down" || dir === "up"){
+        step = Math.min(cr.height, r.height) * 0.35;
+        primary = dir === "down" ? cy - ccy : ccy - cy;
+        cross = gap(r.left, r.right, cr.left, cr.right) + Math.abs(cx - ccx) * 0.3;
+      } else {
+        step = Math.min(cr.width, r.width) * 0.35;
+        primary = dir === "right" ? cx - ccx : ccx - cx;
+        cross = gap(r.top, r.bottom, cr.top, cr.bottom) * 3 + Math.abs(cy - ccy) * 0.5;
+      }
+      if(primary <= step) continue;
+      const score = primary + cross * 2;
+      if(score < bestScore){ bestScore = score; best = el; }
+    }
+    return best;
+  }
+
   document.addEventListener("keydown", (e) => {
     if(sleepOverlay.classList.contains("show") || errorCard.classList.contains("show")) return;
     const tag = document.activeElement?.tagName;
@@ -1203,26 +1239,40 @@
 
     const uiHidden = ui.classList.contains("hidden");
     const ae = document.activeElement;
-    let onBtn = false;
-    try{ onBtn = !!(ae && ae.tagName === "BUTTON" && ae.matches(":focus-visible")); }catch(_){}
-    const onBar = ae === progHit;
+    let focusedControl = false;
+    try{
+      focusedControl = !!(ae && ae !== document.body && !uiHidden &&
+        (ae.tagName === "BUTTON" || ae === progHit) && ae.matches(":focus-visible"));
+    }catch(_){}
+
+    const dirs = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
+    const dir = dirs[e.code];
+
+    /* A control is focused and the controls are showing: move between controls */
+    if(dir && focusedControl){
+      /* on the seek bar, Left/Right still seek */
+      if(ae === progHit && (dir === "left" || dir === "right")){
+        e.preventDefault(); seekBy(dir === "right" ? 15 : -5); showUI(); return;
+      }
+      e.preventDefault();
+      const next = pickNext(ae, dir);
+      if(next) next.focus({ focusVisible: true });
+      showUI();
+      return;
+    }
+
     switch(e.code){
       case "Space":      e.preventDefault(); togglePlay(); break;
-      case "ArrowRight":
-        if(onBtn && !uiHidden){ showUI(); break; }   /* native focus move */
-        e.preventDefault(); seekBy(15); showUI(); break;
-      case "ArrowLeft":
-        if(onBtn && !uiHidden){ showUI(); break; }
-        e.preventDefault(); seekBy(-5); showUI(); break;
+      case "ArrowRight": e.preventDefault(); seekBy(15); showUI(); break;
+      case "ArrowLeft":  e.preventDefault(); seekBy(-5); showUI(); break;
       case "ArrowUp":
       case "ArrowDown":
-        /* TV remote: wake the controls and drop focus on Play/Pause */
-        if(uiHidden || !onBtn){ e.preventDefault(); showUI(); ppBtn.focus({ focusVisible: true }); }
-        else showUI();
+        /* TV remote: wake the controls and put focus on Play/Pause */
+        e.preventDefault(); showUI(); ppBtn.focus({ focusVisible: true });
         break;
       case "Enter":
       case "NumpadEnter":
-        if(uiHidden || (!onBtn && !onBar)){ e.preventDefault(); togglePlay(); }
+        if(!focusedControl){ e.preventDefault(); togglePlay(); }
         break;
       case "KeyF":       fsBtn.click(); break;
       case "KeyN":       nextBtn.click(); break;
