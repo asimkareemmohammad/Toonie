@@ -10917,14 +10917,30 @@ starBtn.addEventListener("click", ()=>{
      TV REMOTE NAVIGATION (Android TV app only)
      Active only inside the WebView app (html.tv-webview). Replaces the
      browser's guess-y arrow-key behaviour with one predictable rule:
-     move to the nearest visible button in the pressed direction, and
-     scroll just enough to keep it on screen. Does nothing elsewhere.
+     move to the nearest visible control in the pressed direction, and
+     scroll just enough to keep it on screen. Handles buttons, links,
+     text boxes, dropdowns, toggles and the custom dropdown list.
+     Does nothing anywhere else.
      ============================================================ -->
 <script>
 (function(){
   if(!document.documentElement.classList.contains("tv-webview")) return;
 
-  const SEL = 'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  const SEL = 'a[href],button:not([disabled]),input:not([type="hidden"]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  const TEXTY = /^(text|search|tel|url|email|password|number|)$/i;
+
+  const isInput  = el => el && el.tagName === "INPUT";
+  const isTextField = el => el && (el.tagName === "TEXTAREA" || (isInput(el) && TEXTY.test(el.getAttribute("type") || "")));
+  const isCheck  = el => isInput(el) && /^(checkbox|radio)$/i.test(el.type);
+
+  /* the box we measure: custom toggles hide the real checkbox, so use its label */
+  function boxEl(el){
+    if(isCheck(el)){
+      const r = el.getBoundingClientRect();
+      if(r.width < 4 || r.height < 4) return el.closest("label") || el;
+    }
+    return el;
+  }
 
   function fixedLayer(el){
     for(let p = el; p && p !== document.body; p = p.parentElement){
@@ -10942,7 +10958,6 @@ starBtn.addEventListener("click", ()=>{
       const top = document.elementFromPoint(cx, cy);
       return !!top && (top === el || el.contains(top));
     }
-    /* off-screen: make sure no collapsed / clipping ancestor hides it */
     for(let p = el.parentElement; p && p !== document.body; p = p.parentElement){
       const cs = getComputedStyle(p);
       if(cs.display === "none") return false;
@@ -10958,33 +10973,55 @@ starBtn.addEventListener("click", ()=>{
     return true;
   }
 
-  function gap(a1, a2, b1, b2){            /* distance between two intervals (0 if they overlap) */
-    return Math.max(0, Math.max(a1, b1) - Math.min(a2, b2));
+  function gap(a1, a2, b1, b2){ return Math.max(0, Math.max(a1, b1) - Math.min(a2, b2)); }
+
+  function score(cr, r, dir){
+    const ccx = cr.left + cr.width / 2, ccy = cr.top + cr.height / 2;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let primary, cross, step;
+    if(dir === "down" || dir === "up"){
+      step = Math.min(cr.height, r.height) * 0.35;
+      primary = dir === "down" ? cy - ccy : ccy - cy;
+      cross = gap(r.left, r.right, cr.left, cr.right) + Math.abs(cx - ccx) * 0.3;
+    } else {
+      step = Math.min(cr.width, r.width) * 0.35;
+      primary = dir === "right" ? cx - ccx : ccx - cx;
+      cross = gap(r.top, r.bottom, cr.top, cr.bottom) * 3 + Math.abs(cy - ccy) * 0.5;
+    }
+    return primary <= step ? null : primary + cross * 2;
+  }
+
+  /* ---- open custom dropdown list (the pop-up with the options) ---- */
+  function openPicker(){ return document.querySelector(".material-picker.open"); }
+
+  function pickInPicker(picker, cur, dir){
+    const opts = Array.from(picker.querySelectorAll(".material-picker-option"));
+    if(!opts.length) return null;
+    const i = opts.indexOf(cur);
+    if(i < 0) return opts.find(o => o.classList.contains("is-selected")) || opts[0];
+    if(dir === "down") return opts[Math.min(opts.length - 1, i + 1)];
+    if(dir === "up")   return opts[Math.max(0, i - 1)];
+    return null;
   }
 
   function pick(cur, dir){
-    const cr = cur.getBoundingClientRect();
-    const ccx = cr.left + cr.width / 2, ccy = cr.top + cr.height / 2;
+    const cr = boxEl(cur).getBoundingClientRect();
     const layer = fixedLayer(cur);
     const list = [];
     document.querySelectorAll(SEL).forEach(el => {
-      if(el === cur || el.offsetParent === null && getComputedStyle(el).position !== "fixed") return;
-      const r = el.getBoundingClientRect();
+      if(el === cur) return;
+      const be = boxEl(el);
+      if(be.offsetParent === null && getComputedStyle(be).position !== "fixed") return;
+      const r = be.getBoundingClientRect();
       if(r.width < 2 || r.height < 2) return;
-      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-      let primary, cross, step = Math.min(cr.height, r.height) * 0.35;
-      if(dir === "down"){ primary = cy - ccy;  cross = gap(r.left, r.right, cr.left, cr.right) + Math.abs(cx - ccx) * 0.3; }
-      else if(dir === "up"){ primary = ccy - cy; cross = gap(r.left, r.right, cr.left, cr.right) + Math.abs(cx - ccx) * 0.3; }
-      else if(dir === "right"){ step = Math.min(cr.width, r.width) * 0.35; primary = cx - ccx; cross = gap(r.top, r.bottom, cr.top, cr.bottom) * 3 + Math.abs(cy - ccy) * 0.5; }
-      else { step = Math.min(cr.width, r.width) * 0.35; primary = ccx - cx; cross = gap(r.top, r.bottom, cr.top, cr.bottom) * 3 + Math.abs(cy - ccy) * 0.5; }
-      if(primary <= step) return;
-      list.push({ el, r, score: primary + cross * 2 });
+      const sc = score(cr, r, dir);
+      if(sc !== null) list.push({ el, be, r, sc });
     });
-    list.sort((a, b) => a.score - b.score);
+    list.sort((a, b) => a.sc - b.sc);
     for(let i = 0; i < Math.min(list.length, 25); i++){
       const c = list[i];
       if(fixedLayer(c.el) !== layer) continue;
-      if(isVisible(c.el, c.r)) return c.el;
+      if(isVisible(c.be, c.r)) return c.el;
     }
     return null;
   }
@@ -10998,30 +11035,60 @@ starBtn.addEventListener("click", ()=>{
   }
 
   function reveal(el){
+    const be = boxEl(el);
     const header = document.querySelector(".appbar");
     const topLimit = (header ? header.getBoundingClientRect().bottom : 0) + 20;
     const bottomLimit = innerHeight - 20;
-    const r = el.getBoundingClientRect();
+    const r = be.getBoundingClientRect();
     let delta = 0;
     if(r.top < topLimit) delta = r.top - topLimit;
     else if(r.bottom > bottomLimit) delta = r.bottom - bottomLimit;
     if(!delta) return;
-    const sp = scrollParent(el);
+    const sp = scrollParent(be);
     if(sp) sp.scrollTop += delta; else window.scrollBy(0, delta);
   }
 
-  document.addEventListener("keydown", (e) => {
-    const dir = ({ ArrowDown: "down", ArrowUp: "up", ArrowLeft: "left", ArrowRight: "right" })[e.key];
-    if(!dir || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-    const cur = document.activeElement;
-    if(cur && /^(INPUT|TEXTAREA|SELECT)$/.test(cur.tagName)) return;     /* leave form fields alone */
+  function firstOnScreen(){
+    return Array.from(document.querySelectorAll(SEL)).find(el => {
+      const be = boxEl(el), r = be.getBoundingClientRect();
+      return r.width > 2 && r.height > 2 && r.top >= 0 && r.bottom <= innerHeight && isVisible(be, r);
+    });
+  }
 
-    if(!cur || cur === document.body || cur === document.documentElement){
-      /* nothing focused yet: start from the first visible button on screen */
-      const first = Array.from(document.querySelectorAll(SEL)).find(el => {
-        const r = el.getBoundingClientRect();
-        return r.width > 2 && r.height > 2 && r.top >= 0 && r.bottom <= innerHeight && isVisible(el, r);
-      });
+  document.addEventListener("keydown", (e) => {
+    if(e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const cur = document.activeElement;
+    const none = !cur || cur === document.body || cur === document.documentElement;
+
+    /* OK / Enter on a custom toggle: flip it (Enter doesn't flip checkboxes natively) */
+    if((e.key === "Enter") && !none && isCheck(cur)){
+      e.preventDefault(); cur.click(); return;
+    }
+    /* OK / Enter on a text box: make sure the on-screen keyboard opens */
+    if((e.key === "Enter") && !none && isTextField(cur) && !cur.__tvKb){
+      cur.__tvKb = true;
+      setTimeout(() => { cur.__tvKb = false; }, 400);
+      try{ cur.blur(); cur.focus(); }catch(_){}
+      return;
+    }
+
+    const dir = ({ ArrowDown: "down", ArrowUp: "up", ArrowLeft: "left", ArrowRight: "right" })[e.key];
+    if(!dir) return;
+
+    /* Left / Right inside a text box move the cursor; Up / Down leave it */
+    if(isTextField(cur) && (dir === "left" || dir === "right")) return;
+
+    /* An open dropdown list takes over the arrows until it closes */
+    const picker = openPicker();
+    if(picker){
+      e.preventDefault();
+      const t = pickInPicker(picker, cur, dir);
+      if(t){ t.focus({ preventScroll: true }); t.scrollIntoView({ block: "nearest" }); }
+      return;
+    }
+
+    if(none){
+      const first = firstOnScreen();
       if(first){ e.preventDefault(); first.focus({ preventScroll: true }); }
       return;
     }
@@ -11032,6 +11099,12 @@ starBtn.addEventListener("click", ()=>{
     target.focus({ preventScroll: true });
     reveal(target);
   }, true);
+
+  /* focus ring for the custom toggle (the real checkbox is invisible) */
+  const st = document.createElement("style");
+  st.textContent = ".toggle-switch input:focus-visible + .toggle-slider{ box-shadow: 0 0 0 2px #D0BCFF, 0 0 0 5px rgba(208,188,255,0.35) !important; }" +
+                   ".material-picker-option:focus-visible{ background: rgba(208,188,255,0.22); }";
+  document.head.appendChild(st);
 })();
 </script>
 </body>
