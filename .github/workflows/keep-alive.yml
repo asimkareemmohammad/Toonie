@@ -1,0 +1,20 @@
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: "17 12 */3 * *"     # every 3 days
+  workflow_dispatch: {}          # lets you run it by hand from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Supabase
+        run: |
+          code=$(curl -s -o /tmp/out.txt -w "%{http_code}" \
+            "https://tdpyeauwzdktfihqqyxc.supabase.co/rest/v1/toonie_progress?select=room_code&limit=1" \
+            -H "apikey: sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe" \
+            -H "Authorization: Bearer sb_publishable_WhASrKnpqODlxsod-B1AhQ___lLXnpe")
+          echo "HTTP status: $code"
+          cat /tmp/out.txt
+          test "$code" -ge 200 && test "$code" -lt 300
