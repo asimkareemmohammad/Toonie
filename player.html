@@ -75,13 +75,6 @@
       font-size: 11px; color: rgba(255,255,255,0.45);
       margin-top: 3px; letter-spacing: 0.4px;
     }
-    #clock{
-      flex-shrink: 0; margin-top: 7px;
-      font-size: 13px; font-weight: 500; letter-spacing: 0.3px;
-      color: rgba(255,255,255,0.9);
-      font-variant-numeric: tabular-nums; white-space: nowrap;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.7);
-    }
     #star-btn{
       font-size: 24px; color: #fff; background: none; border: none;
       cursor: pointer; padding: 2px 4px; line-height: 1; flex-shrink: 0;
@@ -96,7 +89,9 @@
       display: flex; align-items: center; justify-content: center; gap: 22px;
     }
     .ctrl{
-      background: transparent;
+      background: rgba(20,20,25,0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: none; color: #fff; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       border-radius: 50%;
@@ -104,13 +99,16 @@
       transition: background 0.15s ease, transform 0.1s ease;
     }
     .ctrl:active{ transform: scale(0.92); background: rgba(255,255,255,0.15); }
-    .ctrl svg{ width: 24px; height: 24px; fill: #fff; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.75)); }
+    .ctrl svg{ width: 24px; height: 24px; fill: #fff; }
     .ctrl.disabled{ opacity: 0.3; pointer-events: none; }
 
     #playpause{
       width: 72px; height: 72px;
+      background: rgba(20,20,25,0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
-    #playpause svg{ width: 40px; height: 40px; fill: #fff; }
+    #playpause svg{ width: 34px; height: 34px; fill: #fff; }
 
     #bottom{
       position: relative; z-index: 2;
@@ -219,7 +217,9 @@
     #toast{
       position: fixed; bottom: 96px; left: 50%;
       transform: translateX(-50%) translateY(8px);
-      background: rgba(20,20,25,0.88);
+      background: rgba(20,20,25,0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: 1px solid var(--accent-line);
       color: var(--accent);
       padding: 10px 20px; border-radius: 999px;
@@ -240,7 +240,9 @@
       bottom: 96px;
       z-index: 6;
       display: flex; align-items: center; gap: 7px;
-      background: rgba(20,20,25,0.88);
+      background: rgba(20,20,25,0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: 1px solid var(--accent-line);
       color: var(--accent);
       font-size: 13px; font-weight: 600;
@@ -329,7 +331,6 @@
         <div id="subtitle"></div>
         <div id="queue-pos"></div>
       </div>
-      <div id="clock" aria-hidden="true"></div>
       <button id="star-btn" aria-label="Wishlist">☆</button>
     </div>
 
@@ -1283,19 +1284,6 @@
 /* ============================================================
    SECTION 21 · INIT
    ============================================================ */
-  /* small 12-hour clock, shown with the controls */
-  const clockEl = $("clock");
-  function updateClock(){
-    const d = new Date();
-    let h = d.getHours();
-    const m = d.getMinutes();
-    const ap = h >= 12 ? "PM" : "AM";
-    h = h % 12 || 12;
-    clockEl.textContent = h + ":" + (m < 10 ? "0" : "") + m + " " + ap;
-  }
-  updateClock();
-  setInterval(updateClock, 10000);
-
   speedBtn.textContent = SPEEDS[speedIdx] + "×";
   loadAndPlay(currentIndex);
   refreshSleepBtn();
